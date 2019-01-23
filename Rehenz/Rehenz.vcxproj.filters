@@ -21,12 +21,27 @@
     <ClCompile Include="HString.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="test.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="HMath.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="CRand.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Windows\CSurface.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="HString.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="HMath.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="CRand.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

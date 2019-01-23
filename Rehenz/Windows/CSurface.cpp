@@ -7,7 +7,7 @@
 
 #include "CSurface.h"
 
-#define WindowClassName TEXT("WNDCLASS")
+#define WindowClassName TEXT("REHENZ")
 
 using namespace Rehenz::Windows;
 

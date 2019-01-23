@@ -6,8 +6,6 @@
 // use DX8
 // only Windows
 //
-// Windows 限定使用
-//
 
 #pragma once
 #pragma comment(lib,"ddraw.lib")

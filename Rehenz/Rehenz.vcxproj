@@ -115,10 +115,15 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="CRand.cpp" />
+    <ClCompile Include="HMath.cpp" />
     <ClCompile Include="HString.cpp" />
+    <ClCompile Include="test.cpp" />
     <ClCompile Include="Windows\CSurface.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="CRand.h" />
+    <ClInclude Include="HMath.h" />
     <ClInclude Include="HString.h" />
     <ClInclude Include="Windows\CSurface.h" />
   </ItemGroup>
