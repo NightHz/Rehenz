@@ -11,6 +11,7 @@
 //		struct EulerAngles
 //		struct Point2D
 //		more functions
+//      PerlinNoise generator
 //
 
 #ifndef _HMATH_H_
@@ -191,20 +192,23 @@ namespace Rehenz
 
 	// 限制x在min到max之间
 	template <typename T>
-	T MiddleValue(T x, T min, T max)
+	inline T Clamp(T x, T min, T max)
 	{
-		if (x < min)
-			return min;
-		else if (x > max)
-			return max;
-		else
-			return x;
+		return (x < min) ? min : ((x > max) ? max : x);
 	}
 
-	// 插值计算
+	// 线性插值
 	template <typename T>
-	inline T Interp(T x1, T x2, float t)
+	inline T Lerp(T x1, T x2, float t)
 	{
+		return x1 + (T)((x2 - x1)*t);
+	}
+
+	// 非线性平滑插值
+	template <typename T>
+	inline T Fade(T x1, T x2, float t)
+	{
+		t = t * t * t * (10 + t * (-15 + t * 6)); // 6*t^5 - 15*t^4 + 10*t^3
 		return x1 + (T)((x2 - x1)*t);
 	}
 
@@ -218,7 +222,7 @@ namespace Rehenz
 	Vector VectorCross(Vector v1, Vector v2);
 
 	// 矢量插值(w设为一)
-	Vector VectorInterp(Vector v1, Vector v2, float t);
+	Vector VectorLerp(Vector v1, Vector v2, float t);
 
 	// 矢量单位化(w设为一)
 	Vector VectorUnit(Vector v1);
@@ -228,6 +232,9 @@ namespace Rehenz
 
 	// 计算两点间距离
 	float PointDistance(Point p1, Point p2);
+
+	// 计算两点间距离
+	float PointDistance(Point2D p1, Point2D p2);
 
 	// 计算三角形单位法向量
 	Vector TrianglesNormal(Point p1, Point p2, Point p3);

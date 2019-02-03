@@ -577,12 +577,12 @@ Vector Rehenz::VectorCross(Vector v1, Vector v2)
 	return result;
 }
 
-Vector Rehenz::VectorInterp(Vector v1, Vector v2, float t)
+Vector Rehenz::VectorLerp(Vector v1, Vector v2, float t)
 {
 	Vector result;
-	result.x = Interp(v1.x, v2.x, t);
-	result.y = Interp(v1.y, v2.y, t);
-	result.z = Interp(v1.z, v2.z, t);
+	result.x = Lerp(v1.x, v2.x, t);
+	result.y = Lerp(v1.y, v2.y, t);
+	result.z = Lerp(v1.z, v2.z, t);
 	result.w = 1.0f;
 	return result;
 }
@@ -622,6 +622,11 @@ float Rehenz::PointDistance(Point p1, Point p2)
 {
 	Vector v1 = p1 - p2;
 	return sqrtf(v1.x*v1.x + v1.y*v1.y + v1.z*v1.z);
+}
+
+float Rehenz::PointDistance(Point2D p1, Point2D p2)
+{
+	return sqrtf((p1.x - p2.x)*(p1.x - p2.x) + (p1.y - p2.y)*(p1.y - p2.y));
 }
 
 Vector Rehenz::TrianglesNormal(Point p1, Point p2, Point p3)
