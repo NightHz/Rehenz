@@ -32,7 +32,6 @@ namespace Rehenz
 	// 2D点
 	struct Point2D;
 
-
 	// 4*4矩阵
 	struct Matrix
 	{
@@ -204,12 +203,17 @@ namespace Rehenz
 		return x1 + (T)((x2 - x1)*t);
 	}
 
-	// 非线性平滑插值
+	// 缓动函数
+	inline float Fade(float t)
+	{
+		return t * t * t * (10 + t * (-15 + t * 6)); // 6*t^5 - 15*t^4 + 10*t^3
+	}
+
+	// 非线性平滑插值 缓动函数插值
 	template <typename T>
 	inline T Fade(T x1, T x2, float t)
 	{
-		t = t * t * t * (10 + t * (-15 + t * 6)); // 6*t^5 - 15*t^4 + 10*t^3
-		return x1 + (T)((x2 - x1)*t);
+		return x1 + (T)((x2 - x1)*Fade(t));
 	}
 
 	// 矢量长度

@@ -626,7 +626,7 @@ float Rehenz::PointDistance(Point p1, Point p2)
 
 float Rehenz::PointDistance(Point2D p1, Point2D p2)
 {
-	return sqrtf((p1.x - p2.x)*(p1.x - p2.x) + (p1.y - p2.y)*(p1.y - p2.y));
+	return sqrtf((float)((p1.x - p2.x)*(p1.x - p2.x) + (p1.y - p2.y)*(p1.y - p2.y)));
 }
 
 Vector Rehenz::TrianglesNormal(Point p1, Point p2, Point p3)

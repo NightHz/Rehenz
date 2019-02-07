@@ -4,8 +4,9 @@
 #include <stdio.h>
 #include <string.h>
 #include <memory.h>
-#include "../HPCG.h"
-#include "../Windows/CSurface.h"
+#include <time.h>
+#include "HPCG.h"
+#include "Windows/CSurface.h"
 
 int perlin1DTest()
 {
@@ -23,7 +24,7 @@ int perlin1DTest()
 		image[200 * 600 + x] = 0x00ff00;
 		image[50 * 600 + x]  = 0xffff00;
 		image[350 * 600 + x] = 0xffff00;
-		float value = Rehenz::Perlin(seed, x / 100.0f);
+		float value = Rehenz::PerlinOctave(seed, x / 100.0f, 5, 0.5);
 		int y = (int)(200 + 150 * value);
 		image[y * 600 + x] = x % 100 == 0 ? 0xff0000 : 0xffffff;
 	}
@@ -54,15 +55,16 @@ int perlin2DTest()
 
 	memset(image, 0, sizeof(UINT) * 600 * 600);
 	UINT * p = image;
+	printf("time: %d\n", clock());
 	for (int y = 0; y < 600; y++)
 	{
 		for (int x = 0; x < 600; x++)
 		{
-			float value = Rehenz::Perlin(seed, x / 100.0f, y / 100.0f);
-			//UINT v2 = (UINT)(0xff * (value < 0 ? -value : value));
-			//UINT color = (value < 0 ? (v2 << 8) + (v2 << 16) : (v2 << 8));
-			UINT v2 = (UINT)(0xff * (value + 1) / 2);
-			UINT color = (v2 << 8);
+			float value = Rehenz::PerlinOctave(seed, x / 100.0f, y / 100.0f, 3, 0.5);
+			UINT v2 = (UINT)(0xff * (value < 0 ? -value : value));
+			UINT color = (value < 0 ? (v2 << 8) + (v2 << 16) : (v2 << 8));
+			//UINT v2 = (UINT)(0xff * (value + 1) / 2);
+			//UINT color = (v2 << 8);
 			if (x % 100 == 0 && y % 100 == 0)
 			{
 				p[x] = 0xff0000;
@@ -73,6 +75,7 @@ int perlin2DTest()
 		}
 		p += 600;
 	}
+	printf("time: %d\n", clock());
 	sf.FillFromImage(image);
 
 	bool state = true;

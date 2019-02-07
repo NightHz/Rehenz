@@ -16,8 +16,9 @@ namespace Rehenz
 	// PerlinNoise2D
 	float Perlin(unsigned int seed, float x, float y);
 
-	// PerlinNoise3D
-	float Perlin(unsigned int seed, float x, float y, float z);
+	float PerlinOctave(unsigned int seed, float x, int octaves, float persistence);
+
+	float PerlinOctave(unsigned int seed, float x, float y, int octaves, float persistence);
 
 }
 
