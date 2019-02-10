@@ -60,17 +60,16 @@ int perlin2DTest()
 	{
 		for (int x = 0; x < 600; x++)
 		{
-			float value = Rehenz::PerlinOctave(seed, x / 100.0f, y / 100.0f, 3, 0.5);
+			//float value = Rehenz::PerlinOctave(seed, x / 166.0f, y / 100.0f, 3, 0.5);
+			float value = Rehenz::Perlin(seed, x / 166.0f, y / 100.0f);
 			UINT v2 = (UINT)(0xff * (value < 0 ? -value : value));
 			UINT color = (value < 0 ? (v2 << 8) + (v2 << 16) : (v2 << 8));
-			//UINT v2 = (UINT)(0xff * (value + 1) / 2);
-			//UINT color = (v2 << 8);
-			if (x % 100 == 0 && y % 100 == 0)
+			/*if (x % 100 == 0 && y % 100 == 0)
 			{
 				p[x] = 0xff0000;
 				printf("x = %d \t y = %d \t value = %f \t color = 0x%x \n", x, y, value, color);
 			}
-			else
+			else*/
 				p[x] = color;
 		}
 		p += 600;
