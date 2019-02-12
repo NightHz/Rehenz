@@ -42,6 +42,9 @@
     <ClCompile Include="SoftRender\HRenderMath.cpp">
       <Filter>SoftRender</Filter>
     </ClCompile>
+    <ClCompile Include="SoftRender\HSoftRender.cpp">
+      <Filter>SoftRender</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="HString.h">
@@ -61,6 +64,12 @@
     </ClInclude>
     <ClInclude Include="SoftRender\HRenderMath.h">
       <Filter>SoftRender</Filter>
+    </ClInclude>
+    <ClInclude Include="SoftRender\HSoftRender.h">
+      <Filter>SoftRender</Filter>
+    </ClInclude>
+    <ClInclude Include="HDataStructrue.h">
+      <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

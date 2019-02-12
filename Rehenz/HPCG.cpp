@@ -8,7 +8,6 @@
 #include "HMath.h"
 #include <cmath>
 
-using namespace Rehenz;
 
 namespace Rehenz
 {
@@ -22,6 +21,18 @@ namespace Rehenz
 	{
 		float x;
 		float y;
+	};
+
+	struct Point2D
+	{
+		int x;
+		int y;
+
+		Point2D(int _x = 0, int _y = 0)
+		{
+			x = _x;
+			y = _y;
+		}
 	};
 
 	Vector2D PerlinRand(unsigned int seed, Point2D point)

@@ -13,8 +13,8 @@
 //		more functions
 //
 
-#ifndef _HMATH_H_
-#define _HMATH_H
+#ifndef _HRENDERMATH_H_
+#define _HRENDERMATH_H_
 
 namespace Rehenz
 {
@@ -220,4 +220,4 @@ namespace Rehenz
 	}
 }
 
-#endif // !_HMATH_H_
+#endif // !_HRENDERMATH_H_

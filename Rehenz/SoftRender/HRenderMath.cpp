@@ -9,7 +9,6 @@
 
 using namespace Rehenz::SoftRender;
 
-
 Rehenz::SoftRender::Matrix::Matrix()
 {
 	float *p = (float*)m;

@@ -7,6 +7,9 @@
 #include <time.h>
 #include "HPCG.h"
 #include "Windows/CSurface.h"
+#include "SoftRender/HSoftRender.h"
+
+using namespace Rehenz;
 
 int perlin1DTest()
 {
@@ -90,7 +93,34 @@ int perlin2DTest()
 	return 0;
 }
 
+int renderTest()
+{
+	int seed;
+	printf("Input seed : ");
+	scanf_s("%d", &seed);
+
+	Windows::CSurface sf;
+	sf.Create(nullptr, 600, 400, "Test");
+	UINT * image = new UINT[400 * 600];
+
+	SoftRender::World * world = new SoftRender::World(100);
+
+	bool state = true;
+	while (true)
+	{
+		world->RenderImage(image, 600, 400);
+		sf.Present(state);
+		if (!state)
+			break;
+	}
+
+	delete world;
+	delete[] image;
+	sf.Destroy();
+	return 0;
+}
+
 int main()
 {
-	return perlin2DTest();
+	return renderTest();
 }

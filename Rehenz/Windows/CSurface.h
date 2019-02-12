@@ -11,8 +11,12 @@
 #pragma comment(lib,"ddraw.lib")
 #pragma comment(lib,"dxguid.lib")
 
+#define WIN32_LEAN_AND_MEAN
+
 #include <ddraw.h>
 #include <Windows.h>
+
+
 
 namespace Rehenz
 {

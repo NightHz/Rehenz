@@ -6,7 +6,6 @@
 #include "HString.h"
 #include <string.h>
 
-using namespace Rehenz;
 
 int Rehenz::stringSearch(const char *strPar, const char *strChi)
 {

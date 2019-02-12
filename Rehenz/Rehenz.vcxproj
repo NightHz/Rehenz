@@ -120,15 +120,18 @@
     <ClCompile Include="HPCG.cpp" />
     <ClCompile Include="HString.cpp" />
     <ClCompile Include="SoftRender\HRenderMath.cpp" />
+    <ClCompile Include="SoftRender\HSoftRender.cpp" />
     <ClCompile Include="test.cpp" />
     <ClCompile Include="Windows\CSurface.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="HDataStructrue.h" />
     <ClInclude Include="HRand.h" />
     <ClInclude Include="HMath.h" />
     <ClInclude Include="HPCG.h" />
     <ClInclude Include="HString.h" />
     <ClInclude Include="SoftRender\HRenderMath.h" />
+    <ClInclude Include="SoftRender\HSoftRender.h" />
     <ClInclude Include="Windows\CSurface.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -6,7 +6,7 @@
 //
 
 #ifndef _HMATH_H_
-#define _HMATH_H
+#define _HMATH_H_
 
 namespace Rehenz
 {
