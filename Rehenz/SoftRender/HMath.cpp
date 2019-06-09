@@ -1,8 +1,0 @@
-// .cpp
-//
-// By NightHz
-//
-
-#include 
-
-

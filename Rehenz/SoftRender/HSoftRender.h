@@ -62,10 +62,10 @@ namespace Rehenz
 				obj->scale = scale;
 				obj->vertexN = vertexN;
 				obj->vertices = new Vertex[vertexN];
-				memcpy_s(obj->vertices, sizeof(obj->vertices), vertices, sizeof(vertices));
+				memcpy(obj->vertices, vertices, sizeof(vertices));
 				obj->triangleN = triangleN;
 				obj->triangles = new int[3 * triangleN];
-				memcpy_s(obj->triangles, sizeof(obj->triangles), triangles, sizeof(triangles));
+				memcpy(obj->triangles, triangles, sizeof(triangles));
 			}
 		};
 

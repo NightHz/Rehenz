@@ -24,7 +24,7 @@ UINT Rehenz::SoftRender::World::CloneObjectToWorld(Object * obj, Point position,
 	unsigned int newSize = size + cSize;
 	Object** newObjs = new Object*[newSize];
 	::memset(newObjs, 0, sizeof(newObjs));
-	::memcpy_s(newObjs, sizeof(newObjs), objs, sizeof(objs));
+	::memcpy(newObjs, objs, sizeof(objs));
 
 	Object** clsObjs = objs;
 	unsigned int clsSize = size;
@@ -39,14 +39,6 @@ UINT Rehenz::SoftRender::World::CloneObjectToWorld(Object * obj, Point position,
 	delete[] clsObjs;
 
 	return clsSize;
-}
-
-namespace Rehenz
-{
-	namespace SoftRender
-	{
-
-	}
 }
 
 void Rehenz::SoftRender::World::RenderImage(UINT * image, int width, int height)
