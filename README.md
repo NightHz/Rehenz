@@ -1,21 +1,18 @@
 # Rehenz
 
----
+some code writed by NightHz
 
-**old**
+# code style
 
-- Winndows:CSurface  
-Windows窗口快速建立，并获得编辑像素的权限
+- file: `render_soft.h`
+- var: `int player_speed = 10;`
+- func: `int getPlayerSpeed(int number) { ... }`
+- type: `class MovableObj { ... }`
+- enum: `enum ObjType { Movable = 0, ... }`
+- #define: `#define PI 3.14f`
+- namespace: `namespace Rehenz { ... }`
 
-- String
-    - 匹配算法
+# file description
 
-- PCG
-	- 柏林噪点
+- math: math
 
-- Rand
-	- 伪随机数生成器
-	- 计算哈希值
-	
-- SoftRender  
-软件渲染3D图形
