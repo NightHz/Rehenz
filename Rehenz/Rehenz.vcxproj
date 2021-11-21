@@ -124,9 +124,12 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="noise_gen.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="math.h" />
+    <ClInclude Include="noise_gen.h" />
+    <ClInclude Include="rehenz.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\README.md" />
