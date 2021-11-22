@@ -37,4 +37,33 @@ namespace Rehenz
 		}
 		return noise;
 	}
+
+	PerlinNoise1D::PerlinNoise1D(unsigned int _seed)
+	{
+		seed = _seed;
+	}
+
+	PerlinNoise1D::~PerlinNoise1D()
+	{
+	}
+
+	float PerlinNoise1D::GetGrad(int x)
+	{
+		if (grads.find(x) == grads.end())
+		{
+			std::default_random_engine e(Hash(seed ^ Hash(x)));
+			std::uniform_real_distribution<float> d(-1, 1);
+			grads[x] = d(e);
+		}
+		return grads[x];
+	}
+
+	float PerlinNoise1D::GetNoise(float x)
+	{
+		int xi = static_cast<int>(x);
+		float xf = x - xi;
+		if (xf < 0)
+			xi--, xf = x - xi;
+		return Fade(GetGrad(xi), GetGrad(xi + 1), xf);
+	}
 }

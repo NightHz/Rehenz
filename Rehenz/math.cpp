@@ -16,6 +16,7 @@ namespace Rehenz
 
 	Matrix::Matrix(float value)
 	{
+		m[0][0] = value; // for ignore C26495 warn
 		float* p = (float*)m;
 		for (int i = 0; i < 16; i++)
 			(*(p++)) = value;

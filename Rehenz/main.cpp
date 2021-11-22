@@ -17,5 +17,14 @@ int main()
 		cout << endl;
 	}
 
+	cout << endl;
+	PerlinNoise1D noise1(123);
+	for (int i = 0; i < 10; i++)
+	{
+		for (int j = 0; j < 5; j++)
+			cout << noise1.GetNoise(i + j / 5.0f) << " ";
+		cout << endl;
+	}
+
 	return 0;
 }
