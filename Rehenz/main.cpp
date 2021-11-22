@@ -9,7 +9,7 @@ int main()
 	cout << "Hello~ Rehenz~" << endl;
 
 	float noise[50];
-	perlin1D(123U, 0, 10, 5, noise);
+	Perlin1D(123U, 0, 10, 5, noise);
 	for (int i = 0; i < 10; i++)
 	{
 		for (int j = 0; j < 5; j++)

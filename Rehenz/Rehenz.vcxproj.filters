@@ -21,6 +21,9 @@
     <ClCompile Include="main.cpp">
       <Filter>source</Filter>
     </ClCompile>
+    <ClCompile Include="math.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="math.h">
