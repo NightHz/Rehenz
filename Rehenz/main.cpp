@@ -26,5 +26,11 @@ int main()
 		cout << endl;
 	}
 
+	cout << endl << "2-dim perlin and 3-dim perlin" << endl;
+	PerlinNoise2D noise2(234);
+	cout << noise2.GetNoise(1.1f, 2.3f) << endl; // -0.145062
+	PerlinNoise3D noise3(345);
+	cout << noise3.GetNoise(1.1f, 2.3f, 4.5f) << endl; // 0.0540515
+
 	return 0;
 }

@@ -49,7 +49,8 @@ namespace Rehenz
 	struct Vector;
 	struct Point;
 	struct EulerAngles;
-	struct Point2D;
+	struct Vector2;
+	struct Vector3;
 
 	// 4x4 matrix
 	struct Matrix
@@ -143,7 +144,7 @@ namespace Rehenz
 	// get inverse matrix of rotation defined by eular angles
 	Matrix GetInverseMatrixE(EulerAngles euler_angles);
 
-	// 4-component vector = 1x4 matrix
+	// 3-component vector with w = 1x4 matrix
 	struct Vector
 	{
 	public:
@@ -186,7 +187,7 @@ namespace Rehenz
 	};
 	Vector operator*(float, Vector);
 
-	// 4-component point = 1x4 matrix
+	// 3-component point with w = 1x4 matrix
 	struct Point : public Vector
 	{
 	public:
@@ -208,23 +209,61 @@ namespace Rehenz
 		EulerAngles(float _psi, float _theta, float _phi);
 	};
 
-	// 2-component point
-	struct Point2D
+	// 2-component vector
+	struct Vector2
 	{
 	public:
-		int x;
-		int y;
+		float x;
+		float y;
 
-		Point2D();
-		Point2D(int _x, int _y);
+		Vector2();
+		Vector2(float _x, float _y);
+
+		Vector2 operator*(float);
+		bool operator==(Vector2);
+		bool operator!=(Vector2);
 	};
+
+	// 2-component point
+	typedef Vector2 Point2;
+
+	// 3-component vector without w
+	struct Vector3
+	{
+	public:
+		float x;
+		float y;
+		float z;
+
+		Vector3();
+		Vector3(float _x, float _y, float _z);
+
+		Vector3 operator*(float);
+		bool operator==(Vector3);
+		bool operator!=(Vector3);
+	};
+
+	// 3-component point without w
+	typedef Vector3 Point3;
 
 
 	// get vector length
 	float VectorLength(Vector v1);
 
+	// get vector length
+	float VectorLength(Vector2 v);
+
+	// get vector length
+	float VectorLength(Vector3 v);
+
 	// vector dot
 	float VectorDot(Vector v1, Vector v2);
+
+	// vector dot
+	float VectorDot(Vector2 v1, Vector2 v2);
+
+	// vector dot
+	float VectorDot(Vector3 v1, Vector3 v2);
 
 	// vector cross
 	Vector VectorCross(Vector v1, Vector v2);
@@ -245,8 +284,22 @@ namespace Rehenz
 	float PointDistance(Point p1, Point p2);
 
 	// get point distance
-	float PointDistance(Point2D p1, Point2D p2);
+	float PointDistance(Point2 p1, Point2 p2);
 
 	// get triangles normal vector
 	Vector TrianglesNormal(Point p1, Point p2, Point p3);
+
+	// 2-component vector with int type
+	struct Vector2I
+	{
+	public:
+		int x;
+		int y;
+
+		Vector2I();
+		Vector2I(int _x, int _y);
+	};
+
+	// 2-component point with int type
+	typedef Vector2I Point2I;
 }

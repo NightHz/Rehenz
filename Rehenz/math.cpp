@@ -540,16 +540,66 @@ namespace Rehenz
 		phi = _phi;
 	}
 
-	Point2D::Point2D()
+	Vector2::Vector2()
 	{
 		x = 0;
 		y = 0;
 	}
 
-	Point2D::Point2D(int _x, int _y)
+	Vector2::Vector2(float _x, float _y)
 	{
 		x = _x;
 		y = _y;
+	}
+
+	Vector2 Vector2::operator*(float f)
+	{
+		return Vector2(f * x, f * y);
+	}
+
+	bool Vector2::operator==(Vector2 v)
+	{
+		if (v.x == x && v.y == y)
+			return true;
+		else
+			return false;
+	}
+
+	bool Vector2::operator!=(Vector2 v)
+	{
+		return !(*this == v);
+	}
+
+	Vector3::Vector3()
+	{
+		x = 0;
+		y = 0;
+		z = 0;
+	}
+
+	Vector3::Vector3(float _x, float _y, float _z)
+	{
+		x = _x;
+		y = _y;
+		z = _z;
+	}
+
+	Vector3 Vector3::operator*(float f)
+	{
+		return Vector3(f * x, f * y, f * z);
+	}
+
+	bool Vector3::operator==(Vector3 v)
+	{
+		if (v.x == x && v.y == y && v.z == z)
+			return true;
+		else
+			return false;
+	}
+
+	bool Vector3::operator!=(Vector3 v)
+	{
+		return !(*this == v);
 	}
 
 	float VectorLength(Vector v1)
@@ -557,7 +607,27 @@ namespace Rehenz
 		return sqrtf(v1.x * v1.x + v1.y * v1.y + v1.z * v1.z);
 	}
 
+	float VectorLength(Vector2 v)
+	{
+		return sqrtf(v.x * v.x + v.y * v.y);
+	}
+
+	float VectorLength(Vector3 v)
+	{
+		return sqrtf(v.x * v.x + v.y * v.y + v.z * v.z);
+	}
+
 	float VectorDot(Vector v1, Vector v2)
+	{
+		return v1.x * v2.x + v1.y * v2.y + v1.z * v2.z;
+	}
+
+	float VectorDot(Vector2 v1, Vector2 v2)
+	{
+		return v1.x * v2.x + v1.y * v2.y;
+	}
+
+	float VectorDot(Vector3 v1, Vector3 v2)
 	{
 		return v1.x * v2.x + v1.y * v2.y + v1.z * v2.z;
 	}
@@ -629,7 +699,7 @@ namespace Rehenz
 		return sqrtf(v1.x * v1.x + v1.y * v1.y + v1.z * v1.z);
 	}
 
-	float PointDistance(Point2D p1, Point2D p2)
+	float PointDistance(Point2 p1, Point2 p2)
 	{
 		return sqrtf((float)((p1.x - p2.x) * (p1.x - p2.x) + (p1.y - p2.y) * (p1.y - p2.y)));
 	}
@@ -639,4 +709,15 @@ namespace Rehenz
 		return VectorNormalize(VectorCross(p2 - p1, p3 - p1));
 	}
 
+	Vector2I::Vector2I()
+	{
+		x = 0;
+		y = 0;
+	}
+
+	Vector2I::Vector2I(int _x, int _y)
+	{
+		x = _x;
+		y = _y;
+	}
 }
