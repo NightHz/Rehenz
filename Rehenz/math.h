@@ -1,4 +1,5 @@
 #pragma once
+#include <cmath>
 
 namespace Rehenz
 {
@@ -35,7 +36,7 @@ namespace Rehenz
 	template <typename T>
 	inline void Sort(T& x1, T& x2)
 	{
-		if (x1 > x2)
+		if (x2 < x1)
 		{
 			T t = x1;
 			x1 = x2;

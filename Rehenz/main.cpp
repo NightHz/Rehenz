@@ -31,6 +31,9 @@ int main()
 	cout << noise2.GetNoise(1.1f, 2.3f) << endl; // -0.145062
 	PerlinNoise3D noise3(345);
 	cout << noise3.GetNoise(1.1f, 2.3f, 4.5f) << endl; // 0.0540515
+	cout << noise2.GetNoiseSum(1.1f, 2.3f) << endl;    // -0.0163853
+	cout << noise2.GetNoiseSumAbs(1.1f, 2.3f) << endl; // 0.258147
+	cout << noise2.GetNoiseSumAbsSin(1.1f, 2.3f) << endl; // 0.999569
 
 	return 0;
 }

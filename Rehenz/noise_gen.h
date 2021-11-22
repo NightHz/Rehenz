@@ -4,7 +4,7 @@
 
 namespace Rehenz
 {
-	// generate 1D perlin noise, return noise ptr
+	// [Deprecated] generate 1D perlin noise, return noise ptr
 	float* Perlin1D(unsigned int seed, int x1, int x2, unsigned int block_size, float* noise);
 
 	// 1-dim Perlin noise
@@ -36,6 +36,9 @@ namespace Rehenz
 		PerlinNoise2D(unsigned int _seed);
 		~PerlinNoise2D();
 		float GetNoise(float x, float y);
+		float GetNoiseSum(float x, float y);
+		float GetNoiseSumAbs(float x, float y);
+		float GetNoiseSumAbsSin(float x, float y);
 	};
 
 	struct Point3Compare

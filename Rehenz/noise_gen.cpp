@@ -118,6 +118,43 @@ namespace Rehenz
 		return Fade(n2, n3, yf);
 	}
 
+	float PerlinNoise2D::GetNoiseSum(float x, float y)
+	{
+		float max = 0;
+		float s = 0;
+		s += GetNoise(x, y); max += 1;
+		x *= 2; y *= 2; s += 0.5000f * GetNoise(x, y); max += 0.5000f;
+		x *= 2; y *= 2; s += 0.2500f * GetNoise(x, y); max += 0.2500f;
+		x *= 2; y *= 2; s += 0.1250f * GetNoise(x, y); max += 0.1250f;
+		x *= 2; y *= 2; s += 0.0625f * GetNoise(x, y); max += 0.0625f;
+		return s / max;
+	}
+
+	float PerlinNoise2D::GetNoiseSumAbs(float x, float y)
+	{
+		float max = 0;
+		float s = 0;
+		s += abs(GetNoise(x, y)); max += 1;
+		x *= 2; y *= 2; s += 0.5000f * abs(GetNoise(x, y)); max += 0.5000f;
+		x *= 2; y *= 2; s += 0.2500f * abs(GetNoise(x, y)); max += 0.2500f;
+		x *= 2; y *= 2; s += 0.1250f * abs(GetNoise(x, y)); max += 0.1250f;
+		x *= 2; y *= 2; s += 0.0625f * abs(GetNoise(x, y)); max += 0.0625f;
+		return s / max;
+	}
+
+	float PerlinNoise2D::GetNoiseSumAbsSin(float x, float y)
+	{
+		float s = 0;
+		float x0 = x;
+		s += abs(GetNoise(x, y));
+		x *= 2; y *= 2; s += 0.5000f * abs(GetNoise(x, y));
+		x *= 2; y *= 2; s += 0.2500f * abs(GetNoise(x, y));
+		x *= 2; y *= 2; s += 0.1250f * abs(GetNoise(x, y));
+		x *= 2; y *= 2; s += 0.0625f * abs(GetNoise(x, y));
+		s = sin(s + x0);
+		return s;
+	}
+
 	bool Point2Compare::operator()(const Point2& lhs, const Point2& rhs) const
 	{
 		if (lhs.y < rhs.y)
