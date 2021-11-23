@@ -1,9 +1,11 @@
+#define WIN32_LEAN_AND_MEAN
 #include <iostream>
 using std::cout;
 using std::endl;
 #include "rehenz.h"
 using namespace Rehenz;
 #include <string>
+#include <timeapi.h>
 
 int main()
 {
@@ -41,17 +43,14 @@ int main()
 	std::string title = "surface by dx8";
 	srf_dx8.Create(GetModuleHandle(nullptr), 800, 600, title.c_str());
 	int fps[2] = { 0,0 };
-	auto fps_t0 = GetTickCount64();
-	auto t = GetTickCount64();
+	auto fps_t0 = timeGetTime();
+	auto t0 = timeGetTime();
 	while (srf_dx8.GetWindowState())
 	{
 		srf_dx8.Present();
-		// sleep
-		Sleep(max(0, 10 - (int)(GetTickCount64() - t)));
-		t = GetTickCount64();
 		// compute fps and set title
 		fps[1]++;
-		auto fps_t1 = GetTickCount64();
+		auto fps_t1 = timeGetTime();
 		if (fps_t1 - fps_t0 >= 500)
 		{
 			srf_dx8.SetTitle((title + " fps: " + std::to_string(fps[0] + fps[1])).c_str());
@@ -59,7 +58,11 @@ int main()
 			fps[1] = 0;
 			fps_t0 = fps_t1;
 		}
-		//exit
+		// sleep
+		while (16 >= (timeGetTime() - t0))
+			;
+		t0 = timeGetTime();
+		// exit
 		if (KeyIsDown('Q'))
 			break;
 	}
