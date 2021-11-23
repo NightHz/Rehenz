@@ -383,7 +383,7 @@ namespace Rehenz
 		v[0] = 0.0f;
 		v[1] = 0.0f;
 		v[2] = 0.0f;
-		v[3] = 1.0f;
+		v[3] = 0.0f;
 	}
 
 	Vector::Vector(float value)
