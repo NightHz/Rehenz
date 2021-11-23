@@ -80,6 +80,7 @@
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
+      <AdditionalDependencies>ddraw.lib;dxguid.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -127,11 +128,13 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="math.cpp" />
     <ClCompile Include="noise_gen.cpp" />
+    <ClCompile Include="surface_dx8.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="math.h" />
     <ClInclude Include="noise_gen.h" />
     <ClInclude Include="rehenz.h" />
+    <ClInclude Include="surface_dx8.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\README.md" />

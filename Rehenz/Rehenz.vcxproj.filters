@@ -24,6 +24,9 @@
     <ClCompile Include="math.cpp">
       <Filter>source</Filter>
     </ClCompile>
+    <ClCompile Include="surface_dx8.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="math.h">
@@ -33,6 +36,9 @@
       <Filter>header</Filter>
     </ClInclude>
     <ClInclude Include="noise_gen.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="surface_dx8.h">
       <Filter>header</Filter>
     </ClInclude>
   </ItemGroup>
