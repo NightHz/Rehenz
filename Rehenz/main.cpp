@@ -59,6 +59,9 @@ int main()
 			fps[1] = 0;
 			fps_t0 = fps_t1;
 		}
+		//exit
+		if (KeyIsDown('Q'))
+			break;
 	}
 	srf_dx8.Destroy();
 
