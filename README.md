@@ -25,8 +25,17 @@ some code writed by NightHz
 
 ### render_soft
 
-- 基本数据
-  - `Object` 存储顶点、三角片元与整体变换信息
-  - `Camera` 存储相机信息，包含上次渲染的图像
-  - 用户提交 `Object` 与 `Camera` 等对象，使用智能指针共享内存，用户可直接修改物件参数
-- 管线
+**data**
+
+- `Mesh` saves vertices and triangles
+- `Object` saves `Mesh` pointer and transform information
+- `Camera` saves camera information, including last buffer image
+- Rendering engine uses smart pointer to save objects such as `Object` and `Camera`, and user should do the same. When user modifies the data, rendering engine can know immediately.
+
+**pipeline**
+
+- Copy and transform all objects (vertex shader)
+- Clipping and back-face culling
+- Mapping to screen
+- Traverse all triangles and compute color for all sampling points (pixel shader)
+- Use z-buffer merge multiple colors
