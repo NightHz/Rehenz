@@ -194,6 +194,7 @@ namespace Rehenz
 	public:
 		// default w = 1
 		Point() : Vector() { w = 1; }
+		Point(Vector v) : Vector(v) {}
 		explicit Point(float value) : Vector(value) {}
 		explicit Point(float _x, float _y, float _z, float _w) : Vector(_x, _y, _z, _w) {}
 	};
