@@ -15,7 +15,7 @@ namespace Rehenz
 		std::map<int, float> grads;
 		float GetGrad(int x);
 	public:
-		PerlinNoise1D(unsigned int _seed);
+		explicit PerlinNoise1D(unsigned int _seed);
 		~PerlinNoise1D();
 		float GetNoise(float x);
 	};
@@ -33,7 +33,7 @@ namespace Rehenz
 		std::map<Point2, Vector2, Point2Compare> grads;
 		Vector2 GetGrad(int x, int y);
 	public:
-		PerlinNoise2D(unsigned int _seed);
+		explicit PerlinNoise2D(unsigned int _seed);
 		~PerlinNoise2D();
 		float GetNoise(float x, float y);
 		float GetNoiseSum(float x, float y);
@@ -54,7 +54,7 @@ namespace Rehenz
 		std::map<Point3, Vector3, Point3Compare> grads;
 		Vector3 GetGrad(int x, int y, int z);
 	public:
-		PerlinNoise3D(unsigned int _seed);
+		explicit PerlinNoise3D(unsigned int _seed);
 		~PerlinNoise3D();
 		float GetNoise(float x, float y, float z);
 	};

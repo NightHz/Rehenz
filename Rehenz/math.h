@@ -61,8 +61,8 @@ namespace Rehenz
 
 		// default unit matrix
 		Matrix();
-		Matrix(float value);
-		Matrix(float _00, float _01, float _02, float _03,
+		explicit Matrix(float value);
+		explicit Matrix(float _00, float _01, float _02, float _03,
 			float _10, float _11, float _12, float _13,
 			float _20, float _21, float _22, float _23,
 			float _30, float _31, float _32, float _33);
@@ -161,8 +161,8 @@ namespace Rehenz
 
 		// default w = 0
 		Vector();
-		Vector(float value);
-		Vector(float _x, float _y, float _z, float _w);
+		explicit Vector(float value);
+		explicit Vector(float _x, float _y, float _z, float _w);
 
 		// access date
 		float& operator()(int index);
@@ -194,8 +194,8 @@ namespace Rehenz
 	public:
 		// default w = 1
 		Point() : Vector() { w = 1; }
-		Point(float value) : Vector(value) {}
-		Point(float _x, float _y, float _z, float _w) : Vector(_x, _y, _z, _w) {}
+		explicit Point(float value) : Vector(value) {}
+		explicit Point(float _x, float _y, float _z, float _w) : Vector(_x, _y, _z, _w) {}
 	};
 
 	// eular angles
@@ -207,7 +207,7 @@ namespace Rehenz
 		float phi;
 
 		EulerAngles();
-		EulerAngles(float _psi, float _theta, float _phi);
+		explicit EulerAngles(float _psi, float _theta, float _phi);
 	};
 
 	// 2-component vector
@@ -218,7 +218,7 @@ namespace Rehenz
 		float y;
 
 		Vector2();
-		Vector2(float _x, float _y);
+		explicit Vector2(float _x, float _y);
 
 		Vector2 operator*(float);
 		bool operator==(Vector2);
@@ -237,7 +237,7 @@ namespace Rehenz
 		float z;
 
 		Vector3();
-		Vector3(float _x, float _y, float _z);
+		explicit Vector3(float _x, float _y, float _z);
 
 		Vector3 operator*(float);
 		bool operator==(Vector3);
@@ -298,7 +298,7 @@ namespace Rehenz
 		int y;
 
 		Vector2I();
-		Vector2I(int _x, int _y);
+		explicit Vector2I(int _x, int _y);
 	};
 
 	// 2-component point with int type
