@@ -78,16 +78,16 @@ namespace Rehenz
 		Matrix& operator*=(float);
 		Matrix& operator/=(float);
 
-		Matrix operator-();
+		Matrix operator-() const;
 
-		Matrix operator*(Matrix);
-		Matrix operator+(Matrix);
-		Matrix operator-(Matrix);
-		Matrix operator*(float);
-		Matrix operator/(float);
+		Matrix operator*(Matrix) const;
+		Matrix operator+(Matrix) const;
+		Matrix operator-(Matrix) const;
+		Matrix operator*(float) const;
+		Matrix operator/(float) const;
 
-		bool operator==(Matrix);
-		bool operator!=(Matrix);
+		bool operator==(Matrix) const;
+		bool operator!=(Matrix) const;
 	};
 	Matrix operator*(float, Matrix);
 
@@ -175,16 +175,16 @@ namespace Rehenz
 		Vector& operator*=(float);
 		Vector& operator/=(float);
 
-		Vector operator-();
+		Vector operator-() const;
 
-		Vector operator*(Matrix);
-		Vector operator+(Vector);
-		Vector operator-(Vector);
-		Vector operator*(float);
-		Vector operator/(float);
+		Vector operator*(Matrix) const;
+		Vector operator+(Vector) const;
+		Vector operator-(Vector) const;
+		Vector operator*(float) const;
+		Vector operator/(float) const;
 
-		bool operator==(Vector);
-		bool operator!=(Vector);
+		bool operator==(Vector) const;
+		bool operator!=(Vector) const;
 	};
 	Vector operator*(float, Vector);
 
@@ -221,9 +221,9 @@ namespace Rehenz
 		Vector2();
 		explicit Vector2(float _x, float _y);
 
-		Vector2 operator*(float);
-		bool operator==(Vector2);
-		bool operator!=(Vector2);
+		Vector2 operator*(float) const;
+		bool operator==(Vector2) const;
+		bool operator!=(Vector2) const;
 	};
 
 	// 2-component point
@@ -240,9 +240,9 @@ namespace Rehenz
 		Vector3();
 		explicit Vector3(float _x, float _y, float _z);
 
-		Vector3 operator*(float);
-		bool operator==(Vector3);
-		bool operator!=(Vector3);
+		Vector3 operator*(float) const;
+		bool operator==(Vector3) const;
+		bool operator!=(Vector3) const;
 	};
 
 	// 3-component point without w

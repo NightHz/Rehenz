@@ -92,7 +92,7 @@ namespace Rehenz
 		return (*this);
 	}
 
-	Matrix Matrix::operator-()
+	Matrix Matrix::operator-() const
 	{
 		Matrix result;
 		for (int i = 0; i < 4; i++)
@@ -101,7 +101,7 @@ namespace Rehenz
 		return result;
 	}
 
-	Matrix Matrix::operator*(Matrix matrix0)
+	Matrix Matrix::operator*(Matrix matrix0) const
 	{
 		Matrix result;
 		for (int i = 0; i < 4; i++)
@@ -110,7 +110,7 @@ namespace Rehenz
 		return result;
 	}
 
-	Matrix Matrix::operator+(Matrix matrix0)
+	Matrix Matrix::operator+(Matrix matrix0) const
 	{
 		Matrix result;
 		for (int i = 0; i < 4; i++)
@@ -119,7 +119,7 @@ namespace Rehenz
 		return result;
 	}
 
-	Matrix Matrix::operator-(Matrix matrix0)
+	Matrix Matrix::operator-(Matrix matrix0) const
 	{
 		Matrix result;
 		for (int i = 0; i < 4; i++)
@@ -128,7 +128,7 @@ namespace Rehenz
 		return result;
 	}
 
-	Matrix Matrix::operator*(float f0)
+	Matrix Matrix::operator*(float f0) const
 	{
 		Matrix result;
 		for (int i = 0; i < 4; i++)
@@ -146,7 +146,7 @@ namespace Rehenz
 		return result;
 	}
 
-	Matrix Matrix::operator/(float f0)
+	Matrix Matrix::operator/(float f0) const
 	{
 		Matrix result;
 		for (int i = 0; i < 4; i++)
@@ -155,7 +155,7 @@ namespace Rehenz
 		return result;
 	}
 
-	bool Matrix::operator==(Matrix matrix0)
+	bool Matrix::operator==(Matrix matrix0) const
 	{
 		for (int i = 0; i < 4; i++)
 			for (int j = 0; j < 4; j++)
@@ -164,7 +164,7 @@ namespace Rehenz
 		return true;
 	}
 
-	bool Matrix::operator!=(Matrix matrix0)
+	bool Matrix::operator!=(Matrix matrix0) const
 	{
 		for (int i = 0; i < 4; i++)
 			for (int j = 0; j < 4; j++)
@@ -454,7 +454,7 @@ namespace Rehenz
 		return (*this);
 	}
 
-	Vector Vector::operator-()
+	Vector Vector::operator-() const
 	{
 		Vector result;
 		for (int i = 0; i < 4; i++)
@@ -462,7 +462,7 @@ namespace Rehenz
 		return result;
 	}
 
-	Vector Vector::operator*(Matrix matrix0)
+	Vector Vector::operator*(Matrix matrix0) const
 	{
 		Vector result;
 		for (int i = 0; i < 4; i++)
@@ -470,7 +470,7 @@ namespace Rehenz
 		return result;
 	}
 
-	Vector Vector::operator+(Vector vector0)
+	Vector Vector::operator+(Vector vector0) const
 	{
 		Vector result;
 		for (int i = 0; i < 4; i++)
@@ -478,7 +478,7 @@ namespace Rehenz
 		return result;
 	}
 
-	Vector Vector::operator-(Vector vector0)
+	Vector Vector::operator-(Vector vector0) const
 	{
 		Vector result;
 		for (int i = 0; i < 4; i++)
@@ -486,7 +486,7 @@ namespace Rehenz
 		return result;
 	}
 
-	Vector Vector::operator*(float f0)
+	Vector Vector::operator*(float f0) const
 	{
 		Vector result;
 		for (int i = 0; i < 4; i++)
@@ -502,7 +502,7 @@ namespace Rehenz
 		return result;
 	}
 
-	Vector Vector::operator/(float f0)
+	Vector Vector::operator/(float f0) const
 	{
 		Vector result;
 		for (int i = 0; i < 4; i++)
@@ -510,7 +510,7 @@ namespace Rehenz
 		return result;
 	}
 
-	bool Vector::operator==(Vector vector0)
+	bool Vector::operator==(Vector vector0) const
 	{
 		for (int i = 0; i < 4; i++)
 			if (v[i] != vector0(i))
@@ -518,7 +518,7 @@ namespace Rehenz
 		return true;
 	}
 
-	bool Vector::operator!=(Vector vector0)
+	bool Vector::operator!=(Vector vector0) const
 	{
 		for (int i = 0; i < 4; i++)
 			if (v[i] != vector0(i))
@@ -552,12 +552,12 @@ namespace Rehenz
 		y = _y;
 	}
 
-	Vector2 Vector2::operator*(float f)
+	Vector2 Vector2::operator*(float f) const
 	{
 		return Vector2(f * x, f * y);
 	}
 
-	bool Vector2::operator==(Vector2 v)
+	bool Vector2::operator==(Vector2 v) const
 	{
 		if (v.x == x && v.y == y)
 			return true;
@@ -565,7 +565,7 @@ namespace Rehenz
 			return false;
 	}
 
-	bool Vector2::operator!=(Vector2 v)
+	bool Vector2::operator!=(Vector2 v) const
 	{
 		return !(*this == v);
 	}
@@ -584,12 +584,12 @@ namespace Rehenz
 		z = _z;
 	}
 
-	Vector3 Vector3::operator*(float f)
+	Vector3 Vector3::operator*(float f) const
 	{
 		return Vector3(f * x, f * y, f * z);
 	}
 
-	bool Vector3::operator==(Vector3 v)
+	bool Vector3::operator==(Vector3 v) const
 	{
 		if (v.x == x && v.y == y && v.z == z)
 			return true;
@@ -597,7 +597,7 @@ namespace Rehenz
 			return false;
 	}
 
-	bool Vector3::operator!=(Vector3 v)
+	bool Vector3::operator!=(Vector3 v) const
 	{
 		return !(*this == v);
 	}
