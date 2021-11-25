@@ -117,10 +117,27 @@ namespace Rehenz
 		int v_n = old->VertexCount();
 		int tri_n = old->TriangleCount();
 
-		std::vector<Vertex> vertices();
-		std::vector<int> triangles();
+		std::vector<Vertex> vertices(v_old);
+		std::vector<int> triangles;
 
-		// ...
+		for (int i = 0; i < tri_n; i++)
+		{
+			// get three vertex index
+			int a = tri_old[3 * i], b = tri_old[3 * i + 1], c = tri_old[3 * i + 2];
+			// compute center vertex on unit sphere
+			Point center = (v_old[a].p + v_old[b].p + v_old[c].p) / 3;
+			float length = VectorLength(center);
+			if (length != 0)
+				center /= length;
+			center.w = 1;
+			// add new vertex
+			int d = vertices.size();
+			vertices.push_back(center);
+			// add new triangles
+			triangles.push_back(a); triangles.push_back(b); triangles.push_back(d);
+			triangles.push_back(b); triangles.push_back(c); triangles.push_back(d);
+			triangles.push_back(c); triangles.push_back(a); triangles.push_back(d);
+		}
 
 		return std::make_shared<Mesh>(vertices, triangles);
 	}
