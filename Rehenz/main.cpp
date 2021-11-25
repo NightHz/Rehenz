@@ -40,7 +40,7 @@ int main()
 
 	cout << endl << "Open a surface with dx8" << endl;
 	SurfaceDx8 srf_dx8;
-	std::string title = "surface by dx8";
+	String title = "surface by dx8";
 	srf_dx8.Create(GetModuleHandle(nullptr), 800, 600, title.c_str());
 	int fps[2] = { 0,0 };
 	auto fps_t0 = timeGetTime();

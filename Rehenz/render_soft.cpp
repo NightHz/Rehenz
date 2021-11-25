@@ -114,13 +114,12 @@ namespace Rehenz
 	{
 		auto v_old = old->GetVertices();
 		auto tri_old = old->GetTriangles();
-		int v_n = old->VertexCount();
-		int tri_n = old->TriangleCount();
+		size_t tri_n = old->TriangleCount();
 
 		std::vector<Vertex> vertices(v_old);
 		std::vector<int> triangles;
 
-		for (int i = 0; i < tri_n; i++)
+		for (size_t i = 0; i < tri_n; i++)
 		{
 			// get three vertex index
 			int a = tri_old[3 * i], b = tri_old[3 * i + 1], c = tri_old[3 * i + 2];
@@ -131,7 +130,7 @@ namespace Rehenz
 				center /= length;
 			center.w = 1;
 			// add new vertex
-			int d = vertices.size();
+			int d = static_cast<int>(vertices.size());
 			vertices.push_back(center);
 			// add new triangles
 			triangles.push_back(a); triangles.push_back(b); triangles.push_back(d);
