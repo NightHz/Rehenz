@@ -53,10 +53,10 @@ namespace Rehenz
 	{
 		if (title != nullptr)
 			free(title);
-		title = (TCHAR*)malloc((strlen(_title) + 1) * sizeof(TCHAR));
+		title = (TCHAR*)malloc(lstrlen(_title) * sizeof(TCHAR) + sizeof(TCHAR));
 		if (title == nullptr)
 			return;
-		memcpy(title, _title, (strlen(_title) + 1) * sizeof(TCHAR));
+		memcpy(title, _title, lstrlen(_title) * sizeof(TCHAR) + sizeof(TCHAR));
 		if (hwnd != nullptr)
 			SetWindowText(hwnd, title);
 	}
