@@ -2,6 +2,7 @@
 #include "math.h"
 #include <vector>
 #include <memory>
+#include "type.h"
 
 namespace Rehenz
 {
@@ -24,8 +25,8 @@ namespace Rehenz
 		explicit Mesh(const std::vector<Vertex>& _vertices, const std::vector<int>& _triangles);
 		~Mesh();
 
-		int VertexCount() { return vertices.size(); }
-		int TriangleCount() { return triangles.size() / 3; }
+		size_t VertexCount() { return vertices.size(); }
+		size_t TriangleCount() { return triangles.size() / 3; }
 		const std::vector<Vertex> GetVertices() { return vertices; }
 		const std::vector<int> GetTriangles() { return triangles; }
 
@@ -35,36 +36,54 @@ namespace Rehenz
 		void AddTriangle(const std::vector<int>& _triangles);
 	};
 
+	std::shared_ptr<Mesh> CreateCubeMesh();
+	std::shared_ptr<Mesh> CreateSphereMesh(int smooth = 3);
+
 	class Object
 	{
 	private:
-		std::shared_ptr<Mesh> pmesh;
-
 	public:
+		std::shared_ptr<Mesh> pmesh;
 		Vector position;
-		// at vector for rotation
-		Vector at;
-		// up vector for rotation
-		Vector up;
+		EulerAngles rotation;
 		Vector scale;
 
 		Object();
 		explicit Object(std::shared_ptr<Mesh> _pmesh);
 		~Object();
-
-		std::shared_ptr<Mesh> GetMesh() { return pmesh; }
-
-		void SetMesh(std::shared_ptr<Mesh> _pmesh);
 	};
 
 	void AddObject(std::shared_ptr<Object> pobj);
-	void RemoveObject(std::shared_ptr<Object> pobj);
+	bool RemoveObject(std::shared_ptr<Object> pobj);
 	// use nullptr get first object, and input last object will return nullptr
 	std::shared_ptr<Object> GetObject(std::shared_ptr<Object> prev);
 
 	class Camera
 	{
 	private:
+		int height, width;
+		// last buffer image
+		uint* buffer;
+
 	public:
+		Vector position;
+		Vector at;
+		Vector up;
+		// projection parameters
+		float fovy, aspect, z_near, z_far;
+
+		// default height = 600, width = 800, fovy = pi/2, aspect = 4/3, z_near = 1, z_far = 500
+		Camera();
+		// auto set aspect = width / height
+		explicit Camera(int _height, int _width);
+		~Camera();
+
+		int GetHeight() { return height; }
+		int GetWidth() { return width; }
+		const uint* GetLastImage() { return buffer; }
+
+		void SetSize(int _height, int _width, float _fovy);
+
+		const uint* RenderImage();
 	};
 }
