@@ -47,6 +47,9 @@
     <ClInclude Include="render_soft.h">
       <Filter>header</Filter>
     </ClInclude>
+    <ClInclude Include="type.h">
+      <Filter>header</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\README.md" />

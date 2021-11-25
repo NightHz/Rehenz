@@ -19,9 +19,10 @@ some code writed by NightHz
 - `rehenz.h`: include all header file
 - `render_soft.h`: use cpu to render 3-dim world
 - `surface_dx8.h`: use DirectDraw in DirectX8 to create surface which can draw image
+- `type.h`: define basic type such as `uint`
 
 
-## program design
+## program description
 
 ### render_soft
 
@@ -30,7 +31,7 @@ some code writed by NightHz
 - `Mesh` saves vertices and triangles
 - `Object` saves `Mesh` pointer and transform information
 - `Camera` saves camera information, including last buffer image
-- Rendering engine uses smart pointer to save objects such as `Object` and `Camera`, and user should do the same. When user modifies the data, rendering engine can know immediately.
+- The renderer uses smart pointer to save objects such as `Object` and `Camera`, and user should do the same. When user modifies the data, renderer can know immediately.
 
 **pipeline**
 

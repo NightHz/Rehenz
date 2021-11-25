@@ -139,6 +139,7 @@
     <ClInclude Include="rehenz.h" />
     <ClInclude Include="render_soft.h" />
     <ClInclude Include="surface_dx8.h" />
+    <ClInclude Include="type.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\README.md" />
