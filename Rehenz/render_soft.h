@@ -27,8 +27,8 @@ namespace Rehenz
 
 		size_t VertexCount() { return vertices.size(); }
 		size_t TriangleCount() { return triangles.size() / 3; }
-		const std::vector<Vertex> GetVertices() { return vertices; }
-		const std::vector<int> GetTriangles() { return triangles; }
+		const std::vector<Vertex>& GetVertices() { return vertices; }
+		const std::vector<int>& GetTriangles() { return triangles; }
 
 		void AddVertex(Vertex vertex);
 		void AddVertex(const std::vector<Vertex>& _vertices);
@@ -84,6 +84,18 @@ namespace Rehenz
 
 		void SetSize(int _height, int _width, float _fovy);
 
+		friend class Drawer;
 		const uint* RenderImage();
+	};
+
+	class Drawer
+	{
+	public:
+		Drawer() = delete;
+		static uint Color(uchar r, uchar g, uchar b);
+		static void Pixel(Camera& camera, Point2I p, uint color);
+		static void Pixel(Camera& camera, Point2I p, uint color, float* zbuffer, float z);
+		static void Line(Camera& camera, Point2I p1, Point2I p2, uint color);
+		static void Line(Camera& camera, Point2I p1, Point2I p2, uint color, float* zbuffer, float z1, float z2);
 	};
 }

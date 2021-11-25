@@ -81,6 +81,66 @@ namespace Rehenz
 		buffer = new uint[size];
 		fovy = _fovy;
 	}
+	const uint* Camera::RenderImage()
+	{
+		// Copy and transform all objects (vertex shader)
+		std::vector<Vertex> vertices;
+		std::vector<int> triangles;
+		Matrix mat_view = GetMatrixT(position) * GetMatrixR(at, up) * GetMatrixP(fovy, aspect, z_near, z_far);
+		for (auto pobj : objs)
+		{
+			Matrix mat_world = GetMatrixS(pobj->scale) * GetMatrixE(pobj->rotation) * GetMatrixT(pobj->position);
+			Matrix transform = mat_world * mat_view;
+			auto& v_mesh = pobj->pmesh->GetVertices();
+			auto& tri_mesh = pobj->pmesh->GetTriangles();
+			int v_index_offset = static_cast<int>(vertices.size());
+			for (auto& v : v_mesh)
+				vertices.push_back(Vertex(PointStandard(v.p * transform)));
+			for (auto tri : tri_mesh)
+				triangles.push_back(tri + v_index_offset);
+		}
+
+		// Clipping and back-face culling
+		std::vector<int> tri_new;
+		for (size_t i = 0; i < triangles.size(); i += 3)
+		{
+			int a = triangles[3 * i], b = triangles[3 * i + 1], c = triangles[3 * i + 2];
+			Vertex& va = vertices[a], vb = vertices[b], vc = vertices[c];
+			auto Inside = [](Vertex& v) -> bool { return !(v.p.x < -1 || v.p.x>1 || v.p.y < -1 || v.p.y>1 || v.p.z < 0 || v.p.z>1); };
+			if (Inside(va) && Inside(vb) && Inside(vc) && TrianglesNormal(va.p, vb.p, vc.p).z < 0)
+			{
+				tri_new.push_back(a); tri_new.push_back(b); tri_new.push_back(c);
+			}
+		}
+		triangles.swap(tri_new);
+		tri_new.clear();
+
+		// Mapping to screen
+		std::vector<Point2I> screen_pos;
+		for (auto& v : vertices)
+		{
+			screen_pos.push_back(Point2I(static_cast<int>((v.p.x + 1) * width / 2), static_cast<int>((v.p.y + 1) * height / 2)));
+		}
+
+		// Traverse all triangles and compute color for all sampling points (pixel shader)
+		int size = height * width;
+		float* zbuffer = new float[size];
+		std::fill(zbuffer, zbuffer + size, 2.0f);
+		std::fill(buffer, buffer + size, 0U);
+		for (size_t i = 0; i < triangles.size(); i += 3)
+		{
+			int a = triangles[3 * i], b = triangles[3 * i + 1], c = triangles[3 * i + 2];
+			Vertex& va = vertices[a], vb = vertices[b], vc = vertices[c];
+			Point2I pa = screen_pos[a], pb = screen_pos[b], pc = screen_pos[c];
+			// Use z-buffer merge multiple colors
+			Drawer::Line(*this, pa, pb, Drawer::Color(255, 255, 255), zbuffer, va.p.z, vb.p.z);
+			Drawer::Line(*this, pa, pc, Drawer::Color(255, 255, 255), zbuffer, va.p.z, vc.p.z);
+			Drawer::Line(*this, pb, pc, Drawer::Color(255, 255, 255), zbuffer, vb.p.z, vc.p.z);
+		}
+		delete[] zbuffer;
+
+		return buffer;
+	}
 	std::shared_ptr<Mesh> CreateCubeMesh()
 	{
 		std::vector<Vertex> vertices;
@@ -112,8 +172,8 @@ namespace Rehenz
 	}
 	std::shared_ptr<Mesh> SmoothSphereMesh(std::shared_ptr<Mesh> old)
 	{
-		auto v_old = old->GetVertices();
-		auto tri_old = old->GetTriangles();
+		auto& v_old = old->GetVertices();
+		auto& tri_old = old->GetTriangles();
 		size_t tri_n = old->TriangleCount();
 
 		std::vector<Vertex> vertices(v_old);
