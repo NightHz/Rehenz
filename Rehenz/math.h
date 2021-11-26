@@ -28,7 +28,7 @@ namespace Rehenz
 	template <typename T>
 	inline T Lerp(T x1, T x2, float t)
 	{
-		return x1 + (x2 - x1) * t;
+		return x1 + static_cast<T>((x2 - x1) * t);
 	}
 
 	// f(0)=0, f(1)=1, f(t) = 6*t^5 - 15*t^4 + 10*t^3
@@ -41,7 +41,7 @@ namespace Rehenz
 	template <typename T>
 	inline T Fade(T x1, T x2, float t)
 	{
-		return x1 + (x2 - x1) * Fade(t);
+		return x1 + static_cast<T>((x2 - x1) * Fade(t));
 	}
 
 	// sort two number, first <= second
