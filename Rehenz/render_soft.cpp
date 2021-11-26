@@ -86,7 +86,7 @@ namespace Rehenz
 		// Copy and transform all objects (vertex shader)
 		std::vector<Vertex> vertices;
 		std::vector<int> triangles;
-		Matrix mat_view = GetMatrixT(position) * GetMatrixR(at, up) * GetMatrixP(fovy, aspect, z_near, z_far);
+		Matrix mat_view = GetInverseMatrixT(position) * GetInverseMatrixR(at, up) * GetMatrixP(fovy, aspect, z_near, z_far);
 		for (auto pobj : objs)
 		{
 			Matrix mat_world = GetMatrixS(pobj->scale) * GetMatrixE(pobj->rotation) * GetMatrixT(pobj->position);
@@ -156,18 +156,18 @@ namespace Rehenz
 		vertices.push_back(Point(1, 1, 0, 1));
 		vertices.push_back(Point(1, 1, 1, 1));
 
-		triangles.push_back(0); triangles.push_back(1); triangles.push_back(2);
-		triangles.push_back(2); triangles.push_back(1); triangles.push_back(3);
-		triangles.push_back(0); triangles.push_back(4); triangles.push_back(1);
-		triangles.push_back(1); triangles.push_back(4); triangles.push_back(5);
-		triangles.push_back(0); triangles.push_back(2); triangles.push_back(4);
-		triangles.push_back(4); triangles.push_back(2); triangles.push_back(6);
-		triangles.push_back(7); triangles.push_back(5); triangles.push_back(6);
-		triangles.push_back(6); triangles.push_back(5); triangles.push_back(4);
-		triangles.push_back(7); triangles.push_back(6); triangles.push_back(3);
-		triangles.push_back(3); triangles.push_back(6); triangles.push_back(2);
-		triangles.push_back(7); triangles.push_back(3); triangles.push_back(5);
-		triangles.push_back(5); triangles.push_back(3); triangles.push_back(1);
+		triangles.push_back(0); triangles.push_back(2); triangles.push_back(1);
+		triangles.push_back(2); triangles.push_back(3); triangles.push_back(1);
+		triangles.push_back(0); triangles.push_back(1); triangles.push_back(4);
+		triangles.push_back(1); triangles.push_back(5); triangles.push_back(4);
+		triangles.push_back(0); triangles.push_back(4); triangles.push_back(2);
+		triangles.push_back(4); triangles.push_back(6); triangles.push_back(2);
+		triangles.push_back(7); triangles.push_back(6); triangles.push_back(5);
+		triangles.push_back(6); triangles.push_back(4); triangles.push_back(5);
+		triangles.push_back(7); triangles.push_back(3); triangles.push_back(6);
+		triangles.push_back(3); triangles.push_back(2); triangles.push_back(6);
+		triangles.push_back(7); triangles.push_back(5); triangles.push_back(3);
+		triangles.push_back(5); triangles.push_back(1); triangles.push_back(3);
 
 		return std::make_shared<Mesh>(vertices, triangles);
 	}
@@ -213,14 +213,14 @@ namespace Rehenz
 		vertices.push_back(Point(0, -1, 0, 1));
 		vertices.push_back(Point(0, 0, -1, 1));
 
-		triangles.push_back(0); triangles.push_back(2); triangles.push_back(1);
-		triangles.push_back(0); triangles.push_back(3); triangles.push_back(2);
-		triangles.push_back(0); triangles.push_back(4); triangles.push_back(3);
-		triangles.push_back(0); triangles.push_back(1); triangles.push_back(4);
-		triangles.push_back(5); triangles.push_back(1); triangles.push_back(2);
-		triangles.push_back(5); triangles.push_back(2); triangles.push_back(3);
-		triangles.push_back(5); triangles.push_back(3); triangles.push_back(4);
-		triangles.push_back(5); triangles.push_back(4); triangles.push_back(1);
+		triangles.push_back(0); triangles.push_back(1); triangles.push_back(2);
+		triangles.push_back(0); triangles.push_back(2); triangles.push_back(3);
+		triangles.push_back(0); triangles.push_back(3); triangles.push_back(4);
+		triangles.push_back(0); triangles.push_back(4); triangles.push_back(1);
+		triangles.push_back(5); triangles.push_back(2); triangles.push_back(1);
+		triangles.push_back(5); triangles.push_back(3); triangles.push_back(2);
+		triangles.push_back(5); triangles.push_back(4); triangles.push_back(3);
+		triangles.push_back(5); triangles.push_back(1); triangles.push_back(4);
 
 		auto pmesh = std::make_shared<Mesh>(vertices, triangles);
 
