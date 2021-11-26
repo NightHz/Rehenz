@@ -72,7 +72,16 @@ int main()
 	while (srf_dx8.GetWindowState())
 	{
 		// render
-		if (KeyIsDown('Z'))
+		if (KeyIsDown('W'))
+			camera.position.y += 0.1f;
+		else if (KeyIsDown('S'))
+			camera.position.y -= 0.1f;
+		if (KeyIsDown('A'))
+			camera.position.x += 0.1f;
+		else if (KeyIsDown('D'))
+			camera.position.x -= 0.1f;
+		camera.at = -camera.position;
+		if (KeyIsDown(VK_RETURN))
 			srf_dx8.FillFromImage(camera.RenderImage());
 		// refresh
 		srf_dx8.Present();
