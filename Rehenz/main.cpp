@@ -41,12 +41,40 @@ int main()
 	cout << endl << "Open a surface with dx8" << endl;
 	SurfaceDx8 srf_dx8;
 	String title = "surface by dx8";
-	srf_dx8.Create(GetModuleHandle(nullptr), 800, 600, title.c_str());
+	int width = 800;
+	int height = 600;
+	srf_dx8.Create(GetModuleHandle(nullptr), width, height, title.c_str());
+	cout << "Draw lines" << endl;
+	int size = width * height;
+	auto buffer = std::make_unique<uint[]>(size);
+	auto drawer = Drawer(buffer.get(), width, height);
+	drawer.Line(Point2I(30, 30), Point2I(400, 200), drawer.Color(255, 255, 255));
+	drawer.Line(Point2I(50, 30), Point2I(420, 200), drawer.Color(255, 0, 0));
+	drawer.Line(Point2I(70, 30), Point2I(440, 200), drawer.Color(0, 255, 0));
+	drawer.Line(Point2I(90, 30), Point2I(460, 200), drawer.Color(0, 0, 255));
+	drawer.Line(Point2I(110, 30), Point2I(480, 200), drawer.Color(0, 255, 255));
+	drawer.Line(Point2I(130, 30), Point2I(500, 200), drawer.Color(255, 0, 255));
+	drawer.Line(Point2I(150, 30), Point2I(520, 200), drawer.Color(255, 255, 0));
+	srf_dx8.FillFromImage(buffer.get());
+	cout << "Ready render" << endl;
+	auto cube = CreateCubeMesh();
+	cout << "cube v_count: " << cube->VertexCount() << " tri_count: " << cube->TriangleCount() << endl;
+	auto sphere = CreateSphereMesh();
+	cout << "sphere v_count: " << sphere->VertexCount() << " tri_count: " << sphere->TriangleCount() << endl;
+	auto obj_cube = std::make_shared<Object>(cube);
+	AddObject(obj_cube);
+	Camera camera(height, width);
+	cout << "Start fps counter" << endl;
 	int fps[2] = { 0,0 };
 	auto fps_t0 = timeGetTime();
+	cout << "Lock fps" << endl;
 	auto t0 = timeGetTime();
 	while (srf_dx8.GetWindowState())
 	{
+		// render
+		if (KeyIsDown('Z'))
+			srf_dx8.FillFromImage(camera.RenderImage());
+		// refresh
 		srf_dx8.Present();
 		// compute fps and set title
 		fps[1]++;

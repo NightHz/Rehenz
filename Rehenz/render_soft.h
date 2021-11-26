@@ -73,7 +73,10 @@ namespace Rehenz
 		float fovy, aspect, z_near, z_far;
 
 		// default height = 600, width = 800, fovy = pi/2, aspect = 4/3, z_near = 1, z_far = 500
+		//         position = (0,0,-5), at = (0,0,1), up = (0,1,0)
 		Camera();
+		Camera(const Camera& c) = delete;
+		Camera& operator=(const Camera& c) = delete;
 		// auto set aspect = width / height
 		explicit Camera(int _height, int _width);
 		~Camera();
@@ -84,18 +87,39 @@ namespace Rehenz
 
 		void SetSize(int _height, int _width, float _fovy);
 
-		friend class Drawer;
 		const uint* RenderImage();
 	};
 
 	class Drawer
 	{
+	private:
+		uint* const buffer;
+		const int w;
+		const int h;
+
 	public:
-		Drawer() = delete;
+		Drawer(uint* _buffer, int _width, int _height);
+		~Drawer();
+
 		static uint Color(uchar r, uchar g, uchar b);
-		static void Pixel(Camera& camera, Point2I p, uint color);
-		static void Pixel(Camera& camera, Point2I p, uint color, float* zbuffer, float z);
-		static void Line(Camera& camera, Point2I p1, Point2I p2, uint color);
-		static void Line(Camera& camera, Point2I p1, Point2I p2, uint color, float* zbuffer, float z1, float z2);
+		void Pixel(Point2I p, uint color);
+		void Line(Point2I p1, Point2I p2, uint color);
+	};
+
+	class DrawerZ
+	{
+	private:
+		uint* const buffer;
+		const int w;
+		const int h;
+		float* const zbuffer;
+
+	public:
+		DrawerZ(uint* _buffer, int _width, int _height, float* _zbuffer);
+		~DrawerZ();
+
+		static uint Color(uchar r, uchar g, uchar b);
+		void Pixel(Point2I p, uint color, float z);
+		void Line(Point2I p1, Point2I p2, uint color, float z1, float z2);
 	};
 }

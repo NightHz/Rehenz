@@ -46,7 +46,7 @@ namespace Rehenz
 	Object::~Object()
 	{
 	}
-	Camera::Camera() : position(), at(0, 0, 1, 0), up(0, 1, 0, 0)
+	Camera::Camera() : position(0, 0, -5, 0), at(0, 0, 1, 0), up(0, 1, 0, 0)
 	{
 		height = 600;
 		width = 800;
@@ -57,14 +57,14 @@ namespace Rehenz
 		z_near = 1;
 		z_far = 500;
 	}
-	Camera::Camera(int _height, int _width) : position(), at(0, 0, 1, 0), up(0, 1, 0, 0)
+	Camera::Camera(int _height, int _width) : position(0, 0, -5, 0), at(0, 0, 1, 0), up(0, 1, 0, 0)
 	{
 		height = _height;
 		width = _width;
 		int size = height * width;
 		buffer = new uint[size];
 		fovy = pi / 2;
-		aspect = 4.0f / 3;
+		aspect = static_cast<float>(width) / height;
 		z_near = 1;
 		z_far = 500;
 	}
@@ -72,14 +72,14 @@ namespace Rehenz
 	{
 		delete[] buffer;
 	}
-	void Camera::SetSize(int _height, int _width, float _fovy)
+	void Camera::SetSize(int _height, int _width, float _aspect)
 	{
 		delete[] buffer;
 		height = _height;
 		width = _width;
 		int size = height * width;
 		buffer = new uint[size];
-		fovy = _fovy;
+		aspect = _aspect;
 	}
 	const uint* Camera::RenderImage()
 	{
@@ -104,9 +104,9 @@ namespace Rehenz
 		std::vector<int> tri_new;
 		for (size_t i = 0; i < triangles.size(); i += 3)
 		{
-			int a = triangles[3 * i], b = triangles[3 * i + 1], c = triangles[3 * i + 2];
+			int a = triangles[i], b = triangles[i + 1], c = triangles[i + 2];
 			Vertex& va = vertices[a], vb = vertices[b], vc = vertices[c];
-			auto Inside = [](Vertex& v) -> bool { return !(v.p.x < -1 || v.p.x>1 || v.p.y < -1 || v.p.y>1 || v.p.z < 0 || v.p.z>1); };
+			auto Inside = [](Vertex& v) -> bool { return v.p.x >= -1 && v.p.x <= 1 && v.p.y >= -1 && v.p.y <= 1 && v.p.z >= 0 && v.p.z <= 1; };
 			if (Inside(va) && Inside(vb) && Inside(vc) && TrianglesNormal(va.p, vb.p, vc.p).z < 0)
 			{
 				tri_new.push_back(a); tri_new.push_back(b); tri_new.push_back(c);
@@ -119,7 +119,7 @@ namespace Rehenz
 		std::vector<Point2I> screen_pos;
 		for (auto& v : vertices)
 		{
-			screen_pos.push_back(Point2I(static_cast<int>((v.p.x + 1) * width / 2), static_cast<int>((v.p.y + 1) * height / 2)));
+			screen_pos.push_back(Point2I(static_cast<int>((v.p.x + 1) * (width - 1) / 2), static_cast<int>((v.p.y + 1) * (height - 1) / 2)));
 		}
 
 		// Traverse all triangles and compute color for all sampling points (pixel shader)
@@ -129,13 +129,14 @@ namespace Rehenz
 		std::fill(buffer, buffer + size, 0U);
 		for (size_t i = 0; i < triangles.size(); i += 3)
 		{
-			int a = triangles[3 * i], b = triangles[3 * i + 1], c = triangles[3 * i + 2];
+			int a = triangles[i], b = triangles[i + 1], c = triangles[i + 2];
 			Vertex& va = vertices[a], vb = vertices[b], vc = vertices[c];
 			Point2I pa = screen_pos[a], pb = screen_pos[b], pc = screen_pos[c];
 			// Use z-buffer merge multiple colors
-			Drawer::Line(*this, pa, pb, Drawer::Color(255, 255, 255), zbuffer, va.p.z, vb.p.z);
-			Drawer::Line(*this, pa, pc, Drawer::Color(255, 255, 255), zbuffer, va.p.z, vc.p.z);
-			Drawer::Line(*this, pb, pc, Drawer::Color(255, 255, 255), zbuffer, vb.p.z, vc.p.z);
+			DrawerZ drawer(buffer, width, height, zbuffer);
+			drawer.Line(pa, pb, Drawer::Color(255, 255, 255), va.p.z, vb.p.z);
+			drawer.Line(pa, pc, Drawer::Color(255, 255, 255), va.p.z, vc.p.z);
+			drawer.Line(pb, pc, Drawer::Color(255, 255, 255), vb.p.z, vc.p.z);
 		}
 		delete[] zbuffer;
 
@@ -259,5 +260,151 @@ namespace Rehenz
 			}
 		}
 		return nullptr;
+	}
+	Drawer::Drawer(uint* _buffer, int _width, int _height)
+		: buffer(_buffer), w(_width), h(_height)
+	{
+	}
+	Drawer::~Drawer()
+	{
+	}
+	uint Drawer::Color(uchar r, uchar g, uchar b)
+	{
+		return (static_cast<uint>(r) << 16) | (static_cast<uint>(g) << 8) | (static_cast<uint>(b) << 0);
+	}
+	void Drawer::Pixel(Point2I p, uint color)
+	{
+		//if (p.x >= 0 && p.x < w && p.y >= 0 && p.y < h)
+		int i = p.y * w + p.x;
+		buffer[i] = color;
+	}
+	void Drawer::Line(Point2I p1, Point2I p2, uint color)
+	{
+		if (p1.x == p2.x && p1.y == p2.y)
+			Pixel(p1, color);
+		else if (p1.y == p2.y)
+		{
+			if (p2.x < p1.x)
+				Swap(p1, p2);
+			for (int x = p1.x; x <= p2.x; x++)
+				Pixel(Point2I(x, p1.y), color);
+		}
+		else if (p1.x == p2.x)
+		{
+			if (p2.y < p1.y)
+				Swap(p1, p2);
+			for (int y = p1.y; y <= p2.y; y++)
+				Pixel(Point2I(p1.x, y), color);
+		}
+		else
+		{
+			int dx = abs(p1.x - p2.x), dy = abs(p1.y - p2.y);
+			if (dx >= dy)
+			{
+				if (p2.x < p1.x)
+					Swap(p1, p2);
+				int y_move = (p2.y >= p1.y) ? 1 : -1;
+				int y_offset = dx / 2; // dx times of 1/2
+				for (auto p = p1; p.x <= p2.x; p.x++)
+				{
+					Pixel(p, color);
+					y_offset += dy;     // dx times of dy/dx
+					if (y_offset >= dx) // dx times of >= 1
+					{
+						y_offset -= dx; // dx times of -= 1
+						p.y += y_move;
+					}
+				}
+			}
+			else
+			{
+				if (p2.y < p1.y)
+					Swap(p1, p2);
+				int x_move = (p2.x >= p1.x) ? 1 : -1;
+				int x_offset = dy / 2;
+				for (auto p = p1; p.y <= p2.y; p.y++)
+				{
+					Pixel(p, color);
+					x_offset += dx;
+					if (x_offset >= dy)
+					{
+						x_offset -= dy;
+						p.x += x_move;
+					}
+				}
+			}
+		}
+	}
+	DrawerZ::DrawerZ(uint* _buffer, int _width, int _height, float* _zbuffer)
+		: buffer(_buffer), w(_width), h(_height), zbuffer(_zbuffer)
+	{
+	}
+	DrawerZ::~DrawerZ()
+	{
+	}
+	uint DrawerZ::Color(uchar r, uchar g, uchar b)
+	{
+		return Drawer::Color(r, g, b);
+	}
+	void DrawerZ::Pixel(Point2I p, uint color, float z)
+	{
+		//if (p.x >= 0 && p.x < w && p.y >= 0 && p.y < h && z >= 0 && z <= 1)
+		int i = p.y * w + p.x;
+		if (z < zbuffer[i])
+		{
+			buffer[i] = color;
+			zbuffer[i] = z;
+		}
+	}
+	void DrawerZ::Line(Point2I p1, Point2I p2, uint color, float z1, float z2)
+	{
+		if (p1.x == p2.x && p1.y == p2.y)
+			Pixel(p1, color, Min(z1, z2));
+		else if (p1.y == p2.y)
+		{
+			if (p2.x < p1.x)
+				Swap(p1, p2), Swap(z1, z2);
+			for (int x = p1.x; x <= p2.x; x++)
+			{
+				float t = static_cast<float>(x - p1.x) / (p2.x - p1.x);
+				Pixel(Point2I(x, p1.y), color, Lerp(z1, z2, t));
+			}
+		}
+		else if (p1.x == p2.x)
+		{
+			if (p2.y < p1.y)
+				Swap(p1, p2), Swap(z1, z2);
+			for (int y = p1.y; y <= p2.y; y++)
+			{
+				float t = static_cast<float>(y - p1.y) / (p2.y - p1.y);
+				Pixel(Point2I(p1.x, y), color, Lerp(z1, z2, t));
+			}
+		}
+		else
+		{
+			int dx = abs(p1.x - p2.x), dy = abs(p1.y - p2.y);
+			if (dx >= dy)
+			{
+				if (p2.x < p1.x)
+					Swap(p1, p2), Swap(z1, z2);
+				for (auto p = p1; p.x <= p2.x; p.x++)
+				{
+					float t = static_cast<float>(p.x - p1.x) / (p2.x - p1.x);
+					p.y = Lerp(p1.y, p2.y, t);
+					Pixel(p, color, Lerp(z1, z2, t));
+				}
+			}
+			else
+			{
+				if (p2.y < p1.y)
+					Swap(p1, p2), Swap(z1, z2);
+				for (auto p = p1; p.y <= p2.y; p.y++)
+				{
+					float t = static_cast<float>(p.y - p1.y) / (p2.y - p1.y);
+					p.x = Lerp(p1.x, p2.x, t);
+					Pixel(p, color, Lerp(z1, z2, t));
+				}
+			}
+		}
 	}
 }
