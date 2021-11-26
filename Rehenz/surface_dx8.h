@@ -43,7 +43,7 @@ namespace Rehenz
 		void Destroy(void);
 
 		// Draw Method
-		bool FillFromImage(UINT* image);
+		bool FillFromImage(const UINT* image);
 
 		// Display Method
 		bool Present();

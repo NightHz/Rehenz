@@ -212,7 +212,7 @@ namespace Rehenz
 		window_state = false;
 	}
 
-	bool SurfaceDx8::FillFromImage(UINT* image)
+	bool SurfaceDx8::FillFromImage(const UINT* image)
 	{
 		if (hwnd == nullptr)
 			return false;
@@ -227,7 +227,7 @@ namespace Rehenz
 
 		int mempitch = ddsd.lPitch;
 		UCHAR* bufferDest = (UCHAR*)ddsd.lpSurface;
-		UCHAR* bufferSrc = (UCHAR*)image;
+		const UCHAR* bufferSrc = (const UCHAR*)image;
 		for (int i = 0; i < height; i++)
 		{
 			memcpy(bufferDest, bufferSrc, width * sizeof(int));
