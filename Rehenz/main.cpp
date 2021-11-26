@@ -38,6 +38,8 @@ int main()
 	cout << noise2.GetNoiseSumAbs(1.1f, 2.3f) << endl; // 0.258147
 	cout << noise2.GetNoiseSumAbsSin(1.1f, 2.3f) << endl; // 0.999569
 
+
+
 	cout << endl << "Open a surface with dx8" << endl;
 	SurfaceDx8 srf_dx8;
 	String title = "surface by dx8";
@@ -56,14 +58,25 @@ int main()
 	drawer.Line(Point2I(130, 30), Point2I(500, 200), drawer.Color(255, 0, 255));
 	drawer.Line(Point2I(150, 30), Point2I(520, 200), drawer.Color(255, 255, 0));
 	srf_dx8.FillFromImage(buffer.get());
+
 	cout << "Ready render" << endl;
 	auto cube = CreateCubeMesh();
 	cout << "cube v_count: " << cube->VertexCount() << " tri_count: " << cube->TriangleCount() << endl;
 	auto sphere = CreateSphereMesh();
 	cout << "sphere v_count: " << sphere->VertexCount() << " tri_count: " << sphere->TriangleCount() << endl;
-	auto obj_cube = std::make_shared<Object>(cube);
-	AddObject(obj_cube);
+	//auto obj_cube = std::make_shared<Object>(cube);
+	//AddObject(obj_cube);
+	for (int x = -10; x <= 10; x += 2)
+	{
+		auto obj_cube = std::make_shared<Object>(cube);
+		obj_cube->position = Vector(static_cast<float>(x), -1, 0);
+		AddObject(obj_cube);
+	}
+	auto obj_sphere = std::make_shared<Object>(sphere);
+	obj_sphere->position = Vector(0, 2, 0);
+	AddObject(obj_sphere);
 	Camera camera(height, width);
+
 	cout << "Start fps counter" << endl;
 	int fps[2] = { 0,0 };
 	auto fps_t0 = timeGetTime();
