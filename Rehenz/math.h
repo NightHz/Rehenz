@@ -182,7 +182,7 @@ namespace Rehenz
 		// default w = 0
 		Vector();
 		explicit Vector(float value);
-		explicit Vector(float _x, float _y, float _z, float _w);
+		explicit Vector(float _x, float _y, float _z, float _w = 0);
 
 		// access date
 		float& operator()(int index);
@@ -216,7 +216,7 @@ namespace Rehenz
 		Point() : Vector() { w = 1; }
 		Point(Vector v) : Vector(v) {}
 		explicit Point(float value) : Vector(value) {}
-		explicit Point(float _x, float _y, float _z, float _w) : Vector(_x, _y, _z, _w) {}
+		explicit Point(float _x, float _y, float _z, float _w = 1) : Vector(_x, _y, _z, _w) {}
 	};
 
 	// eular angles
