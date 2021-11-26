@@ -5,6 +5,18 @@ namespace Rehenz
 {
 	const float pi = 3.14159265359f;
 
+	template <typename T>
+	inline T Min(T a, T b)
+	{
+		return (a <= b) ? a : b;
+	}
+
+	template <typename T>
+	inline T Max(T a, T b)
+	{
+		return (a >= b) ? a : b;
+	}
+
 	// limit x to [min, max]
 	template <typename T>
 	inline T Clamp(T x, T min, T max)
@@ -42,6 +54,14 @@ namespace Rehenz
 			x1 = x2;
 			x2 = t;
 		}
+	}
+
+	template <typename T>
+	inline void Swap(T& x1, T& x2)
+	{
+		T t = x1;
+		x1 = x2;
+		x2 = t;
 	}
 
 
