@@ -139,7 +139,8 @@ namespace Rehenz
 		Drawer(uint* _buffer, int _width, int _height);
 		~Drawer();
 
-		static uint Color(uchar r, uchar g, uchar b);
+		static uint Color(uint r, uint g, uint b);
+		static uint Color(float r, float g, float b);
 		void Pixel(Point2I p, uint color);
 		void Line(Point2I p1, Point2I p2, uint color);
 	};
@@ -156,7 +157,8 @@ namespace Rehenz
 		DrawerZ(uint* _buffer, int _width, int _height, float* _zbuffer);
 		~DrawerZ();
 
-		static uint Color(uchar r, uchar g, uchar b);
+		static uint Color(uint r, uint g, uint b);
+		static uint Color(float r, float g, float b);
 		void Pixel(Point2I p, uint color, float z);
 		void Line(Point2I p1, Point2I p2, uint color, float z1, float z2);
 	};

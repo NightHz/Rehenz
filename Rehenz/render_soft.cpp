@@ -57,9 +57,9 @@ namespace Rehenz
 			Point2I pa = screen_pos[a], pb = screen_pos[b], pc = screen_pos[c];
 			// Use z-buffer merge multiple colors
 			DrawerZ drawer(buffer, width, height, zbuffer);
-			drawer.Line(pa, pb, Drawer::Color(255, 255, 255), va.p.z, vb.p.z);
-			drawer.Line(pa, pc, Drawer::Color(255, 255, 255), va.p.z, vc.p.z);
-			drawer.Line(pb, pc, Drawer::Color(255, 255, 255), vb.p.z, vc.p.z);
+			drawer.Line(pa, pb, Drawer::Color(255U, 255U, 255U), va.p.z, vb.p.z);
+			drawer.Line(pa, pc, Drawer::Color(255U, 255U, 255U), va.p.z, vc.p.z);
+			drawer.Line(pb, pc, Drawer::Color(255U, 255U, 255U), vb.p.z, vc.p.z);
 		}
 		delete[] zbuffer;
 
@@ -494,9 +494,13 @@ namespace Rehenz
 	Drawer::~Drawer()
 	{
 	}
-	uint Drawer::Color(uchar r, uchar g, uchar b)
+	uint Drawer::Color(uint r, uint g, uint b)
 	{
-		return (static_cast<uint>(r) << 16) | (static_cast<uint>(g) << 8) | (static_cast<uint>(b) << 0);
+		return ((r & 0xff) << 16) | ((g & 0xff) << 8) | ((b & 0xff) << 0);
+	}
+	uint Drawer::Color(float r, float g, float b)
+	{
+		return Color(static_cast<uint>(r * 255), static_cast<uint>(g * 255), static_cast<uint>(b * 255));
 	}
 	void Drawer::Pixel(Point2I p, uint color)
 	{
@@ -568,7 +572,11 @@ namespace Rehenz
 	DrawerZ::~DrawerZ()
 	{
 	}
-	uint DrawerZ::Color(uchar r, uchar g, uchar b)
+	uint DrawerZ::Color(uint r, uint g, uint b)
+	{
+		return Drawer::Color(r, g, b);
+	}
+	uint DrawerZ::Color(float r, float g, float b)
 	{
 		return Drawer::Color(r, g, b);
 	}
