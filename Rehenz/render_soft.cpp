@@ -91,29 +91,29 @@ namespace Rehenz
 		{
 			Matrix mat_world = GetMatrixS(pobj->scale) * GetMatrixE(pobj->rotation) * GetMatrixT(pobj->position);
 			Matrix transform = mat_world * mat_view;
-			auto& v_mesh = pobj->pmesh->GetVertices();
-			auto& tri_mesh = pobj->pmesh->GetTriangles();
+			auto& vs_mesh = pobj->pmesh->GetVertices();
+			auto& tris_mesh = pobj->pmesh->GetTriangles();
 			int v_index_offset = static_cast<int>(vertices.size());
-			for (auto& v : v_mesh)
+			for (auto& v : vs_mesh)
 				vertices.push_back(Vertex(PointStandard(v.p * transform)));
-			for (auto tri : tri_mesh)
+			for (auto tri : tris_mesh)
 				triangles.push_back(tri + v_index_offset);
 		}
 
 		// Clipping and back-face culling
-		std::vector<int> tri_new;
+		std::vector<int> tris_new;
 		for (size_t i = 0; i < triangles.size(); i += 3)
 		{
 			int a = triangles[i], b = triangles[i + 1], c = triangles[i + 2];
-			Vertex& va = vertices[a], vb = vertices[b], vc = vertices[c];
+			Vertex& va = vertices[a], & vb = vertices[b], & vc = vertices[c];
 			auto Inside = [](Vertex& v) -> bool { return v.p.x >= -1 && v.p.x <= 1 && v.p.y >= -1 && v.p.y <= 1 && v.p.z >= 0 && v.p.z <= 1; };
 			if (Inside(va) && Inside(vb) && Inside(vc) && TrianglesNormal(va.p, vb.p, vc.p).z < 0)
 			{
-				tri_new.push_back(a); tri_new.push_back(b); tri_new.push_back(c);
+				tris_new.push_back(a); tris_new.push_back(b); tris_new.push_back(c);
 			}
 		}
-		triangles.swap(tri_new);
-		tri_new.clear();
+		triangles.swap(tris_new);
+		tris_new.clear();
 
 		// Mapping to screen
 		std::vector<Point2I> screen_pos;
@@ -131,7 +131,7 @@ namespace Rehenz
 		for (size_t i = 0; i < triangles.size(); i += 3)
 		{
 			int a = triangles[i], b = triangles[i + 1], c = triangles[i + 2];
-			Vertex& va = vertices[a], vb = vertices[b], vc = vertices[c];
+			Vertex& va = vertices[a], & vb = vertices[b], & vc = vertices[c];
 			Point2I pa = screen_pos[a], pb = screen_pos[b], pc = screen_pos[c];
 			// Use z-buffer merge multiple colors
 			DrawerZ drawer(buffer, width, height, zbuffer);
@@ -142,6 +142,10 @@ namespace Rehenz
 		delete[] zbuffer;
 
 		return buffer;
+	}
+	Vertex VertexLerp(const Vertex& v1, const Vertex& v2, float t)
+	{
+		return Vertex(PointLerp(v1.p, v2.p, t));
 	}
 	std::shared_ptr<Mesh> CreateCubeMesh()
 	{
@@ -172,63 +176,194 @@ namespace Rehenz
 
 		return std::make_shared<Mesh>(vertices, triangles);
 	}
-	std::shared_ptr<Mesh> SmoothSphereMesh(std::shared_ptr<Mesh> old)
+	std::shared_ptr<Mesh> CreateSphereMesh(int smooth)
 	{
-		auto& v_old = old->GetVertices();
-		auto& tri_old = old->GetTriangles();
-		size_t tri_n = old->TriangleCount();
+		smooth = Clamp(smooth, 2, 200);
+		int yn = smooth, xn = 2 * smooth;
 
-		std::vector<Vertex> vertices(v_old);
+		std::vector<Vertex> vertices;
 		std::vector<int> triangles;
 
-		for (size_t i = 0; i < tri_n; i++)
+		// add vertices by latitude from top(0,1,0) to bottom(0,-1,0)
+		vertices.push_back(Point(0, 1, 0));
+		for (int y = 1; y < yn; y++)
 		{
-			// get three vertex index
-			int a = tri_old[3 * i], b = tri_old[3 * i + 1], c = tri_old[3 * i + 2];
-			// compute center vertex on unit sphere
-			Point center = (v_old[a].p + v_old[b].p + v_old[c].p) / 3;
-			float length = VectorLength(center);
-			if (length != 0)
-				center /= length;
-			center.w = 1;
-			// add new vertex
-			int d = static_cast<int>(vertices.size());
-			vertices.push_back(center);
-			// add new triangles
-			triangles.push_back(a); triangles.push_back(b); triangles.push_back(d);
-			triangles.push_back(b); triangles.push_back(c); triangles.push_back(d);
-			triangles.push_back(c); triangles.push_back(a); triangles.push_back(d);
+			float theta = pi * y / yn;
+			for (int x = 0; x < xn; x++)
+			{
+				float phi = 2 * pi * x / xn;
+				vertices.push_back(Point(sinf(theta) * cosf(phi), cosf(theta), -sinf(theta) * sinf(phi)));
+			}
 		}
+		vertices.push_back(Point(0, -1, 0));
+
+		// add first part triangles, which include top vertex
+		for (int i = 1; i < xn; i++)
+		{
+			triangles.push_back(0); triangles.push_back(i); triangles.push_back(i + 1);
+		}
+		triangles.push_back(0); triangles.push_back(xn); triangles.push_back(1);
+		// add second part triangles
+		for (int j = 2; j < yn; j++)
+		{
+			int a = 1 + xn * (j - 2); // upper starting vertex
+			int b = 1 + xn * (j - 1); // below starting vertex
+			for (int i = 0; i < xn - 1; i++)
+			{
+				triangles.push_back(a + i); triangles.push_back(b + i); triangles.push_back(b + i + 1);
+				triangles.push_back(a + i); triangles.push_back(b + i + 1); triangles.push_back(a + i + 1);
+			}
+			triangles.push_back(a + xn - 1); triangles.push_back(b + xn - 1); triangles.push_back(b);
+			triangles.push_back(a + xn - 1); triangles.push_back(b); triangles.push_back(a);
+		}
+		// add last part triangles, which include bottom vertex
+		int bottom = xn * (yn - 1) + 1;
+		int a = 1 + xn * (yn - 2); // starting vertex
+		for (int i = 0; i < xn - 1; i++)
+		{
+			triangles.push_back(a + i + 1); triangles.push_back(a + i); triangles.push_back(bottom);
+		}
+		triangles.push_back(a); triangles.push_back(a + xn - 1); triangles.push_back(bottom);
 
 		return std::make_shared<Mesh>(vertices, triangles);
 	}
-	std::shared_ptr<Mesh> CreateSphereMesh(int smooth)
+	// generate internal triangles as return, and internal vertices will be added automatically
+	std::vector<int> BigTriangleLerp(std::vector<Vertex>& vertices, const std::vector<int>& big_triangle, bool unit_vertex)
+	{
+		std::vector<int> triangles;
+		size_t smooth = big_triangle.size() / 3;
+
+		// add first part triangles
+		triangles.push_back(big_triangle[0]); triangles.push_back(big_triangle[1]); triangles.push_back(big_triangle[3 * smooth - 1]);
+		// add second part triangles
+		for (size_t j = 1; j < smooth - 1; j++)
+		{
+			int a = big_triangle[j];                  // left upper vertex
+			int b = big_triangle[j + 1];              // left below vertex
+			int c = big_triangle[3 * smooth - j];     // right upper vertex
+			int d = big_triangle[3 * smooth - j - 1]; // right below vertex
+			Vertex vb = vertices[b], vd = vertices[d];
+			for (int i = 0; i < j; i++)
+			{
+				// add vertex
+				Vertex ve_new = VertexLerp(vb, vd, static_cast<float>(i + 1) / (j + 1));
+				if (unit_vertex)
+				{
+					float length = VectorLength(ve_new.p);
+					if (length != 0)
+						ve_new.p /= length;
+					ve_new.p.w = 1;
+				}
+				vertices.push_back(ve_new);
+				int e = static_cast<int>(vertices.size()) - 1; // save new vertex in center below
+				int f = e - static_cast<int>(j) + 1;         // load old vertex in center upper
+				// add triangle
+				triangles.push_back(a); triangles.push_back(b); triangles.push_back(e);
+				if (i != j - 1)
+				{
+					triangles.push_back(a); triangles.push_back(e); triangles.push_back(f);
+					a = f, b = e;
+				}
+				else
+					b = e;
+			}
+			triangles.push_back(a); triangles.push_back(b); triangles.push_back(c);
+			triangles.push_back(c); triangles.push_back(b); triangles.push_back(d);
+		}
+		// add last part triangles
+		if (smooth > 1)
+		{
+			int a = big_triangle[smooth - 1];     // left upper vertex
+			int b = big_triangle[smooth];         // left below vertex
+			int c = big_triangle[2 * smooth + 1]; // right upper vertex
+			int d = big_triangle[2 * smooth];     // right below vertex
+			int f = static_cast<int>(vertices.size() - smooth) + 2; // load old vertex in center upper
+			for (int i = 0; i < smooth - 1; i++)
+			{
+				int e = big_triangle[smooth + i + 1]; // center below vertex
+				triangles.push_back(a); triangles.push_back(b); triangles.push_back(e);
+				if (i != smooth - 2)
+				{
+					triangles.push_back(a); triangles.push_back(e); triangles.push_back(f);
+					a = f++, b = e;
+				}
+				else
+					b = e;
+			}
+			triangles.push_back(a); triangles.push_back(b); triangles.push_back(c);
+			triangles.push_back(c); triangles.push_back(b); triangles.push_back(d);
+		}
+
+		return triangles;
+	}
+	std::shared_ptr<Mesh> CreateSphereMeshB(int smooth)
 	{
 		std::vector<Vertex> vertices;
 		std::vector<int> triangles;
 
-		vertices.push_back(Point(0, 0, 1, 1));
-		vertices.push_back(Point(1, 0, 0, 1));
-		vertices.push_back(Point(0, 1, 0, 1));
-		vertices.push_back(Point(-1, 0, 0, 1));
-		vertices.push_back(Point(0, -1, 0, 1));
-		vertices.push_back(Point(0, 0, -1, 1));
+		// add first part vertices
+		vertices.push_back(Point(0, 1, 0));
+		vertices.push_back(Point(1, 0, 0));
+		vertices.push_back(Point(0, 0, -1));
+		vertices.push_back(Point(-1, 0, 0));
+		vertices.push_back(Point(0, 0, 1));
+		vertices.push_back(Point(0, -1, 0));
+		// add second part vertices
+		auto AddEdge = [&vertices, smooth](int a, int b)
+		{
+			for (int i = 1; i < smooth; i++)
+			{
+				Vertex v_new = VertexLerp(vertices[a], vertices[b], static_cast<float>(i) / smooth);
+				float length = VectorLength(v_new.p);
+				if (length != 0)
+					v_new.p /= length;
+				v_new.p.w = 1;
+				vertices.push_back(v_new);
+			}
+		};
+		AddEdge(0, 1); AddEdge(0, 2); AddEdge(0, 3); AddEdge(0, 4);
+		AddEdge(1, 2); AddEdge(2, 3); AddEdge(3, 4); AddEdge(4, 1);
+		AddEdge(1, 5); AddEdge(2, 5); AddEdge(3, 5); AddEdge(4, 5);
+		// add triangles
+		auto GetBigTriangle = [&vertices, smooth](int a, int b, int c, int eab, int ebc, int eca) -> std::vector<int>
+		{
+			std::vector<int> big_tri;
+			auto PushBackEdge = [&big_tri, smooth](int e)
+			{
+				int o = 6 + (abs(e) - 1) * (smooth - 1);
+				if (e > 0)
+				{
+					for (int i = 0; i < smooth - 1; i++)
+						big_tri.push_back(i + o);
+				}
+				else
+				{
+					for (int i = smooth - 2; i >= 0; i--)
+						big_tri.push_back(i + o);
+				}
+			};
+			big_tri.push_back(a);
+			PushBackEdge(eab);
+			big_tri.push_back(b);
+			PushBackEdge(ebc);
+			big_tri.push_back(c);
+			PushBackEdge(eca);
+			return big_tri;
+		};
+		auto AddTriangles = [&triangles](const std::vector<int>& tris_new)
+		{
+			triangles.insert(triangles.end(), tris_new.begin(), tris_new.end());
+		};
+		AddTriangles(BigTriangleLerp(vertices, GetBigTriangle(0, 1, 2, +1, +5, -2), true));
+		AddTriangles(BigTriangleLerp(vertices, GetBigTriangle(0, 2, 3, +2, +6, -3), true));
+		AddTriangles(BigTriangleLerp(vertices, GetBigTriangle(0, 3, 4, +3, +7, -4), true));
+		AddTriangles(BigTriangleLerp(vertices, GetBigTriangle(0, 4, 1, +4, +8, -1), true));
+		AddTriangles(BigTriangleLerp(vertices, GetBigTriangle(5, 2, 1, -10, -5, +9), true));
+		AddTriangles(BigTriangleLerp(vertices, GetBigTriangle(5, 3, 2, -11, -6, +10), true));
+		AddTriangles(BigTriangleLerp(vertices, GetBigTriangle(5, 4, 3, -12, -7, +11), true));
+		AddTriangles(BigTriangleLerp(vertices, GetBigTriangle(5, 1, 4, -9, -8, +12), true));
 
-		triangles.push_back(0); triangles.push_back(1); triangles.push_back(2);
-		triangles.push_back(0); triangles.push_back(2); triangles.push_back(3);
-		triangles.push_back(0); triangles.push_back(3); triangles.push_back(4);
-		triangles.push_back(0); triangles.push_back(4); triangles.push_back(1);
-		triangles.push_back(5); triangles.push_back(2); triangles.push_back(1);
-		triangles.push_back(5); triangles.push_back(3); triangles.push_back(2);
-		triangles.push_back(5); triangles.push_back(4); triangles.push_back(3);
-		triangles.push_back(5); triangles.push_back(1); triangles.push_back(4);
-
-		auto pmesh = std::make_shared<Mesh>(vertices, triangles);
-
-		for (; smooth > 0; smooth--)
-			pmesh = SmoothSphereMesh(pmesh);
-
-		return pmesh;
+		return std::make_shared<Mesh>(vertices, triangles);
 	}
 	void AddObject(std::shared_ptr<Object> pobj)
 	{

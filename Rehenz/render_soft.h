@@ -14,6 +14,8 @@ namespace Rehenz
 		Vertex(Point _p);
 	};
 
+	Vertex VertexLerp(const Vertex& v1, const Vertex& v2, float t);
+
 	class Mesh
 	{
 	private:
@@ -37,7 +39,9 @@ namespace Rehenz
 	};
 
 	std::shared_ptr<Mesh> CreateCubeMesh();
-	std::shared_ptr<Mesh> CreateSphereMesh(int smooth = 3);
+	std::shared_ptr<Mesh> CreateSphereMesh(int smooth = 10);
+	// another mesh layout. I call it B layout. default is A layout
+	std::shared_ptr<Mesh> CreateSphereMeshB(int smooth = 5);
 
 	class Object
 	{
