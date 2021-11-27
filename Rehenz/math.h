@@ -241,7 +241,10 @@ namespace Rehenz
 		Vector2();
 		explicit Vector2(float _x, float _y);
 
+		Vector2 operator+(Vector2) const;
+		Vector2 operator-(Vector2) const;
 		Vector2 operator*(float) const;
+
 		bool operator==(Vector2) const;
 		bool operator!=(Vector2) const;
 	};
