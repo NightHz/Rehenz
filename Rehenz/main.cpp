@@ -7,10 +7,8 @@ using namespace Rehenz;
 #include <string>
 #include <timeapi.h>
 
-int main()
+int noise_example()
 {
-	cout << "Hello~ Rehenz~" << endl;
-
 	float noise[50];
 	Perlin1D(123U, 0, 10, 5, noise);
 	for (int i = 0; i < 10; i++)
@@ -38,7 +36,12 @@ int main()
 	cout << noise2.GetNoiseSumAbs(1.1f, 2.3f) << endl; // 0.258147
 	cout << noise2.GetNoiseSumAbsSin(1.1f, 2.3f) << endl; // 0.999569
 
+	return 0;
+}
 
+int main()
+{
+	cout << "Hello~ Rehenz~" << endl;
 
 	cout << endl << "Open a surface with dx8" << endl;
 	SurfaceDx8 srf_dx8;
@@ -46,6 +49,7 @@ int main()
 	int width = 800;
 	int height = 600;
 	srf_dx8.Create(GetModuleHandle(nullptr), width, height, title.c_str());
+
 	cout << "Draw lines" << endl;
 	int size = width * height;
 	auto buffer = std::make_unique<uint[]>(size);
@@ -70,31 +74,36 @@ int main()
 	cout << "sphereC vertex count: " << sphereC->VertexCount() << "  \ttriangle count: " << sphereC->TriangleCount() << endl;
 	auto sphereD = CreateSphereMeshD();
 	cout << "sphereD vertex count: " << sphereD->VertexCount() << "  \ttriangle count: " << sphereD->TriangleCount() << endl;
-	//auto obj_cube = std::make_shared<Object>(cube);
-	//AddObject(obj_cube);
+	Objects test1;
 	for (int x = -10; x <= 10; x += 1)
 	{
 		auto obj_cube = std::make_shared<Object>(cube);
 		obj_cube->position = Vector(static_cast<float>(x), -2, 0);
 		obj_cube->scale = Vector(0.4f, 0.4f, 0.4f);
-		AddObject(obj_cube);
+		test1.AddObject(obj_cube);
 	}
 	auto obj_sphere = std::make_shared<Object>(sphere);
 	obj_sphere->position = Vector(0, 2, 0);
 	obj_sphere->scale = Vector(0.4f, 0.4f, 0.4f);
-	AddObject(obj_sphere);
+	test1.AddObject(obj_sphere);
 	auto obj_sphere2 = std::make_shared<Object>(sphereB);
 	obj_sphere2->position = Vector(-2, 2, 0);
 	obj_sphere2->scale = Vector(0.4f, 0.4f, 0.4f);
-	AddObject(obj_sphere2);
+	test1.AddObject(obj_sphere2);
 	auto obj_sphere3 = std::make_shared<Object>(sphereC);
 	obj_sphere3->position = Vector(2, 2, 0);
 	obj_sphere3->scale = Vector(0.4f, 0.4f, 0.4f);
-	AddObject(obj_sphere3);
+	test1.AddObject(obj_sphere3);
 	auto obj_sphere4 = std::make_shared<Object>(sphereD);
 	obj_sphere4->position = Vector(0, 0, 0);
 	obj_sphere4->scale = Vector(1, 1, 1);
-	AddObject(obj_sphere4);
+	test1.AddObject(obj_sphere4);
+	Objects test2;
+	auto obj_cube = std::make_shared<Object>(cube);
+	obj_cube->position = Vector(0, 0, 0);
+	obj_cube->rotation = EulerAngles(0, pi / 4, pi / 4 + pi / 24);
+	obj_cube->scale = Vector(2.2f, 2.2f, 2.2f);
+	test2.AddObject(obj_cube);
 	Camera camera(height, width);
 
 	cout << "Start fps counter" << endl;
@@ -110,12 +119,12 @@ int main()
 		if (KeyIsDown('A'))		 camera.position.x -= 0.1f;
 		else if (KeyIsDown('D')) camera.position.x += 0.1f;
 		camera.at = -camera.position;
-		if (KeyIsDown('I'))		 obj_sphere4->rotation.theta += 0.05f;
-		else if (KeyIsDown('K')) obj_sphere4->rotation.theta -= 0.05f;
-		if (KeyIsDown('J'))		 obj_sphere4->rotation.psi += 0.05f;
-		else if (KeyIsDown('L')) obj_sphere4->rotation.psi -= 0.05f;
+		if (KeyIsDown('I'))		 obj_cube->rotation.theta += 0.05f;
+		else if (KeyIsDown('K')) obj_cube->rotation.theta -= 0.05f;
+		if (KeyIsDown('J'))		 obj_cube->rotation.psi += 0.05f;
+		else if (KeyIsDown('L')) obj_cube->rotation.psi -= 0.05f;
 		if (KeyIsDown(VK_RETURN))
-			srf_dx8.FillFromImage(camera.RenderImage());
+			srf_dx8.FillFromImage(camera.RenderImage(test2));
 		// refresh
 		srf_dx8.Present();
 		// compute fps and set title
