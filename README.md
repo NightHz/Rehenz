@@ -14,7 +14,9 @@ some code writed by NightHz
 
 ## file description
 
+- `drawer.h`: draw geometry
 - `math.h`: math
+- `mesh.h`: save model
 - `noise_gen.h`: generate a noise, such as Perlin noise
 - `rehenz.h`: include all header file
 - `render_soft.h`: use cpu to render 3-dim world

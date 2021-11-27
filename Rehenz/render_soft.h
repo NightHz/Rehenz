@@ -3,60 +3,16 @@
 #include <vector>
 #include <memory>
 #include "type.h"
+#include "mesh.h"
 
 namespace Rehenz
 {
-	struct Vertex;
-	class Mesh;
 	class Object;
 	class Camera;
 
-	class Drawer;
-	class DrawerZ;
 	class Objects;
 
 
-
-	struct Vertex
-	{
-	public:
-		Point p;
-
-		Vertex(Point _p);
-	};
-
-	Vertex VertexLerp(const Vertex& v1, const Vertex& v2, float t);
-
-	class Mesh
-	{
-	private:
-		std::vector<Vertex> vertices;
-		std::vector<int> triangles;
-
-	public:
-		Mesh();
-		explicit Mesh(const std::vector<Vertex>& _vertices, const std::vector<int>& _triangles);
-		~Mesh();
-
-		size_t VertexCount() { return vertices.size(); }
-		size_t TriangleCount() { return triangles.size() / 3; }
-		const std::vector<Vertex>& GetVertices() { return vertices; }
-		const std::vector<int>& GetTriangles() { return triangles; }
-
-		void AddVertex(Vertex vertex);
-		void AddVertex(const std::vector<Vertex>& _vertices);
-		void AddTriangle(int a, int b, int c);
-		void AddTriangle(const std::vector<int>& _triangles);
-	};
-
-	std::shared_ptr<Mesh> CreateCubeMesh();
-	std::shared_ptr<Mesh> CreateSphereMesh(int smooth = 10);
-	// another mesh layout. I call it B layout. default is A layout
-	std::shared_ptr<Mesh> CreateSphereMeshB(int smooth = 5);
-	// C layout
-	std::shared_ptr<Mesh> CreateSphereMeshC(int smooth = 8);
-	// D layout
-	std::shared_ptr<Mesh> CreateSphereMeshD(int smooth = 4);
 
 	class Object
 	{
@@ -126,40 +82,5 @@ namespace Rehenz
 		void SetSize(int _height, int _width, float _fovy);
 
 		const uint* RenderImage(Objects& objs = Objects::global_objs);
-	};
-
-	class Drawer
-	{
-	private:
-		uint* const buffer;
-		const int w;
-		const int h;
-
-	public:
-		Drawer(uint* _buffer, int _width, int _height);
-		~Drawer();
-
-		static uint Color(uint r, uint g, uint b);
-		static uint Color(float r, float g, float b);
-		void Pixel(Point2I p, uint color);
-		void Line(Point2I p1, Point2I p2, uint color);
-	};
-
-	class DrawerZ
-	{
-	private:
-		uint* const buffer;
-		const int w;
-		const int h;
-		float* const zbuffer;
-
-	public:
-		DrawerZ(uint* _buffer, int _width, int _height, float* _zbuffer);
-		~DrawerZ();
-
-		static uint Color(uint r, uint g, uint b);
-		static uint Color(float r, float g, float b);
-		void Pixel(Point2I p, uint color, float z);
-		void Line(Point2I p1, Point2I p2, uint color, float z1, float z2);
 	};
 }

@@ -30,6 +30,12 @@
     <ClCompile Include="render_soft.cpp">
       <Filter>source</Filter>
     </ClCompile>
+    <ClCompile Include="mesh.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="drawer.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="math.h">
@@ -48,6 +54,12 @@
       <Filter>header</Filter>
     </ClInclude>
     <ClInclude Include="type.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="mesh.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="drawer.h">
       <Filter>header</Filter>
     </ClInclude>
   </ItemGroup>
