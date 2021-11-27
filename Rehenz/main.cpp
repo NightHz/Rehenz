@@ -66,6 +66,10 @@ int main()
 	cout << "sphere  vertex count: " << sphere->VertexCount() << "  \ttriangle count: " << sphere->TriangleCount() << endl;
 	auto sphereB = CreateSphereMeshB();
 	cout << "sphereB vertex count: " << sphereB->VertexCount() << "  \ttriangle count: " << sphereB->TriangleCount() << endl;
+	auto sphereC = CreateSphereMeshC();
+	cout << "sphereC vertex count: " << sphereC->VertexCount() << "  \ttriangle count: " << sphereC->TriangleCount() << endl;
+	auto sphereD = CreateSphereMeshD();
+	cout << "sphereD vertex count: " << sphereD->VertexCount() << "  \ttriangle count: " << sphereD->TriangleCount() << endl;
 	//auto obj_cube = std::make_shared<Object>(cube);
 	//AddObject(obj_cube);
 	for (int x = -10; x <= 10; x += 1)
@@ -76,11 +80,21 @@ int main()
 		AddObject(obj_cube);
 	}
 	auto obj_sphere = std::make_shared<Object>(sphere);
-	obj_sphere->position = Vector(-3, 3, 0);
+	obj_sphere->position = Vector(0, 2, 0);
+	obj_sphere->scale = Vector(0.4f, 0.4f, 0.4f);
 	AddObject(obj_sphere);
 	auto obj_sphere2 = std::make_shared<Object>(sphereB);
-	obj_sphere2->position = Vector(0, 0, 0);
+	obj_sphere2->position = Vector(-2, 2, 0);
+	obj_sphere2->scale = Vector(0.4f, 0.4f, 0.4f);
 	AddObject(obj_sphere2);
+	auto obj_sphere3 = std::make_shared<Object>(sphereC);
+	obj_sphere3->position = Vector(2, 2, 0);
+	obj_sphere3->scale = Vector(0.4f, 0.4f, 0.4f);
+	AddObject(obj_sphere3);
+	auto obj_sphere4 = std::make_shared<Object>(sphereD);
+	obj_sphere4->position = Vector(0, 0, 0);
+	obj_sphere4->scale = Vector(1, 1, 1);
+	AddObject(obj_sphere4);
 	Camera camera(height, width);
 
 	cout << "Start fps counter" << endl;
@@ -96,10 +110,10 @@ int main()
 		if (KeyIsDown('A'))		 camera.position.x -= 0.1f;
 		else if (KeyIsDown('D')) camera.position.x += 0.1f;
 		camera.at = -camera.position;
-		if (KeyIsDown('I'))		 obj_sphere2->rotation.theta += 0.05f;
-		else if (KeyIsDown('K')) obj_sphere2->rotation.theta -= 0.05f;
-		if (KeyIsDown('J'))		 obj_sphere2->rotation.psi += 0.05f;
-		else if (KeyIsDown('L')) obj_sphere2->rotation.psi -= 0.05f;
+		if (KeyIsDown('I'))		 obj_sphere4->rotation.theta += 0.05f;
+		else if (KeyIsDown('K')) obj_sphere4->rotation.theta -= 0.05f;
+		if (KeyIsDown('J'))		 obj_sphere4->rotation.psi += 0.05f;
+		else if (KeyIsDown('L')) obj_sphere4->rotation.psi -= 0.05f;
 		if (KeyIsDown(VK_RETURN))
 			srf_dx8.FillFromImage(camera.RenderImage());
 		// refresh
