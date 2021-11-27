@@ -2,9 +2,29 @@
 
 namespace Rehenz
 {
-	Vertex::Vertex(Point _p) : p(_p)
+	Vertex::Vertex(Point _p) : p(_p), c(1, 1, 1, 1), uv(0, 0), uv2(0, 0), uv3(0, 0), uv4(0, 0)
 	{
 	}
+
+	Vertex::Vertex(Point _p, Vector _c, Vector2 _uv, Vector2 _uv2, Vector2 _uv3, Vector2 _uv4)
+		: p(_p), c(_c), uv(_uv), uv2(_uv2), uv3(_uv3), uv4(_uv4)
+	{
+	}
+
+	Vertex::Vertex(Point _p, Vector2 _uv, Vector2 _uv2, Vector2 _uv3, Vector2 _uv4)
+		: p(_p), c(1, 1, 1, 1), uv(_uv), uv2(_uv2), uv3(_uv3), uv4(_uv4)
+	{
+	}
+
+
+
+	Vertex VertexLerp(const Vertex& v1, const Vertex& v2, float t)
+	{
+		return Vertex(PointLerp(v1.p, v2.p, t), Lerp(v1.c, v2.c, t), Lerp(v1.uv, v2.uv, t)
+			, Lerp(v1.uv2, v2.uv2, t), Lerp(v1.uv3, v2.uv3, t), Lerp(v1.uv4, v2.uv4, t));
+	}
+
+
 
 	Mesh::Mesh() : vertices(), triangles()
 	{
@@ -32,13 +52,6 @@ namespace Rehenz
 	void Mesh::AddTriangle(const std::vector<int>& _triangles)
 	{
 		triangles.insert(triangles.end(), _triangles.begin(), _triangles.end());
-	}
-
-
-
-	Vertex VertexLerp(const Vertex& v1, const Vertex& v2, float t)
-	{
-		return Vertex(PointLerp(v1.p, v2.p, t));
 	}
 
 

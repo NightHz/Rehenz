@@ -13,9 +13,20 @@ namespace Rehenz
 	struct Vertex
 	{
 	public:
+		// position
 		Point p;
+		// color
+		Vector c;
+		Vector2 uv;
+		Vector2 uv2;
+		Vector2 uv3;
+		Vector2 uv4;
 
 		Vertex(Point _p);
+		explicit Vertex(Point _p, Vector _c,
+			Vector2 _uv = Vector2(0, 0), Vector2 _uv2 = Vector2(0, 0), Vector2 _uv3 = Vector2(0, 0), Vector2 _uv4 = Vector2(0, 0));
+		explicit Vertex(Point _p, Vector2 _uv,
+			Vector2 _uv2 = Vector2(0, 0), Vector2 _uv3 = Vector2(0, 0), Vector2 _uv4 = Vector2(0, 0));
 	};
 
 	Vertex VertexLerp(const Vertex& v1, const Vertex& v2, float t);
