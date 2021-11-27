@@ -360,21 +360,21 @@ namespace Rehenz
 	Matrix GetMatrixE(float psi, float theta, float phi)
 	{
 		Matrix result;
-		result = GetMatrixRz(phi) * GetMatrixRx(theta) * GetMatrixRz(psi);
+		result = GetMatrixRy(phi) * GetMatrixRx(theta) * GetMatrixRy(psi);
 		return result;
 	}
 
 	Matrix GetMatrixE(EulerAngles euler_angles)
 	{
 		Matrix result;
-		result = GetMatrixRz(euler_angles.phi) * GetMatrixRx(euler_angles.theta) * GetMatrixRz(euler_angles.psi);
+		result = GetMatrixRy(euler_angles.phi) * GetMatrixRx(euler_angles.theta) * GetMatrixRy(euler_angles.psi);
 		return result;
 	}
 
 	Matrix GetInverseMatrixE(EulerAngles euler_angles)
 	{
 		Matrix result;
-		result = GetMatrixRz(-euler_angles.psi) * GetMatrixRx(-euler_angles.theta) * GetMatrixRz(-euler_angles.phi);
+		result = GetMatrixRy(-euler_angles.psi) * GetMatrixRx(-euler_angles.theta) * GetMatrixRy(-euler_angles.phi);
 		return result;
 	}
 
