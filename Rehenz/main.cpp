@@ -61,20 +61,26 @@ int main()
 
 	cout << "Ready render" << endl;
 	auto cube = CreateCubeMesh();
-	cout << "cube v_count: " << cube->VertexCount() << " tri_count: " << cube->TriangleCount() << endl;
+	cout << "cube    vertex count: " << cube->VertexCount() << "  \ttriangle count: " << cube->TriangleCount() << endl;
 	auto sphere = CreateSphereMesh();
-	cout << "sphere v_count: " << sphere->VertexCount() << " tri_count: " << sphere->TriangleCount() << endl;
+	cout << "sphere  vertex count: " << sphere->VertexCount() << "  \ttriangle count: " << sphere->TriangleCount() << endl;
+	auto sphereB = CreateSphereMeshB();
+	cout << "sphereB vertex count: " << sphereB->VertexCount() << "  \ttriangle count: " << sphereB->TriangleCount() << endl;
 	//auto obj_cube = std::make_shared<Object>(cube);
 	//AddObject(obj_cube);
-	for (int x = -10; x <= 10; x += 2)
+	for (int x = -10; x <= 10; x += 1)
 	{
 		auto obj_cube = std::make_shared<Object>(cube);
-		obj_cube->position = Vector(static_cast<float>(x), -1, 0);
+		obj_cube->position = Vector(static_cast<float>(x), -2, 0);
+		obj_cube->scale = Vector(0.4f, 0.4f, 0.4f);
 		AddObject(obj_cube);
 	}
 	auto obj_sphere = std::make_shared<Object>(sphere);
-	obj_sphere->position = Vector(0, 2, 0);
+	obj_sphere->position = Vector(-3, 3, 0);
 	AddObject(obj_sphere);
+	auto obj_sphere2 = std::make_shared<Object>(sphereB);
+	obj_sphere2->position = Vector(0, 0, 0);
+	AddObject(obj_sphere2);
 	Camera camera(height, width);
 
 	cout << "Start fps counter" << endl;
@@ -85,15 +91,15 @@ int main()
 	while (srf_dx8.GetWindowState())
 	{
 		// render
-		if (KeyIsDown('W'))
-			camera.position.y += 0.1f;
-		else if (KeyIsDown('S'))
-			camera.position.y -= 0.1f;
-		if (KeyIsDown('A'))
-			camera.position.x += 0.1f;
-		else if (KeyIsDown('D'))
-			camera.position.x -= 0.1f;
+		if (KeyIsDown('W'))		 camera.position.y += 0.1f;
+		else if (KeyIsDown('S')) camera.position.y -= 0.1f;
+		if (KeyIsDown('A'))		 camera.position.x -= 0.1f;
+		else if (KeyIsDown('D')) camera.position.x += 0.1f;
 		camera.at = -camera.position;
+		if (KeyIsDown('I'))		 obj_sphere2->rotation.theta += 0.05f;
+		else if (KeyIsDown('K')) obj_sphere2->rotation.theta -= 0.05f;
+		if (KeyIsDown('J'))		 obj_sphere2->rotation.psi += 0.05f;
+		else if (KeyIsDown('L')) obj_sphere2->rotation.psi -= 0.05f;
 		if (KeyIsDown(VK_RETURN))
 			srf_dx8.FillFromImage(camera.RenderImage());
 		// refresh
