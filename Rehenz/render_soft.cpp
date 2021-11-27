@@ -2,92 +2,14 @@
 
 namespace Rehenz
 {
-	// save all objects to render
-	std::vector<std::shared_ptr<Object>> objs;
-
-
-	Vertex::Vertex(Point _p) : p(_p)
-	{
-	}
-
-	Mesh::Mesh() : vertices(), triangles()
-	{
-	}
-	Mesh::Mesh(const std::vector<Vertex>& _vertices, const std::vector<int>& _triangles) : vertices(_vertices), triangles(_triangles)
-	{
-	}
-	Mesh::~Mesh()
-	{
-	}
-	void Mesh::AddVertex(Vertex vertex)
-	{
-		vertices.push_back(vertex);
-	}
-	void Mesh::AddVertex(const std::vector<Vertex>& _vertices)
-	{
-		vertices.insert(vertices.end(), _vertices.begin(), _vertices.end());
-	}
-	void Mesh::AddTriangle(int a, int b, int c)
-	{
-		triangles.push_back(a);
-		triangles.push_back(b);
-		triangles.push_back(c);
-	}
-	void Mesh::AddTriangle(const std::vector<int>& _triangles)
-	{
-		triangles.insert(triangles.end(), _triangles.begin(), _triangles.end());
-	}
-	Object::Object() : pmesh(nullptr), position(), rotation(), scale(1, 1, 1, 0)
-	{
-	}
-	Object::Object(std::shared_ptr<Mesh> _pmesh) : pmesh(_pmesh), position(), rotation(), scale(1, 1, 1, 0)
-	{
-	}
-	Object::~Object()
-	{
-	}
-	Camera::Camera() : position(0, 0, -5, 0), at(0, 0, 1, 0), up(0, 1, 0, 0)
-	{
-		height = 600;
-		width = 800;
-		int size = height * width;
-		buffer = new uint[size];
-		fovy = pi / 2;
-		aspect = 4.0f / 3;
-		z_near = 1;
-		z_far = 500;
-	}
-	Camera::Camera(int _height, int _width) : position(0, 0, -5, 0), at(0, 0, 1, 0), up(0, 1, 0, 0)
-	{
-		height = _height;
-		width = _width;
-		int size = height * width;
-		buffer = new uint[size];
-		fovy = pi / 2;
-		aspect = static_cast<float>(width) / height;
-		z_near = 1;
-		z_far = 500;
-	}
-	Camera::~Camera()
-	{
-		delete[] buffer;
-	}
-	void Camera::SetSize(int _height, int _width, float _aspect)
-	{
-		delete[] buffer;
-		height = _height;
-		width = _width;
-		int size = height * width;
-		buffer = new uint[size];
-		aspect = _aspect;
-	}
-	const uint* Camera::RenderImage()
+	// Core Function
+	const uint* Camera::RenderImage(Objects& objs)
 	{
 		// Copy and transform all objects (vertex shader)
 		std::vector<Vertex> vertices;
 		std::vector<int> triangles;
 		Matrix mat_view = GetInverseMatrixT(position) * GetInverseMatrixR(at, up) * GetMatrixP(fovy, aspect, z_near, z_far);
-		for (auto pobj : objs)
+		for (auto pobj : objs.objs)
 		{
 			Matrix mat_world = GetMatrixS(pobj->scale) * GetMatrixE(pobj->rotation) * GetMatrixT(pobj->position);
 			Matrix transform = mat_world * mat_view;
@@ -143,6 +65,98 @@ namespace Rehenz
 
 		return buffer;
 	}
+
+
+
+	Vertex::Vertex(Point _p) : p(_p)
+	{
+	}
+
+	Mesh::Mesh() : vertices(), triangles()
+	{
+	}
+	Mesh::Mesh(const std::vector<Vertex>& _vertices, const std::vector<int>& _triangles) : vertices(_vertices), triangles(_triangles)
+	{
+	}
+	Mesh::~Mesh()
+	{
+	}
+	void Mesh::AddVertex(Vertex vertex)
+	{
+		vertices.push_back(vertex);
+	}
+	void Mesh::AddVertex(const std::vector<Vertex>& _vertices)
+	{
+		vertices.insert(vertices.end(), _vertices.begin(), _vertices.end());
+	}
+	void Mesh::AddTriangle(int a, int b, int c)
+	{
+		triangles.push_back(a);
+		triangles.push_back(b);
+		triangles.push_back(c);
+	}
+	void Mesh::AddTriangle(const std::vector<int>& _triangles)
+	{
+		triangles.insert(triangles.end(), _triangles.begin(), _triangles.end());
+	}
+	Object::Object() : pmesh(nullptr), position(), rotation(), scale(1, 1, 1, 0)
+	{
+	}
+	Object::Object(std::shared_ptr<Mesh> _pmesh) : pmesh(_pmesh), position(), rotation(), scale(1, 1, 1, 0)
+	{
+	}
+	Object::~Object()
+	{
+	}
+	Camera::Camera() : position(0, 0, -5, 0), at(0, 0, 1, 0), up(0, 1, 0, 0)
+	{
+		height = 600;
+		width = 800;
+		int size = height * width;
+		buffer = new uint[size];
+		fovy = pi / 2;
+		aspect = 4.0f / 3;
+		z_near = 1;
+		z_far = 500;
+	}
+	Camera::Camera(const Camera& c) : position(c.position), at(c.at), up(c.up)
+	{
+		height = c.height;
+		width = c.width;
+		int size = height * width;
+		buffer = new uint[size];
+		fovy = c.fovy;
+		aspect = c.aspect;
+		z_near = c.z_near;
+		z_far = c.z_far;
+	}
+	Camera::Camera(int _height, int _width) : position(0, 0, -5, 0), at(0, 0, 1, 0), up(0, 1, 0, 0)
+	{
+		height = _height;
+		width = _width;
+		int size = height * width;
+		buffer = new uint[size];
+		fovy = pi / 2;
+		aspect = static_cast<float>(width) / height;
+		z_near = 1;
+		z_far = 500;
+	}
+	Camera::~Camera()
+	{
+		delete[] buffer;
+	}
+	void Camera::SetSize(int _height, int _width, float _aspect)
+	{
+		delete[] buffer;
+		height = _height;
+		width = _width;
+		int size = height * width;
+		buffer = new uint[size];
+		aspect = _aspect;
+	}
+
+
+
 	Vertex VertexLerp(const Vertex& v1, const Vertex& v2, float t)
 	{
 		return Vertex(PointLerp(v1.p, v2.p, t));
@@ -463,35 +477,15 @@ namespace Rehenz
 	}
 	void AddObject(std::shared_ptr<Object> pobj)
 	{
-		objs.push_back(pobj);
+		Objects::global_objs.AddObject(pobj);
 	}
 	bool RemoveObject(std::shared_ptr<Object> pobj)
 	{
-		for (auto it = objs.begin(); it != objs.end(); it++)
-		{
-			if (*it == pobj)
-			{
-				it = objs.emplace(it);
-				return true;
-			}
-		}
-		return false;
+		return Objects::global_objs.RemoveObject(pobj);
 	}
 	std::shared_ptr<Object> GetObject(std::shared_ptr<Object> prev)
 	{
-		if (prev == nullptr)
-			return objs.front();
-		for (auto it = objs.begin(); it != objs.end(); it++)
-		{
-			if (*it == prev)
-			{
-				if (it + 1 == objs.end())
-					return nullptr;
-				else
-					return *(it + 1);
-			}
-		}
-		return nullptr;
+		return Objects::global_objs.GetObject(prev);
 	}
 	Drawer::Drawer(uint* _buffer, int _width, int _height)
 		: buffer(_buffer), w(_width), h(_height)
@@ -638,5 +632,44 @@ namespace Rehenz
 				}
 			}
 		}
+	}
+	Objects Objects::global_objs = Objects();
+	Objects::Objects()
+	{
+	}
+	Objects::~Objects()
+	{
+	}
+	void Objects::AddObject(std::shared_ptr<Object> pobj)
+	{
+		objs.push_back(pobj);
+	}
+	bool Objects::RemoveObject(std::shared_ptr<Object> pobj)
+	{
+		for (auto it = objs.begin(); it != objs.end(); it++)
+		{
+			if (*it == pobj)
+			{
+				it = objs.emplace(it);
+				return true;
+			}
+		}
+		return false;
+	}
+	std::shared_ptr<Object> Objects::GetObject(std::shared_ptr<Object> prev)
+	{
+		if (prev == nullptr)
+			return objs.front();
+		for (auto it = objs.begin(); it != objs.end(); it++)
+		{
+			if (*it == prev)
+			{
+				if (it + 1 == objs.end())
+					return nullptr;
+				else
+					return *(it + 1);
+			}
+		}
+		return nullptr;
 	}
 }

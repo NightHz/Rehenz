@@ -6,6 +6,17 @@
 
 namespace Rehenz
 {
+	struct Vertex;
+	class Mesh;
+	class Object;
+	class Camera;
+
+	class Drawer;
+	class DrawerZ;
+	class Objects;
+
+
+
 	struct Vertex
 	{
 	public:
@@ -66,6 +77,25 @@ namespace Rehenz
 	// use nullptr get first object, and input last object will return nullptr
 	std::shared_ptr<Object> GetObject(std::shared_ptr<Object> prev);
 
+	class Objects
+	{
+	private:
+		// save all objects to render
+		std::vector<std::shared_ptr<Object>> objs;
+
+	public:
+		Objects();
+		~Objects();
+
+		void AddObject(std::shared_ptr<Object> pobj);
+		bool RemoveObject(std::shared_ptr<Object> pobj);
+		// use nullptr get first object, and input last object will return nullptr
+		std::shared_ptr<Object> GetObject(std::shared_ptr<Object> prev);
+
+		static Objects global_objs;
+		friend class Camera;
+	};
+
 	class Camera
 	{
 	private:
@@ -83,7 +113,7 @@ namespace Rehenz
 		// default height = 600, width = 800, fovy = pi/2, aspect = 4/3, z_near = 1, z_far = 500
 		//         position = (0,0,-5), at = (0,0,1), up = (0,1,0)
 		Camera();
-		Camera(const Camera& c) = delete;
+		Camera(const Camera& c);
 		Camera& operator=(const Camera& c) = delete;
 		// auto set aspect = width / height
 		explicit Camera(int _height, int _width);
@@ -95,7 +125,7 @@ namespace Rehenz
 
 		void SetSize(int _height, int _width, float _fovy);
 
-		const uint* RenderImage();
+		const uint* RenderImage(Objects& objs = Objects::global_objs);
 	};
 
 	class Drawer
