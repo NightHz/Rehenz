@@ -54,13 +54,13 @@ int main()
 	int size = width * height;
 	auto buffer = std::make_unique<uint[]>(size);
 	auto drawer = Drawer(buffer.get(), width, height);
-	drawer.Line(Point2I(30, 30), Point2I(400, 200), drawer.Color(255, 255, 255));
-	drawer.Line(Point2I(50, 30), Point2I(420, 200), drawer.Color(255, 0, 0));
-	drawer.Line(Point2I(70, 30), Point2I(440, 200), drawer.Color(0, 255, 0));
-	drawer.Line(Point2I(90, 30), Point2I(460, 200), drawer.Color(0, 0, 255));
-	drawer.Line(Point2I(110, 30), Point2I(480, 200), drawer.Color(0, 255, 255));
-	drawer.Line(Point2I(130, 30), Point2I(500, 200), drawer.Color(255, 0, 255));
-	drawer.Line(Point2I(150, 30), Point2I(520, 200), drawer.Color(255, 255, 0));
+	drawer.Line(Point2I(30, 30), Point2I(400, 200), drawer.Color(255U, 255U, 255U));
+	drawer.Line(Point2I(50, 30), Point2I(420, 200), drawer.Color(255U, 0U, 0U));
+	drawer.Line(Point2I(70, 30), Point2I(440, 200), drawer.Color(0U, 255U, 0U));
+	drawer.Line(Point2I(90, 30), Point2I(460, 200), drawer.Color(0U, 0U, 255U));
+	drawer.Line(Point2I(110, 30), Point2I(480, 200), drawer.Color(0U, 255U, 255U));
+	drawer.Line(Point2I(130, 30), Point2I(500, 200), drawer.Color(255U, 0U, 255U));
+	drawer.Line(Point2I(150, 30), Point2I(520, 200), drawer.Color(255U, 255U, 0U));
 	srf_dx8.FillFromImage(buffer.get());
 
 	cout << "Ready render" << endl;
