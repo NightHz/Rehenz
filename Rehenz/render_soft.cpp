@@ -296,6 +296,47 @@ namespace Rehenz
 
 		return triangles;
 	}
+	void SphereSkeleton(std::vector<Vertex>& vertices, int smooth, int a, int b)
+	{
+		for (int i = 1; i < smooth; i++)
+		{
+			Vertex v_new = VertexLerp(vertices[a], vertices[b], static_cast<float>(i) / smooth);
+			float length = VectorLength(v_new.p);
+			if (length != 0)
+				v_new.p /= length;
+			v_new.p.w = 1;
+			vertices.push_back(v_new);
+		}
+	}
+	std::vector<int> SphereBigTriangle(int smooth, int vn, int a, int b, int c, int eab, int ebc, int eca)
+	{
+		std::vector<int> big_tri;
+		auto PushBackEdge = [&big_tri, smooth, vn](int e)
+		{
+			int o = vn + (abs(e) - 1) * (smooth - 1);
+			if (e > 0)
+			{
+				for (int i = 0; i < smooth - 1; i++)
+					big_tri.push_back(i + o);
+			}
+			else
+			{
+				for (int i = smooth - 2; i >= 0; i--)
+					big_tri.push_back(i + o);
+			}
+		};
+		big_tri.push_back(a);
+		PushBackEdge(eab);
+		big_tri.push_back(b);
+		PushBackEdge(ebc);
+		big_tri.push_back(c);
+		PushBackEdge(eca);
+		return big_tri;
+	}
+	void TrianglesAppend(std::vector<int>& triangles, const std::vector<int>& _triangles)
+	{
+		triangles.insert(triangles.end(), _triangles.begin(), _triangles.end());
+	}
 	std::shared_ptr<Mesh> CreateSphereMeshB(int smooth)
 	{
 		std::vector<Vertex> vertices;
@@ -309,59 +350,114 @@ namespace Rehenz
 		vertices.push_back(Point(0, 0, 1));
 		vertices.push_back(Point(0, -1, 0));
 		// add second part vertices
-		auto AddEdge = [&vertices, smooth](int a, int b)
-		{
-			for (int i = 1; i < smooth; i++)
-			{
-				Vertex v_new = VertexLerp(vertices[a], vertices[b], static_cast<float>(i) / smooth);
-				float length = VectorLength(v_new.p);
-				if (length != 0)
-					v_new.p /= length;
-				v_new.p.w = 1;
-				vertices.push_back(v_new);
-			}
-		};
-		AddEdge(0, 1); AddEdge(0, 2); AddEdge(0, 3); AddEdge(0, 4);
-		AddEdge(1, 2); AddEdge(2, 3); AddEdge(3, 4); AddEdge(4, 1);
-		AddEdge(1, 5); AddEdge(2, 5); AddEdge(3, 5); AddEdge(4, 5);
+		SphereSkeleton(vertices, smooth, 0, 1); SphereSkeleton(vertices, smooth, 0, 2);
+		SphereSkeleton(vertices, smooth, 0, 3); SphereSkeleton(vertices, smooth, 0, 4);
+		SphereSkeleton(vertices, smooth, 1, 2); SphereSkeleton(vertices, smooth, 2, 3);
+		SphereSkeleton(vertices, smooth, 3, 4); SphereSkeleton(vertices, smooth, 4, 1);
+		SphereSkeleton(vertices, smooth, 1, 5); SphereSkeleton(vertices, smooth, 2, 5);
+		SphereSkeleton(vertices, smooth, 3, 5); SphereSkeleton(vertices, smooth, 4, 5);
 		// add triangles
-		auto GetBigTriangle = [&vertices, smooth](int a, int b, int c, int eab, int ebc, int eca) -> std::vector<int>
+		TrianglesAppend(triangles, BigTriangleLerp(vertices, SphereBigTriangle(smooth, 6, 0, 1, 2, +1, +5, -2), true));
+		TrianglesAppend(triangles, BigTriangleLerp(vertices, SphereBigTriangle(smooth, 6, 0, 2, 3, +2, +6, -3), true));
+		TrianglesAppend(triangles, BigTriangleLerp(vertices, SphereBigTriangle(smooth, 6, 0, 3, 4, +3, +7, -4), true));
+		TrianglesAppend(triangles, BigTriangleLerp(vertices, SphereBigTriangle(smooth, 6, 0, 4, 1, +4, +8, -1), true));
+		TrianglesAppend(triangles, BigTriangleLerp(vertices, SphereBigTriangle(smooth, 6, 5, 2, 1, -10, -5, +9), true));
+		TrianglesAppend(triangles, BigTriangleLerp(vertices, SphereBigTriangle(smooth, 6, 5, 3, 2, -11, -6, +10), true));
+		TrianglesAppend(triangles, BigTriangleLerp(vertices, SphereBigTriangle(smooth, 6, 5, 4, 3, -12, -7, +11), true));
+		TrianglesAppend(triangles, BigTriangleLerp(vertices, SphereBigTriangle(smooth, 6, 5, 1, 4, -9, -8, +12), true));
+
+		return std::make_shared<Mesh>(vertices, triangles);
+	}
+	std::shared_ptr<Mesh> CreateSphereMeshC(int smooth)
+	{
+		std::vector<Vertex> vertices;
+		std::vector<int> triangles;
+
+		// add first part vertices
+		float sqr2 = sqrtf(2), sqr6 = sqrtf(6);
+		vertices.push_back(Point(0, 1, 0));
+		vertices.push_back(Point(2 * sqr2 / 3, -1.0f / 3, 0));
+		vertices.push_back(Point(-sqr2 / 3, -1.0f / 3, -sqr6 / 3));
+		vertices.push_back(Point(-sqr2 / 3, -1.0f / 3, +sqr6 / 3));
+		// add second part vertices
+		SphereSkeleton(vertices, smooth, 0, 1); SphereSkeleton(vertices, smooth, 0, 2);
+		SphereSkeleton(vertices, smooth, 0, 3); SphereSkeleton(vertices, smooth, 1, 2);
+		SphereSkeleton(vertices, smooth, 2, 3); SphereSkeleton(vertices, smooth, 3, 1);
+		// add triangles
+		TrianglesAppend(triangles, BigTriangleLerp(vertices, SphereBigTriangle(smooth, 4, 0, 1, 2, +1, +4, -2), true));
+		TrianglesAppend(triangles, BigTriangleLerp(vertices, SphereBigTriangle(smooth, 4, 0, 2, 3, +2, +5, -3), true));
+		TrianglesAppend(triangles, BigTriangleLerp(vertices, SphereBigTriangle(smooth, 4, 0, 3, 1, +3, +6, -1), true));
+		TrianglesAppend(triangles, BigTriangleLerp(vertices, SphereBigTriangle(smooth, 4, 1, 3, 2, -6, -5, -4), true));
+
+		return std::make_shared<Mesh>(vertices, triangles);
+	}
+	std::shared_ptr<Mesh> CreateSphereMeshD(int smooth)
+	{
+		std::vector<Vertex> vertices;
+		std::vector<int> triangles;
+
+		// add first part vertices
+		float sqr3 = sqrtf(3), sqr5 = sqrtf(5);
+		vertices.push_back(Point(1, sqr3, (3 + sqr5) / 2));
+		vertices.push_back(Point(-2, 0, (3 + sqr5) / 2));
+		vertices.push_back(Point(1, -sqr3, (3 + sqr5) / 2));
+		vertices.push_back(Point(-(1 + sqr5) / 2, -(1 + sqr5) * sqr3 / 2, (sqr5 - 1) / 2));
+		vertices.push_back(Point(1 + sqr5, 0, (sqr5 - 1) / 2));
+		vertices.push_back(Point(-(1 + sqr5) / 2, (1 + sqr5) * sqr3 / 2, (sqr5 - 1) / 2));
+		vertices.push_back(Point((1 + sqr5) / 2, (1 + sqr5) * sqr3 / 2, -(sqr5 - 1) / 2));
+		vertices.push_back(Point(-(1 + sqr5), 0, -(sqr5 - 1) / 2));
+		vertices.push_back(Point((1 + sqr5) / 2, -(1 + sqr5) * sqr3 / 2, -(sqr5 - 1) / 2));
+		vertices.push_back(Point(-1, -sqr3, -(3 + sqr5) / 2));
+		vertices.push_back(Point(2, 0, -(3 + sqr5) / 2));
+		vertices.push_back(Point(-1, sqr3, -(3 + sqr5) / 2));
+		for (auto& v : vertices)
 		{
-			std::vector<int> big_tri;
-			auto PushBackEdge = [&big_tri, smooth](int e)
-			{
-				int o = 6 + (abs(e) - 1) * (smooth - 1);
-				if (e > 0)
-				{
-					for (int i = 0; i < smooth - 1; i++)
-						big_tri.push_back(i + o);
-				}
-				else
-				{
-					for (int i = smooth - 2; i >= 0; i--)
-						big_tri.push_back(i + o);
-				}
-			};
-			big_tri.push_back(a);
-			PushBackEdge(eab);
-			big_tri.push_back(b);
-			PushBackEdge(ebc);
-			big_tri.push_back(c);
-			PushBackEdge(eca);
-			return big_tri;
-		};
-		auto AddTriangles = [&triangles](const std::vector<int>& tris_new)
-		{
-			triangles.insert(triangles.end(), tris_new.begin(), tris_new.end());
-		};
-		AddTriangles(BigTriangleLerp(vertices, GetBigTriangle(0, 1, 2, +1, +5, -2), true));
-		AddTriangles(BigTriangleLerp(vertices, GetBigTriangle(0, 2, 3, +2, +6, -3), true));
-		AddTriangles(BigTriangleLerp(vertices, GetBigTriangle(0, 3, 4, +3, +7, -4), true));
-		AddTriangles(BigTriangleLerp(vertices, GetBigTriangle(0, 4, 1, +4, +8, -1), true));
-		AddTriangles(BigTriangleLerp(vertices, GetBigTriangle(5, 2, 1, -10, -5, +9), true));
-		AddTriangles(BigTriangleLerp(vertices, GetBigTriangle(5, 3, 2, -11, -6, +10), true));
-		AddTriangles(BigTriangleLerp(vertices, GetBigTriangle(5, 4, 3, -12, -7, +11), true));
-		AddTriangles(BigTriangleLerp(vertices, GetBigTriangle(5, 1, 4, -9, -8, +12), true));
+			float length = VectorLength(v.p);
+			if (length != 0)
+				v.p /= length;
+			v.p.w = 1;
+		}
+		// add second part vertices
+		SphereSkeleton(vertices, smooth, 0, 1); SphereSkeleton(vertices, smooth, 0, 2);
+		SphereSkeleton(vertices, smooth, 0, 4); SphereSkeleton(vertices, smooth, 0, 6);
+		SphereSkeleton(vertices, smooth, 0, 5); SphereSkeleton(vertices, smooth, 1, 2);
+		SphereSkeleton(vertices, smooth, 2, 4); SphereSkeleton(vertices, smooth, 4, 6);
+		SphereSkeleton(vertices, smooth, 6, 5); SphereSkeleton(vertices, smooth, 5, 1);
+		// 1 2 4 6 5
+		SphereSkeleton(vertices, smooth, 1, 7); SphereSkeleton(vertices, smooth, 1, 3);
+		SphereSkeleton(vertices, smooth, 2, 3); SphereSkeleton(vertices, smooth, 2, 8);
+		SphereSkeleton(vertices, smooth, 4, 8); SphereSkeleton(vertices, smooth, 4, 10);
+		SphereSkeleton(vertices, smooth, 6, 10); SphereSkeleton(vertices, smooth, 6, 11);
+		SphereSkeleton(vertices, smooth, 5, 11); SphereSkeleton(vertices, smooth, 5, 7);
+		// 7 3 8 10 11
+		SphereSkeleton(vertices, smooth, 7, 3); SphereSkeleton(vertices, smooth, 3, 8);
+		SphereSkeleton(vertices, smooth, 8, 10); SphereSkeleton(vertices, smooth, 10, 11);
+		SphereSkeleton(vertices, smooth, 11, 7); SphereSkeleton(vertices, smooth, 7, 9);
+		SphereSkeleton(vertices, smooth, 3, 9); SphereSkeleton(vertices, smooth, 8, 9);
+		SphereSkeleton(vertices, smooth, 10, 9); SphereSkeleton(vertices, smooth, 11, 9);
+		// add triangles
+		TrianglesAppend(triangles, BigTriangleLerp(vertices, SphereBigTriangle(smooth, 12, 0, 1, 2, +1, +6, -2), true));
+		TrianglesAppend(triangles, BigTriangleLerp(vertices, SphereBigTriangle(smooth, 12, 0, 2, 4, +2, +7, -3), true));
+		TrianglesAppend(triangles, BigTriangleLerp(vertices, SphereBigTriangle(smooth, 12, 0, 4, 6, +3, +8, -4), true));
+		TrianglesAppend(triangles, BigTriangleLerp(vertices, SphereBigTriangle(smooth, 12, 0, 6, 5, +4, +9, -5), true));
+		TrianglesAppend(triangles, BigTriangleLerp(vertices, SphereBigTriangle(smooth, 12, 0, 5, 1, +5, +10, -1), true));
+		// 1 2 4 6 5
+		TrianglesAppend(triangles, BigTriangleLerp(vertices, SphereBigTriangle(smooth, 12, 1, 7, 3, +11, +21, -12), true));
+		TrianglesAppend(triangles, BigTriangleLerp(vertices, SphereBigTriangle(smooth, 12, 1, 3, 2, +12, -13, -6), true));
+		TrianglesAppend(triangles, BigTriangleLerp(vertices, SphereBigTriangle(smooth, 12, 2, 3, 8, +13, +22, -14), true));
+		TrianglesAppend(triangles, BigTriangleLerp(vertices, SphereBigTriangle(smooth, 12, 2, 8, 4, +14, -15, -7), true));
+		TrianglesAppend(triangles, BigTriangleLerp(vertices, SphereBigTriangle(smooth, 12, 4, 8, 10, +15, +23, -16), true));
+		TrianglesAppend(triangles, BigTriangleLerp(vertices, SphereBigTriangle(smooth, 12, 4, 10, 6, +16, -17, -8), true));
+		TrianglesAppend(triangles, BigTriangleLerp(vertices, SphereBigTriangle(smooth, 12, 6, 10, 11, +17, +24, -18), true));
+		TrianglesAppend(triangles, BigTriangleLerp(vertices, SphereBigTriangle(smooth, 12, 6, 11, 5, +18, -19, -9), true));
+		TrianglesAppend(triangles, BigTriangleLerp(vertices, SphereBigTriangle(smooth, 12, 5, 11, 7, +19, +25, -20), true));
+		TrianglesAppend(triangles, BigTriangleLerp(vertices, SphereBigTriangle(smooth, 12, 5, 7, 1, +20, -11, -10), true));
+		// 7 3 8 10 11
+		TrianglesAppend(triangles, BigTriangleLerp(vertices, SphereBigTriangle(smooth, 12, 9, 3, 7, -27, -21, +26), true));
+		TrianglesAppend(triangles, BigTriangleLerp(vertices, SphereBigTriangle(smooth, 12, 9, 8, 3, -28, -22, +27), true));
+		TrianglesAppend(triangles, BigTriangleLerp(vertices, SphereBigTriangle(smooth, 12, 9, 10, 8, -29, -23, +28), true));
+		TrianglesAppend(triangles, BigTriangleLerp(vertices, SphereBigTriangle(smooth, 12, 9, 11, 10, -30, -24, +29), true));
+		TrianglesAppend(triangles, BigTriangleLerp(vertices, SphereBigTriangle(smooth, 12, 9, 7, 11, -26, -25, +30), true));
 
 		return std::make_shared<Mesh>(vertices, triangles);
 	}

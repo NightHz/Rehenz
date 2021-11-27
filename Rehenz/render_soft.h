@@ -42,6 +42,10 @@ namespace Rehenz
 	std::shared_ptr<Mesh> CreateSphereMesh(int smooth = 10);
 	// another mesh layout. I call it B layout. default is A layout
 	std::shared_ptr<Mesh> CreateSphereMeshB(int smooth = 5);
+	// C layout
+	std::shared_ptr<Mesh> CreateSphereMeshC(int smooth = 8);
+	// D layout
+	std::shared_ptr<Mesh> CreateSphereMeshD(int smooth = 4);
 
 	class Object
 	{
