@@ -76,6 +76,13 @@ int render_soft_example()
 	cout << "sphereD vertex count: " << sphereD->VertexCount() << "  \ttriangle count: " << sphereD->TriangleCount() << endl;
 	auto texture1 = CreateTexture1();
 	auto textureC = CreateTextureC();
+	PixelShader my_pixel_shader = [](const PixelShaderData& data, const Vertex& v0)->Vector
+	{
+		if (data.pobj->texture2 != nullptr)
+			return data.pobj->texture2->GetColor(v0.uv2);
+		else
+			return v0.c;
+	};
 	Objects test1;
 	for (int x = -10; x <= 10; x += 1)
 	{
@@ -140,7 +147,7 @@ int render_soft_example()
 		if (KeyIsDown('8'))      scene = &test2;
 		else if (KeyIsDown('9')) scene = &test1;
 		if (KeyIsDown(VK_RETURN))
-			srf_dx8.FillFromImage(camera.RenderImage(*scene));
+			srf_dx8.FillFromImage(camera.RenderImage(*scene, camera.DefaultVertexShader, my_pixel_shader));
 		// refresh
 		srf_dx8.Present();
 		// compute fps and set title
