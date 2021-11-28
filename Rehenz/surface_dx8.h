@@ -29,6 +29,8 @@ namespace Rehenz
 
 	public:
 		SurfaceDx8(void);
+		SurfaceDx8(const SurfaceDx8&) = delete;
+		SurfaceDx8& operator=(const SurfaceDx8&) = delete;
 		~SurfaceDx8(void);
 
 		// Access functions
