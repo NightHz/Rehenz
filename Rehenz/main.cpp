@@ -39,10 +39,8 @@ int noise_example()
 	return 0;
 }
 
-int main()
+int render_soft_example()
 {
-	cout << "Hello~ Rehenz~" << endl;
-
 	cout << endl << "Open a surface with dx8" << endl;
 	SurfaceDx8 srf_dx8;
 	String title = "surface by dx8";
@@ -107,29 +105,38 @@ int main()
 	obj_cube->scale = Vector(2.2f, 2.2f, 2.2f);
 	test2.AddObject(obj_cube);
 	Camera camera(height, width);
+	Objects* scene = &test2;
+	cout << "hold Enter to render" << endl;
+	cout << "press 1/2/3 to switch render mode" << endl;
+	cout << "press W/A/S/D to move camera" << endl;
+	cout << "press I/J/K/L to rotate cube" << endl;
+	cout << "press 8/9 to switch scene" << endl;
 
 	cout << "Start fps counter" << endl;
 	int fps[2] = { 0,0 };
 	auto fps_t0 = timeGetTime();
 	cout << "Lock fps" << endl;
 	auto t0 = timeGetTime();
+	cout << "press Q to exit" << endl;
 	while (srf_dx8.GetWindowState())
 	{
 		// render
 		if (KeyIsDown('1'))      camera.render_mode = Camera::RenderMode::Wireframe;
 		else if (KeyIsDown('2')) camera.render_mode = Camera::RenderMode::PureWhite;
 		else if (KeyIsDown('3')) camera.render_mode = Camera::RenderMode::Color;
-		if (KeyIsDown('W'))		 camera.position.y += 0.1f;
+		if (KeyIsDown('W'))      camera.position.y += 0.1f;
 		else if (KeyIsDown('S')) camera.position.y -= 0.1f;
-		if (KeyIsDown('A'))		 camera.position.x -= 0.1f;
+		if (KeyIsDown('A'))      camera.position.x -= 0.1f;
 		else if (KeyIsDown('D')) camera.position.x += 0.1f;
 		camera.at = -camera.position;
-		if (KeyIsDown('I'))		 obj_cube->rotation.theta += 0.05f;
+		if (KeyIsDown('I'))      obj_cube->rotation.theta += 0.05f;
 		else if (KeyIsDown('K')) obj_cube->rotation.theta -= 0.05f;
-		if (KeyIsDown('J'))		 obj_cube->rotation.psi += 0.05f;
+		if (KeyIsDown('J'))      obj_cube->rotation.psi += 0.05f;
 		else if (KeyIsDown('L')) obj_cube->rotation.psi -= 0.05f;
+		if (KeyIsDown('8'))      scene = &test2;
+		else if (KeyIsDown('9')) scene = &test1;
 		if (KeyIsDown(VK_RETURN))
-			srf_dx8.FillFromImage(camera.RenderImage(test2));
+			srf_dx8.FillFromImage(camera.RenderImage(*scene));
 		// refresh
 		srf_dx8.Present();
 		// compute fps and set title
@@ -153,4 +160,11 @@ int main()
 	srf_dx8.Destroy();
 
 	return 0;
+}
+
+int main()
+{
+	cout << "Hello~ Rehenz~" << endl;
+
+	return render_soft_example();
 }
