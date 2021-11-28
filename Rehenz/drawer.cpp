@@ -223,7 +223,7 @@ namespace Rehenz
 					{
 						float t2 = static_cast<float>(x - xl) / (xr - xl);
 						Vertex v = VertexLerp(vl, vr, t2);
-						Pixel(Point2I(x, y), Color(v.c), v.p.z);
+						Pixel(Point2I(x, y), Color(pixel_shader(pshader_data, v)), v.p.z);
 					}
 				}
 			}
