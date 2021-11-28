@@ -37,7 +37,7 @@ some code writed by NightHz
 
 **pipeline**
 
-- Copy and transform all objects (vertex shader)
+- Copy and transform vertices (vertex shader)
 - Clipping and back-face culling
 - Mapping to screen
 - Traverse all triangles and compute color for all sampling points (pixel shader)

@@ -6,74 +6,70 @@ namespace Rehenz
 	// Core Function
 	const uint* Camera::RenderImage(Objects& objs)
 	{
-		// Copy and transform all objects (vertex shader)
-		std::vector<Vertex> vertices;
-		std::vector<int> triangles;
 		Matrix mat_view = GetInverseMatrixT(position) * GetInverseMatrixR(at, up) * GetMatrixP(fovy, aspect, z_near, z_far);
-		for (auto pobj = objs.GetObject(nullptr); pobj != nullptr; pobj = objs.GetObject(pobj))
-		{
-			Matrix mat_world = GetMatrixS(pobj->scale) * GetMatrixE(pobj->rotation) * GetMatrixT(pobj->position);
-			Matrix transform = mat_world * mat_view;
-			auto& vs_mesh = pobj->pmesh->GetVertices();
-			auto& tris_mesh = pobj->pmesh->GetTriangles();
-			int v_index_offset = static_cast<int>(vertices.size());
-			for (auto v : vs_mesh)
-			{
-				v.p = PointStandard(v.p * transform);
-				vertices.push_back(v);
-			}
-			for (auto tri : tris_mesh)
-				triangles.push_back(tri + v_index_offset);
-		}
-
-		// Clipping and back-face culling
-		std::vector<int> tris_new;
-		for (size_t i = 0; i < triangles.size(); i += 3)
-		{
-			int a = triangles[i], b = triangles[i + 1], c = triangles[i + 2];
-			Vertex& va = vertices[a], & vb = vertices[b], & vc = vertices[c];
-			static auto Inside = [](Vertex& v) -> bool { return v.p.x >= -1 && v.p.x <= 1 && v.p.y >= -1 && v.p.y <= 1 && v.p.z >= 0 && v.p.z <= 1; };
-			if (Inside(va) && Inside(vb) && Inside(vc) && TrianglesNormal(va.p, vb.p, vc.p).z < 0)
-			{
-				tris_new.push_back(a); tris_new.push_back(b); tris_new.push_back(c);
-			}
-		}
-		triangles.swap(tris_new);
-		tris_new.clear();
-
-		// Mapping to screen
-		std::vector<Point2I> screen_pos;
-		for (auto& v : vertices)
-		{
-			// (-1,-1) -> (0,h-1), (1,1) -> (w-1,0)
-			screen_pos.push_back(Point2I(static_cast<int>((v.p.x + 1) * (width - 1) / 2), static_cast<int>((-v.p.y + 1) * (height - 1) / 2)));
-		}
-
-		// Traverse all triangles and compute color for all sampling points (pixel shader)
 		int size = height * width;
 		float* zbuffer = new float[size];
 		std::fill(zbuffer, zbuffer + size, 2.0f);
 		std::fill(buffer, buffer + size, 0U);
 		DrawerZ drawer(buffer, width, height, zbuffer);
-		for (size_t i = 0; i < triangles.size(); i += 3)
+		for (auto pobj = objs.GetObject(nullptr); pobj != nullptr; pobj = objs.GetObject(pobj))
 		{
-			int a = triangles[i], b = triangles[i + 1], c = triangles[i + 2];
-			Vertex& va = vertices[a], & vb = vertices[b], & vc = vertices[c];
-			Point2I pa = screen_pos[a], pb = screen_pos[b], pc = screen_pos[c];
-			// Use z-buffer merge multiple colors
-			if (render_mode == RenderMode::Wireframe)
+			// Copy and transform vertices (vertex shader)
+			Matrix mat_world = GetMatrixS(pobj->scale) * GetMatrixE(pobj->rotation) * GetMatrixT(pobj->position);
+			Matrix transform = mat_world * mat_view;
+			auto& vs_mesh = pobj->pmesh->GetVertices();
+			std::vector<Vertex> vertices(vs_mesh);
+			for (auto& v : vertices)
 			{
-				drawer.Line(pa, pb, drawer.Color(1.0f, 1.0f, 1.0f), va.p.z, vb.p.z);
-				drawer.Line(pa, pc, drawer.Color(1.0f, 1.0f, 1.0f), va.p.z, vc.p.z);
-				drawer.Line(pb, pc, drawer.Color(1.0f, 1.0f, 1.0f), vb.p.z, vc.p.z);
+				v.p = PointStandard(v.p * transform);
 			}
-			else if (render_mode == RenderMode::PureWhite)
+
+			// Clipping and back-face culling
+			static auto Inside = [](Vertex& v) -> bool { return v.p.x >= -1 && v.p.x <= 1 && v.p.y >= -1 && v.p.y <= 1 && v.p.z >= 0 && v.p.z <= 1; };
+			auto& tris_mesh = pobj->pmesh->GetTriangles();
+			std::vector<int> triangles;
+			for (size_t i = 0; i < tris_mesh.size(); i += 3)
 			{
-				drawer.Triangle(pa, pb, pc, drawer.Color(1.0f, 1.0f, 1.0f), va.p.z, vb.p.z, vc.p.z);
+				int a = tris_mesh[i], b = tris_mesh[i + 1], c = tris_mesh[i + 2];
+				Vertex& va = vertices[a], & vb = vertices[b], & vc = vertices[c];
+				if (TrianglesNormal(va.p, vb.p, vc.p).z < 0)
+				{
+					if (Inside(va) && Inside(vb) && Inside(vc))
+					{
+						triangles.push_back(a); triangles.push_back(b); triangles.push_back(c);
+					}
+				}
 			}
-			else if (render_mode == RenderMode::Color)
+
+			// Mapping to screen
+			std::vector<Point2I> screen_pos;
+			for (auto& v : vertices)
 			{
-				drawer.Triangle(pa, pb, pc, &va, &vb, &vc);
+				// (-1,-1) -> (0,h-1), (1,1) -> (w-1,0)
+				screen_pos.push_back(Point2I(static_cast<int>((v.p.x + 1) * (width - 1) / 2), static_cast<int>((-v.p.y + 1) * (height - 1) / 2)));
+			}
+
+			// Traverse all triangles and compute color for all sampling points (pixel shader)
+			for (size_t i = 0; i < triangles.size(); i += 3)
+			{
+				int a = triangles[i], b = triangles[i + 1], c = triangles[i + 2];
+				Vertex& va = vertices[a], & vb = vertices[b], & vc = vertices[c];
+				Point2I pa = screen_pos[a], pb = screen_pos[b], pc = screen_pos[c];
+				// Use z-buffer merge multiple colors
+				if (render_mode == RenderMode::Wireframe)
+				{
+					drawer.Line(pa, pb, drawer.Color(1.0f, 1.0f, 1.0f), va.p.z, vb.p.z);
+					drawer.Line(pa, pc, drawer.Color(1.0f, 1.0f, 1.0f), va.p.z, vc.p.z);
+					drawer.Line(pb, pc, drawer.Color(1.0f, 1.0f, 1.0f), vb.p.z, vc.p.z);
+				}
+				else if (render_mode == RenderMode::PureWhite)
+				{
+					drawer.Triangle(pa, pb, pc, drawer.Color(1.0f, 1.0f, 1.0f), va.p.z, vb.p.z, vc.p.z);
+				}
+				else if (render_mode == RenderMode::Color)
+				{
+					drawer.Triangle(pa, pb, pc, &va, &vb, &vc);
+				}
 			}
 		}
 		delete[] zbuffer;
