@@ -70,8 +70,12 @@ namespace Rehenz
 			std::vector<Point2I> screen_pos;
 			for (auto& v : vertices)
 			{
-				// (-1,-1) -> (0,h-1), (1,1) -> (w-1,0)
-				screen_pos.push_back(Point2I(static_cast<int>((v.p.x + 1) * (width - 1) / 2), static_cast<int>((-v.p.y + 1) * (height - 1) / 2)));
+				// (-1,-1) -> (0,h), (1,1) -> (w,0)
+				int x = static_cast<int>((v.p.x + 1) * width / 2);
+				int y = static_cast<int>((-v.p.y + 1) * height / 2);
+				x = Clamp(x, 0, width - 1);
+				y = Clamp(y, 0, height - 1);
+				screen_pos.push_back(Point2I(x, y));
 			}
 
 			// Traverse all triangles and compute color for all sampling points (pixel shader)
