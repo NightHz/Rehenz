@@ -79,7 +79,7 @@ int render_soft_example()
 	{
 		auto obj_cube = std::make_shared<Object>(cube);
 		obj_cube->position = Vector(static_cast<float>(x), -2, 0);
-		obj_cube->scale = Vector(0.4f, 0.4f, 0.4f);
+		obj_cube->scale = Vector(0.6f, 0.6f, 0.6f);
 		test1.AddObject(obj_cube);
 	}
 	auto obj_sphere = std::make_shared<Object>(sphere);
