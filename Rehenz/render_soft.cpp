@@ -16,6 +16,14 @@ namespace Rehenz
 		return v0.c;
 	};
 
+	PixelShader Camera::TexturePixelShader = [](const PixelShaderData& data, const Vertex& v0)->Vector
+	{
+		if (data.pobj->texture != nullptr)
+			return data.pobj->texture->GetColor(v0.uv);
+		else
+			return v0.c;
+	};
+
 	// Core Function
 	const uint* Camera::RenderImage(Objects& objs, VertexShader vertex_shader, PixelShader pixel_shader)
 	{
@@ -87,6 +95,14 @@ namespace Rehenz
 				else if (render_mode == RenderMode::Color)
 				{
 					drawer.Triangle(pa, pb, pc, &va, &vb, &vc, DefaultPixelShader, pshader_data);
+				}
+				else if (render_mode == RenderMode::Texture)
+				{
+					drawer.Triangle(pa, pb, pc, &va, &vb, &vc, TexturePixelShader, pshader_data);
+				}
+				else if (render_mode == RenderMode::Shader)
+				{
+					drawer.Triangle(pa, pb, pc, &va, &vb, &vc, pixel_shader, pshader_data);
 				}
 			}
 		}
