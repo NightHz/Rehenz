@@ -10,7 +10,7 @@ namespace Rehenz
 		std::vector<Vertex> vertices;
 		std::vector<int> triangles;
 		Matrix mat_view = GetInverseMatrixT(position) * GetInverseMatrixR(at, up) * GetMatrixP(fovy, aspect, z_near, z_far);
-		for (auto pobj : objs.objs)
+		for (auto pobj = objs.GetObject(nullptr); pobj != nullptr; pobj = objs.GetObject(pobj))
 		{
 			Matrix mat_world = GetMatrixS(pobj->scale) * GetMatrixE(pobj->rotation) * GetMatrixT(pobj->position);
 			Matrix transform = mat_world * mat_view;
@@ -141,6 +141,13 @@ namespace Rehenz
 
 
 
+	Objects Objects::global_objs = Objects();
+	Objects::Objects()
+	{
+	}
+	Objects::~Objects()
+	{
+	}
 	void AddObject(std::shared_ptr<Object> pobj)
 	{
 		Objects::global_objs.AddObject(pobj);
@@ -152,13 +159,6 @@ namespace Rehenz
 	std::shared_ptr<Object> GetObject(std::shared_ptr<Object> prev)
 	{
 		return Objects::global_objs.GetObject(prev);
-	}
-	Objects Objects::global_objs = Objects();
-	Objects::Objects()
-	{
-	}
-	Objects::~Objects()
-	{
 	}
 	void Objects::AddObject(std::shared_ptr<Object> pobj)
 	{

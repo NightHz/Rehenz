@@ -49,7 +49,6 @@ namespace Rehenz
 		std::shared_ptr<Object> GetObject(std::shared_ptr<Object> prev);
 
 		static Objects global_objs;
-		friend class Camera;
 	};
 
 	class Camera
