@@ -410,7 +410,11 @@ namespace Rehenz
 	}
 	Vector Texture::GetColor(float u, float v)
 	{
-		return buffer[static_cast<int>(v * height) * width + static_cast<int>(u * width)];
+		int x = static_cast<int>(Clamp(u, 0.0f, 1.0f) * width);
+		int y = static_cast<int>(Clamp(v, 0.0f, 1.0f) * height);
+		x = (x == width ? width - 1 : x);
+		y = (y == height ? height - 1 : y);
+		return buffer[y * width + x];
 	}
 	Vector Texture::GetColor(Vector2 uv)
 	{
@@ -429,7 +433,7 @@ namespace Rehenz
 		};
 		auto pt = std::make_shared<Texture>(7, 7);
 		for (int i = 0; i < 49; i++)
-			pt->buffer[i] = image1[i] * Vector(1, 1, 1, 1);
+			pt->buffer[i] = (image1[i] + 1) / 2.0f * Vector(1, 1, 1, 1);
 		return pt;
 	}
 	std::shared_ptr<Texture> CreateTextureC()
@@ -445,7 +449,7 @@ namespace Rehenz
 		};
 		auto pt = std::make_shared<Texture>(7, 7);
 		for (int i = 0; i < 49; i++)
-			pt->buffer[i] = imageC[i] * Vector(1, 1, 1, 1);
+			pt->buffer[i] = (imageC[i] + 1) / 2.0f * Vector(1, 1, 1, 1);
 		return pt;
 	}
 }
