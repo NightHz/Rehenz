@@ -397,4 +397,15 @@ namespace Rehenz
 
 		return std::make_shared<Mesh>(vertices, triangles);
 	}
+	Texture::Texture(int _width, int _height) : width(_width), height(_height), buffer(new uint[_width * _height])
+	{
+	}
+	Texture::Texture(const Texture& t) : width(t.width), height(t.height), buffer(new uint[t.width * t.height])
+	{
+		std::copy(t.buffer, t.buffer + width * height, buffer);
+	}
+	Texture::~Texture()
+	{
+		delete[] buffer;
+	}
 }

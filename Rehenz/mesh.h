@@ -8,6 +8,8 @@ namespace Rehenz
 {
 	struct Vertex;
 	class Mesh;
+	class Texture;
+
 
 
 	struct Vertex
@@ -65,4 +67,18 @@ namespace Rehenz
 	std::shared_ptr<Mesh> CreateSphereMeshC(int smooth = 8);
 	// sphere mesh D layout
 	std::shared_ptr<Mesh> CreateSphereMeshD(int smooth = 4);
+
+	class Texture
+	{
+	private:
+	public:
+		const int width;
+		const int height;
+		uint* const buffer;
+
+		Texture(int _width, int _height);
+		Texture(const Texture& t);
+		Texture& operator=(const Texture&) = delete;
+		~Texture();
+	};
 }
