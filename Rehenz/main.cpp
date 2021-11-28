@@ -64,7 +64,9 @@ int main()
 	srf_dx8.FillFromImage(buffer.get());
 
 	cout << "Ready render" << endl;
-	auto cube = CreateCubeMesh();
+	auto cube = CreateCubeMesh(std::vector<Vector>{
+		Vector(1, 1, 1, 1), Vector(1, 0, 0, 1), Vector(0, 1, 0, 1), Vector(0, 0, 1, 1),
+			Vector(1, 1, 0, 1), Vector(1, 0, 1, 1), Vector(0, 1, 1, 1), Vector(1, 1, 1, 1)});
 	cout << "cube    vertex count: " << cube->VertexCount() << "  \ttriangle count: " << cube->TriangleCount() << endl;
 	auto sphere = CreateSphereMesh();
 	cout << "sphere  vertex count: " << sphere->VertexCount() << "  \ttriangle count: " << sphere->TriangleCount() << endl;
@@ -101,7 +103,7 @@ int main()
 	Objects test2;
 	auto obj_cube = std::make_shared<Object>(cube);
 	obj_cube->position = Vector(0, 0, 0);
-	obj_cube->rotation = EulerAngles(0, pi / 4, pi / 4 + pi / 24);
+	obj_cube->rotation = EulerAngles(0, -pi / 4, pi / 4 + pi / 24);
 	obj_cube->scale = Vector(2.2f, 2.2f, 2.2f);
 	test2.AddObject(obj_cube);
 	Camera camera(height, width);
@@ -114,6 +116,9 @@ int main()
 	while (srf_dx8.GetWindowState())
 	{
 		// render
+		if (KeyIsDown('1'))      camera.render_mode = Camera::RenderMode::Wireframe;
+		else if (KeyIsDown('2')) camera.render_mode = Camera::RenderMode::PureWhite;
+		else if (KeyIsDown('3')) camera.render_mode = Camera::RenderMode::Color;
 		if (KeyIsDown('W'))		 camera.position.y += 0.1f;
 		else if (KeyIsDown('S')) camera.position.y -= 0.1f;
 		if (KeyIsDown('A'))		 camera.position.x -= 0.1f;
