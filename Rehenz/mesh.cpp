@@ -397,12 +397,12 @@ namespace Rehenz
 
 		return std::make_shared<Mesh>(vertices, triangles);
 	}
-	Texture::Texture(int _width, int _height) : width(_width), height(_height), buffer(new Vector[_width * _height])
+	Texture::Texture(int _width, int _height) : width(_width), height(_height), buffer(new Vector[static_cast<size_t>(_width) * _height])
 	{
 	}
-	Texture::Texture(const Texture& t) : width(t.width), height(t.height), buffer(new Vector[t.width * t.height])
+	Texture::Texture(const Texture& t) : width(t.width), height(t.height), buffer(new Vector[static_cast<size_t>(t.width) * t.height])
 	{
-		std::copy(t.buffer, t.buffer + width * height, buffer);
+		std::copy(t.buffer, t.buffer + static_cast<size_t>(width) * height, buffer);
 	}
 	Texture::~Texture()
 	{
