@@ -83,10 +83,14 @@ namespace Rehenz
 
 
 
-	Object::Object() : pmesh(nullptr), position(), rotation(), scale(1, 1, 1, 0)
+	Object::Object() : pmesh(nullptr), texture(nullptr), texture2(nullptr), position(), rotation(), scale(1, 1, 1, 0)
 	{
 	}
-	Object::Object(std::shared_ptr<Mesh> _pmesh) : pmesh(_pmesh), position(), rotation(), scale(1, 1, 1, 0)
+	Object::Object(std::shared_ptr<Mesh> _pmesh) : pmesh(_pmesh), texture(nullptr), texture2(nullptr), position(), rotation(), scale(1, 1, 1, 0)
+	{
+	}
+	Object::Object(std::shared_ptr<Mesh> _pmesh, std::shared_ptr<Texture> _pt, std::shared_ptr<Texture> _pt2)
+		: pmesh(_pmesh), texture(_pt), texture2(_pt2), position(), rotation(), scale(1, 1, 1, 0)
 	{
 	}
 	Object::~Object()

@@ -19,12 +19,15 @@ namespace Rehenz
 	private:
 	public:
 		std::shared_ptr<Mesh> pmesh;
+		std::shared_ptr<Texture> texture;
+		std::shared_ptr<Texture> texture2;
 		Vector position;
 		EulerAngles rotation;
 		Vector scale;
 
 		Object();
 		explicit Object(std::shared_ptr<Mesh> _pmesh);
+		explicit Object(std::shared_ptr<Mesh> _pmesh, std::shared_ptr<Texture> _pt, std::shared_ptr<Texture> _pt2 = nullptr);
 		~Object();
 	};
 
