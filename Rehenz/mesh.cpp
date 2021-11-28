@@ -152,7 +152,7 @@ namespace Rehenz
 			int c = big_triangle[3 * smooth - j];     // right upper vertex
 			int d = big_triangle[3 * smooth - j - 1]; // right below vertex
 			Vertex vb = vertices[b], vd = vertices[d];
-			for (int i = 0; i < j; i++)
+			for (size_t i = 0; i < j; i++)
 			{
 				// add vertex
 				Vertex ve_new = VertexLerp(vb, vd, static_cast<float>(i + 1) / (j + 1));
@@ -187,7 +187,7 @@ namespace Rehenz
 			int c = big_triangle[2 * smooth + 1]; // right upper vertex
 			int d = big_triangle[2 * smooth];     // right below vertex
 			int f = static_cast<int>(vertices.size() - smooth) + 2; // load old vertex in center upper
-			for (int i = 0; i < smooth - 1; i++)
+			for (size_t i = 0; i < smooth - 1; i++)
 			{
 				int e = big_triangle[smooth + i + 1]; // center below vertex
 				triangles.push_back(a); triangles.push_back(b); triangles.push_back(e);
