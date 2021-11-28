@@ -89,4 +89,6 @@ namespace Rehenz
 	std::shared_ptr<Texture> CreateTexture1();
 	// create letter C texture
 	std::shared_ptr<Texture> CreateTextureC();
+	// create white-blue plaid texture
+	std::shared_ptr<Texture> CreateTexturePlaid();
 }

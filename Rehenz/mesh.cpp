@@ -452,4 +452,16 @@ namespace Rehenz
 			pt->buffer[i] = (imageC[i] + 1) / 2.0f * Vector(1, 1, 1, 1);
 		return pt;
 	}
+	std::shared_ptr<Texture> CreateTexturePlaid()
+	{
+		auto pt = std::make_shared<Texture>(9, 9);
+		for (int i = 0; i < 81; i++)
+		{
+			if (i % 2 == 0)
+				pt->buffer[i] = Vector(1, 1, 1, 1);
+			else
+				pt->buffer[i] = Vector(0, 0, 1, 1);
+		}
+		return pt;
+	}
 }
