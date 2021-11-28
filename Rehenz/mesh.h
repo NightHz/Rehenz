@@ -53,12 +53,20 @@ namespace Rehenz
 		void AddTriangle(const std::vector<int>& _triangles);
 	};
 
-	std::shared_ptr<Mesh> CreateCubeMesh();
+	// create cube mesh which includes pos, color, uv, uv2 info
+	// pos   : unit cube, and (0,0,0) is center point
+	// color : use colors fill, and default is white
+	// uv    : each faces map to the whole texture
+	// uv2   : expanded faces map to the texture
+	std::shared_ptr<Mesh> CreateCubeMesh(const std::vector<Vector>& colors = std::vector<Vector>());
+
+	// create sphere mesh which includes pos info
+	// pos   : unit sphere, and (0,0,0) is center point
 	std::shared_ptr<Mesh> CreateSphereMesh(int smooth = 10);
-	// another mesh layout. I call it B layout. default is A layout
+	// another sphere mesh layout. I call it B layout. default is A layout
 	std::shared_ptr<Mesh> CreateSphereMeshB(int smooth = 5);
-	// C layout
+	// sphere mesh C layout
 	std::shared_ptr<Mesh> CreateSphereMeshC(int smooth = 8);
-	// D layout
+	// sphere mesh D layout
 	std::shared_ptr<Mesh> CreateSphereMeshD(int smooth = 4);
 }

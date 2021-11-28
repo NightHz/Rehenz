@@ -56,32 +56,61 @@ namespace Rehenz
 
 
 
-	std::shared_ptr<Mesh> CreateCubeMesh()
+	std::shared_ptr<Mesh> CreateCubeMesh(const std::vector<Vector>& colors)
 	{
 		std::vector<Vertex> vertices;
 		std::vector<int> triangles;
 
-		vertices.push_back(Point(-0.5f, -0.5f, -0.5f));
-		vertices.push_back(Point(-0.5f, -0.5f, 0.5f));
-		vertices.push_back(Point(0.5f, -0.5f, -0.5f));
-		vertices.push_back(Point(0.5f, -0.5f, 0.5f));
-		vertices.push_back(Point(-0.5f, 0.5f, -0.5f));
-		vertices.push_back(Point(-0.5f, 0.5f, 0.5f));
-		vertices.push_back(Point(0.5f, 0.5f, -0.5f));
-		vertices.push_back(Point(0.5f, 0.5f, 0.5f));
-
+		size_t color_i = 0;
+		auto GetColor = [&colors, &color_i]() -> Vector
+		{
+			if (colors.size() == 0)
+				return Vector(1, 1, 1, 1);
+			else
+				return colors[(color_i %= colors.size())++];
+		};
+		// front
+		vertices.push_back(Vertex(Point(-0.5f, -0.5f, -0.5f), GetColor(), Vector2(0, 1), Vector2(0.25f, 0.5f)));
+		vertices.push_back(Vertex(Point(0.5f, -0.5f, -0.5f), GetColor(), Vector2(1, 1), Vector2(0.5f, 0.5f)));
+		vertices.push_back(Vertex(Point(-0.5f, 0.5f, -0.5f), GetColor(), Vector2(0, 0), Vector2(0.25f, 0.25f)));
+		vertices.push_back(Vertex(Point(0.5f, 0.5f, -0.5f), GetColor(), Vector2(1, 0), Vector2(0.5f, 0.25f)));
 		triangles.push_back(0); triangles.push_back(2); triangles.push_back(1);
 		triangles.push_back(2); triangles.push_back(3); triangles.push_back(1);
-		triangles.push_back(0); triangles.push_back(1); triangles.push_back(4);
-		triangles.push_back(1); triangles.push_back(5); triangles.push_back(4);
-		triangles.push_back(0); triangles.push_back(4); triangles.push_back(2);
-		triangles.push_back(4); triangles.push_back(6); triangles.push_back(2);
-		triangles.push_back(7); triangles.push_back(6); triangles.push_back(5);
-		triangles.push_back(6); triangles.push_back(4); triangles.push_back(5);
-		triangles.push_back(7); triangles.push_back(3); triangles.push_back(6);
-		triangles.push_back(3); triangles.push_back(2); triangles.push_back(6);
-		triangles.push_back(7); triangles.push_back(5); triangles.push_back(3);
-		triangles.push_back(5); triangles.push_back(1); triangles.push_back(3);
+		// down
+		vertices.push_back(Vertex(Point(-0.5f, -0.5f, 0.5f), GetColor(), Vector2(0, 1), Vector2(0.25f, 0.75f)));
+		vertices.push_back(Vertex(Point(0.5f, -0.5f, 0.5f), GetColor(), Vector2(1, 1), Vector2(0.5f, 0.75f)));
+		vertices.push_back(Vertex(Point(-0.5f, -0.5f, -0.5f), GetColor(), Vector2(0, 0), Vector2(0.25f, 0.5f)));
+		vertices.push_back(Vertex(Point(0.5f, -0.5f, -0.5f), GetColor(), Vector2(1, 0), Vector2(0.5f, 0.5f)));
+		triangles.push_back(4); triangles.push_back(6); triangles.push_back(5);
+		triangles.push_back(6); triangles.push_back(7); triangles.push_back(5);
+		// up
+		vertices.push_back(Vertex(Point(-0.5f, 0.5f, -0.5f), GetColor(), Vector2(0, 1), Vector2(0.25f, 0.25f)));
+		vertices.push_back(Vertex(Point(0.5f, 0.5f, -0.5f), GetColor(), Vector2(1, 1), Vector2(0.5f, 0.25f)));
+		vertices.push_back(Vertex(Point(-0.5f, 0.5f, 0.5f), GetColor(), Vector2(0, 0), Vector2(0.25f, 0)));
+		vertices.push_back(Vertex(Point(0.5f, 0.5f, 0.5f), GetColor(), Vector2(1, 0), Vector2(0.5f, 0)));
+		triangles.push_back(8); triangles.push_back(10); triangles.push_back(9);
+		triangles.push_back(10); triangles.push_back(11); triangles.push_back(9);
+		// back
+		vertices.push_back(Vertex(Point(-0.5f, 0.5f, 0.5f), GetColor(), Vector2(0, 1), Vector2(0.25f, 1)));
+		vertices.push_back(Vertex(Point(0.5f, 0.5f, 0.5f), GetColor(), Vector2(1, 1), Vector2(0.5f, 1)));
+		vertices.push_back(Vertex(Point(-0.5f, -0.5f, 0.5f), GetColor(), Vector2(0, 0), Vector2(0.25f, 0.75f)));
+		vertices.push_back(Vertex(Point(0.5f, -0.5f, 0.5f), GetColor(), Vector2(1, 0), Vector2(0.5f, 0.75f)));
+		triangles.push_back(12); triangles.push_back(14); triangles.push_back(13);
+		triangles.push_back(14); triangles.push_back(15); triangles.push_back(13);
+		// left
+		vertices.push_back(Vertex(Point(-0.5f, -0.5f, 0.5f), GetColor(), Vector2(0, 1), Vector2(0, 0.5f)));
+		vertices.push_back(Vertex(Point(-0.5f, -0.5f, -0.5f), GetColor(), Vector2(1, 1), Vector2(0.25f, 0.5f)));
+		vertices.push_back(Vertex(Point(-0.5f, 0.5f, 0.5f), GetColor(), Vector2(0, 0), Vector2(0, 0.25f)));
+		vertices.push_back(Vertex(Point(-0.5f, 0.5f, -0.5f), GetColor(), Vector2(1, 0), Vector2(0.25f, 0.25f)));
+		triangles.push_back(16); triangles.push_back(18); triangles.push_back(17);
+		triangles.push_back(18); triangles.push_back(19); triangles.push_back(17);
+		// right
+		vertices.push_back(Vertex(Point(0.5f, -0.5f, -0.5f), GetColor(), Vector2(0, 1), Vector2(0.5f, 0.5f)));
+		vertices.push_back(Vertex(Point(0.5f, -0.5f, 0.5f), GetColor(), Vector2(1, 1), Vector2(0.75f, 0.5f)));
+		vertices.push_back(Vertex(Point(0.5f, 0.5f, -0.5f), GetColor(), Vector2(0, 0), Vector2(0.5f, 0.25f)));
+		vertices.push_back(Vertex(Point(0.5f, 0.5f, 0.5f), GetColor(), Vector2(1, 0), Vector2(0.75f, 0.25f)));
+		triangles.push_back(20); triangles.push_back(22); triangles.push_back(21);
+		triangles.push_back(22); triangles.push_back(23); triangles.push_back(21);
 
 		return std::make_shared<Mesh>(vertices, triangles);
 	}
