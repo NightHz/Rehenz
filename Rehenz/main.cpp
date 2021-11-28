@@ -74,10 +74,12 @@ int render_soft_example()
 	cout << "sphereC vertex count: " << sphereC->VertexCount() << "  \ttriangle count: " << sphereC->TriangleCount() << endl;
 	auto sphereD = CreateSphereMeshD();
 	cout << "sphereD vertex count: " << sphereD->VertexCount() << "  \ttriangle count: " << sphereD->TriangleCount() << endl;
+	auto texture1 = CreateTexture1();
+	auto textureC = CreateTextureC();
 	Objects test1;
 	for (int x = -10; x <= 10; x += 1)
 	{
-		auto obj_cube = std::make_shared<Object>(cube);
+		auto obj_cube = std::make_shared<Object>(cube, texture1, textureC);
 		obj_cube->position = Vector(static_cast<float>(x), -2, 0);
 		obj_cube->scale = Vector(0.6f, 0.6f, 0.6f);
 		test1.AddObject(obj_cube);
@@ -99,7 +101,7 @@ int render_soft_example()
 	obj_sphere4->scale = Vector(1, 1, 1);
 	test1.AddObject(obj_sphere4);
 	Objects test2;
-	auto obj_cube = std::make_shared<Object>(cube);
+	auto obj_cube = std::make_shared<Object>(cube, texture1, textureC);
 	obj_cube->position = Vector(0, 0, 0);
 	obj_cube->rotation = EulerAngles(0, -pi / 4, pi / 4 + pi / 24);
 	obj_cube->scale = Vector(2.2f, 2.2f, 2.2f);
@@ -107,7 +109,7 @@ int render_soft_example()
 	Camera camera(height, width);
 	Objects* scene = &test2;
 	cout << "hold Enter to render" << endl;
-	cout << "press 1/2/3 to switch render mode" << endl;
+	cout << "press 1/2/3/4/5 to switch render mode" << endl;
 	cout << "press W/A/S/D to move camera" << endl;
 	cout << "press I/J/K/L to rotate cube" << endl;
 	cout << "press 8/9 to switch scene" << endl;
@@ -124,6 +126,8 @@ int render_soft_example()
 		if (KeyIsDown('1'))      camera.render_mode = Camera::RenderMode::Wireframe;
 		else if (KeyIsDown('2')) camera.render_mode = Camera::RenderMode::PureWhite;
 		else if (KeyIsDown('3')) camera.render_mode = Camera::RenderMode::Color;
+		else if (KeyIsDown('4')) camera.render_mode = Camera::RenderMode::Texture;
+		else if (KeyIsDown('5')) camera.render_mode = Camera::RenderMode::Shader;
 		if (KeyIsDown('W'))      camera.position.y += 0.1f;
 		else if (KeyIsDown('S')) camera.position.y -= 0.1f;
 		if (KeyIsDown('A'))      camera.position.x -= 0.1f;
