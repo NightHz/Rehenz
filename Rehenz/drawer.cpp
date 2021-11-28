@@ -199,7 +199,9 @@ namespace Rehenz
 			}
 		}
 	}
-	void DrawerZ::Trapezoid(Point2I top_l, Point2I bottom_l, Point2I top_r, Point2I bottom_r, const Vertex& v_tl, const Vertex& v_bl, const Vertex& v_tr, const Vertex& v_br)
+	void DrawerZ::Trapezoid(Point2I top_l, Point2I bottom_l, Point2I top_r, Point2I bottom_r,
+		const Vertex& v_tl, const Vertex& v_bl, const Vertex& v_tr, const Vertex& v_br,
+		PixelShader pixel_shader, PixelShaderData pshader_data)
 	{
 		if (top_l.y != bottom_l.y)
 		{
@@ -212,8 +214,8 @@ namespace Rehenz
 				Vertex vr = VertexLerp(v_br, v_tr, t);
 				if (xl == xr)
 				{
-					Pixel(Point2I(xl, y), Color(vl.c), vl.p.z);
-					Pixel(Point2I(xl, y), Color(vr.c), vr.p.z);
+					Pixel(Point2I(xl, y), Color(pixel_shader(pshader_data, vl)), vl.p.z);
+					Pixel(Point2I(xl, y), Color(pixel_shader(pshader_data, vr)), vr.p.z);
 				}
 				else
 				{
@@ -228,7 +230,8 @@ namespace Rehenz
 		}
 	}
 
-	void DrawerZ::Triangle(Point2I p1, Point2I p2, Point2I p3, const Vertex* v1, const Vertex* v2, const Vertex* v3)
+	void DrawerZ::Triangle(Point2I p1, Point2I p2, Point2I p3, const Vertex* v1, const Vertex* v2, const Vertex* v3,
+		PixelShader pixel_shader, PixelShaderData pshader_data)
 	{
 		if (p1.y > p2.y)
 			Swap(p1, p2), Swap(v1, v2);
@@ -244,13 +247,13 @@ namespace Rehenz
 			auto v = VertexLerp(*v1, *v3, t);
 			if (p2.x <= x)
 			{
-				Trapezoid(p3, p2, p3, Point2I(x, p2.y), *v3, *v2, *v3, v);
-				Trapezoid(p2, p1, Point2I(x, p2.y), p1, *v2, *v1, v, *v1);
+				Trapezoid(p3, p2, p3, Point2I(x, p2.y), *v3, *v2, *v3, v, pixel_shader, pshader_data);
+				Trapezoid(p2, p1, Point2I(x, p2.y), p1, *v2, *v1, v, *v1, pixel_shader, pshader_data);
 			}
 			else
 			{
-				Trapezoid(p3, Point2I(x, p2.y), p3, p2, *v3, v, *v3, *v2);
-				Trapezoid(Point2I(x, p2.y), p1, p2, p1, v, *v1, *v2, *v1);
+				Trapezoid(p3, Point2I(x, p2.y), p3, p2, *v3, v, *v3, *v2, pixel_shader, pshader_data);
+				Trapezoid(Point2I(x, p2.y), p1, p2, p1, v, *v1, *v2, *v1, pixel_shader, pshader_data);
 			}
 		}
 	}

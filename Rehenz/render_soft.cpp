@@ -3,10 +3,26 @@
 
 namespace Rehenz
 {
-	// Core Function
-	const uint* Camera::RenderImage(Objects& objs)
+	VertexShader Camera::DefaultVertexShader = [](const VertexShaderData& data, const Vertex& v0)->Vertex
 	{
-		Matrix mat_view = GetInverseMatrixT(position) * GetInverseMatrixR(at, up) * GetMatrixP(fovy, aspect, z_near, z_far);
+		Vertex v(v0);
+		v.p = PointStandard(v.p * data.transform);
+		return v;
+	};
+
+	PixelShader Camera::DefaultPixelShader = [](const PixelShaderData& data, const Vertex& v0)->Vector
+	{
+		(data); // unreferenced
+		return v0.c;
+	};
+
+	// Core Function
+	const uint* Camera::RenderImage(Objects& objs, VertexShader vertex_shader, PixelShader pixel_shader)
+	{
+		VertexShaderData vshader_data;
+		PixelShaderData pshader_data;
+		vshader_data.mat_view = GetInverseMatrixT(position) * GetInverseMatrixR(at, up);
+		vshader_data.mat_project = GetMatrixP(fovy, aspect, z_near, z_far);
 		int size = height * width;
 		float* zbuffer = new float[size];
 		std::fill(zbuffer, zbuffer + size, 2.0f);
@@ -15,13 +31,14 @@ namespace Rehenz
 		for (auto pobj = objs.GetObject(nullptr); pobj != nullptr; pobj = objs.GetObject(pobj))
 		{
 			// Copy and transform vertices (vertex shader)
-			Matrix mat_world = GetMatrixS(pobj->scale) * GetMatrixE(pobj->rotation) * GetMatrixT(pobj->position);
-			Matrix transform = mat_world * mat_view;
+			vshader_data.pobj = pobj;
+			vshader_data.mat_world = GetMatrixS(pobj->scale) * GetMatrixE(pobj->rotation) * GetMatrixT(pobj->position);
+			vshader_data.transform = vshader_data.mat_world * vshader_data.mat_view * vshader_data.mat_project;
 			auto& vs_mesh = pobj->pmesh->GetVertices();
-			std::vector<Vertex> vertices(vs_mesh);
-			for (auto& v : vertices)
+			std::vector<Vertex> vertices;
+			for (auto& v : vs_mesh)
 			{
-				v.p = PointStandard(v.p * transform);
+				vertices.push_back(vertex_shader(vshader_data, v));
 			}
 
 			// Clipping and back-face culling
@@ -50,6 +67,7 @@ namespace Rehenz
 			}
 
 			// Traverse all triangles and compute color for all sampling points (pixel shader)
+			pshader_data.pobj = pobj;
 			for (size_t i = 0; i < triangles.size(); i += 3)
 			{
 				int a = triangles[i], b = triangles[i + 1], c = triangles[i + 2];
@@ -68,13 +86,18 @@ namespace Rehenz
 				}
 				else if (render_mode == RenderMode::Color)
 				{
-					drawer.Triangle(pa, pb, pc, &va, &vb, &vc);
+					drawer.Triangle(pa, pb, pc, &va, &vb, &vc, DefaultPixelShader, pshader_data);
 				}
 			}
 		}
 		delete[] zbuffer;
 
 		return buffer;
+	}
+
+	const uint* Camera::RenderImage(VertexShader vertex_shader, PixelShader pixel_shader)
+	{
+		return RenderImage(Objects::global_objs, vertex_shader, pixel_shader);
 	}
 
 

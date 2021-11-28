@@ -4,6 +4,7 @@
 #include <memory>
 #include "type.h"
 #include "mesh.h"
+#include <functional>
 
 namespace Rehenz
 {
@@ -11,6 +12,11 @@ namespace Rehenz
 	class Camera;
 
 	class Objects;
+
+	struct VertexShaderData;
+	struct PixelShaderData;
+	typedef std::function<Vertex(const VertexShaderData&, const Vertex&)> VertexShader;
+	typedef std::function<Vector(const PixelShaderData&, const Vertex&)> PixelShader;
 
 
 
@@ -70,6 +76,9 @@ namespace Rehenz
 		enum class RenderMode { Wireframe, PureWhite, Color };
 		RenderMode render_mode;
 
+		static VertexShader DefaultVertexShader;
+		static PixelShader DefaultPixelShader;
+
 		// default height = 600, width = 800, fovy = pi/2, aspect = 4/3, z_near = 1, z_far = 500
 		//         position = (0,0,-5), at = (0,0,1), up = (0,1,0)
 		Camera();
@@ -85,6 +94,25 @@ namespace Rehenz
 
 		void SetSize(int _height, int _width, float _fovy);
 
-		const uint* RenderImage(Objects& objs = Objects::global_objs);
+		const uint* RenderImage(Objects& objs = Objects::global_objs,
+			VertexShader vertex_shader = DefaultVertexShader, PixelShader pixel_shader = DefaultPixelShader);
+		const uint* RenderImage(VertexShader vertex_shader, PixelShader pixel_shader = DefaultPixelShader);
+	};
+
+	struct VertexShaderData
+	{
+	public:
+		std::shared_ptr<Object> pobj;
+		Matrix mat_world;
+		Matrix mat_view;
+		Matrix mat_project;
+		// = mat_world * mat_view * mat_project
+		Matrix transform;
+	};
+
+	struct PixelShaderData
+	{
+	public:
+		std::shared_ptr<Object> pobj;
 	};
 }

@@ -46,7 +46,10 @@ namespace Rehenz
 		void Trapezoid(Point2I top_l, Point2I bottom_l, Point2I top_r, Point2I bottom_r, uint color, float z_tl, float z_bl, float z_tr, float z_br);
 		void Triangle(Point2I p1, Point2I p2, Point2I p3, uint color, float z1, float z2, float z3);
 		// require top_l and top_r have same y, and bottom_l and bottom_r have same y
-		void Trapezoid(Point2I top_l, Point2I bottom_l, Point2I top_r, Point2I bottom_r, const Vertex& v_tl, const Vertex& v_bl, const Vertex& v_tr, const Vertex& v_br);
-		void Triangle(Point2I p1, Point2I p2, Point2I p3, const Vertex* v1, const Vertex* v2, const Vertex* v3);
+		void Trapezoid(Point2I top_l, Point2I bottom_l, Point2I top_r, Point2I bottom_r,
+			const Vertex& v_tl, const Vertex& v_bl, const Vertex& v_tr, const Vertex& v_br,
+			PixelShader pixel_shader, PixelShaderData pshader_data);
+		void Triangle(Point2I p1, Point2I p2, Point2I p3, const Vertex* v1, const Vertex* v2, const Vertex* v3,
+			PixelShader pixel_shader, PixelShaderData pshader_data);
 	};
 }
