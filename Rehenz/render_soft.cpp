@@ -17,8 +17,11 @@ namespace Rehenz
 			auto& vs_mesh = pobj->pmesh->GetVertices();
 			auto& tris_mesh = pobj->pmesh->GetTriangles();
 			int v_index_offset = static_cast<int>(vertices.size());
-			for (auto& v : vs_mesh)
-				vertices.push_back(Vertex(PointStandard(v.p * transform)));
+			for (auto v : vs_mesh)
+			{
+				v.p = PointStandard(v.p * transform);
+				vertices.push_back(v);
+			}
 			for (auto tri : tris_mesh)
 				triangles.push_back(tri + v_index_offset);
 		}
@@ -29,7 +32,7 @@ namespace Rehenz
 		{
 			int a = triangles[i], b = triangles[i + 1], c = triangles[i + 2];
 			Vertex& va = vertices[a], & vb = vertices[b], & vc = vertices[c];
-			auto Inside = [](Vertex& v) -> bool { return v.p.x >= -1 && v.p.x <= 1 && v.p.y >= -1 && v.p.y <= 1 && v.p.z >= 0 && v.p.z <= 1; };
+			static auto Inside = [](Vertex& v) -> bool { return v.p.x >= -1 && v.p.x <= 1 && v.p.y >= -1 && v.p.y <= 1 && v.p.z >= 0 && v.p.z <= 1; };
 			if (Inside(va) && Inside(vb) && Inside(vc) && TrianglesNormal(va.p, vb.p, vc.p).z < 0)
 			{
 				tris_new.push_back(a); tris_new.push_back(b); tris_new.push_back(c);
@@ -51,16 +54,27 @@ namespace Rehenz
 		float* zbuffer = new float[size];
 		std::fill(zbuffer, zbuffer + size, 2.0f);
 		std::fill(buffer, buffer + size, 0U);
+		DrawerZ drawer(buffer, width, height, zbuffer);
 		for (size_t i = 0; i < triangles.size(); i += 3)
 		{
 			int a = triangles[i], b = triangles[i + 1], c = triangles[i + 2];
 			Vertex& va = vertices[a], & vb = vertices[b], & vc = vertices[c];
 			Point2I pa = screen_pos[a], pb = screen_pos[b], pc = screen_pos[c];
 			// Use z-buffer merge multiple colors
-			DrawerZ drawer(buffer, width, height, zbuffer);
-			drawer.Line(pa, pb, Drawer::Color(255U, 255U, 255U), va.p.z, vb.p.z);
-			drawer.Line(pa, pc, Drawer::Color(255U, 255U, 255U), va.p.z, vc.p.z);
-			drawer.Line(pb, pc, Drawer::Color(255U, 255U, 255U), vb.p.z, vc.p.z);
+			if (render_mode == RenderMode::Wireframe)
+			{
+				drawer.Line(pa, pb, drawer.Color(1.0f, 1.0f, 1.0f), va.p.z, vb.p.z);
+				drawer.Line(pa, pc, drawer.Color(1.0f, 1.0f, 1.0f), va.p.z, vc.p.z);
+				drawer.Line(pb, pc, drawer.Color(1.0f, 1.0f, 1.0f), vb.p.z, vc.p.z);
+			}
+			else if (render_mode == RenderMode::PureWhite)
+			{
+				drawer.Triangle(pa, pb, pc, drawer.Color(1.0f, 1.0f, 1.0f), va.p.z, vb.p.z, vc.p.z);
+			}
+			else if (render_mode == RenderMode::Color)
+			{
+				drawer.Triangle(pa, pb, pc, &va, &vb, &vc);
+			}
 		}
 		delete[] zbuffer;
 
@@ -78,7 +92,7 @@ namespace Rehenz
 	Object::~Object()
 	{
 	}
-	Camera::Camera() : position(0, 0, -5, 0), at(0, 0, 1, 0), up(0, 1, 0, 0)
+	Camera::Camera() : position(0, 0, -5, 0), at(0, 0, 1, 0), up(0, 1, 0, 0), render_mode(RenderMode::Wireframe)
 	{
 		height = 600;
 		width = 800;
@@ -89,7 +103,7 @@ namespace Rehenz
 		z_near = 1;
 		z_far = 500;
 	}
-	Camera::Camera(const Camera& c) : position(c.position), at(c.at), up(c.up)
+	Camera::Camera(const Camera& c) : position(c.position), at(c.at), up(c.up), render_mode(c.render_mode)
 	{
 		height = c.height;
 		width = c.width;
@@ -100,7 +114,7 @@ namespace Rehenz
 		z_near = c.z_near;
 		z_far = c.z_far;
 	}
-	Camera::Camera(int _height, int _width) : position(0, 0, -5, 0), at(0, 0, 1, 0), up(0, 1, 0, 0)
+	Camera::Camera(int _height, int _width) : position(0, 0, -5, 0), at(0, 0, 1, 0), up(0, 1, 0, 0), render_mode(RenderMode::Wireframe)
 	{
 		height = _height;
 		width = _width;

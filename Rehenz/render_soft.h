@@ -65,6 +65,8 @@ namespace Rehenz
 		Vector up;
 		// projection parameters
 		float fovy, aspect, z_near, z_far;
+		enum class RenderMode { Wireframe, PureWhite, Color };
+		RenderMode render_mode;
 
 		// default height = 600, width = 800, fovy = pi/2, aspect = 4/3, z_near = 1, z_far = 500
 		//         position = (0,0,-5), at = (0,0,1), up = (0,1,0)
