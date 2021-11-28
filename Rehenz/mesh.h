@@ -74,11 +74,19 @@ namespace Rehenz
 	public:
 		const int width;
 		const int height;
-		uint* const buffer;
+		Vector* const buffer;
 
 		Texture(int _width, int _height);
 		Texture(const Texture& t);
 		Texture& operator=(const Texture&) = delete;
 		~Texture();
+
+		Vector GetColor(float u, float v);
+		Vector GetColor(Vector2 uv);
 	};
+
+	// create digit 1 texture
+	std::shared_ptr<Texture> CreateTexture1();
+	// create letter C texture
+	std::shared_ptr<Texture> CreateTextureC();
 }

@@ -397,15 +397,55 @@ namespace Rehenz
 
 		return std::make_shared<Mesh>(vertices, triangles);
 	}
-	Texture::Texture(int _width, int _height) : width(_width), height(_height), buffer(new uint[_width * _height])
+	Texture::Texture(int _width, int _height) : width(_width), height(_height), buffer(new Vector[_width * _height])
 	{
 	}
-	Texture::Texture(const Texture& t) : width(t.width), height(t.height), buffer(new uint[t.width * t.height])
+	Texture::Texture(const Texture& t) : width(t.width), height(t.height), buffer(new Vector[t.width * t.height])
 	{
 		std::copy(t.buffer, t.buffer + width * height, buffer);
 	}
 	Texture::~Texture()
 	{
 		delete[] buffer;
+	}
+	Vector Texture::GetColor(float u, float v)
+	{
+		return buffer[static_cast<int>(v * height) * width + static_cast<int>(u * width)];
+	}
+	Vector Texture::GetColor(Vector2 uv)
+	{
+		return GetColor(uv.x, uv.y);
+	}
+	std::shared_ptr<Texture> CreateTexture1()
+	{
+		char image1[49]{
+			0,0,0,0,0,0,0,
+			0,0,0,1,0,0,0,
+			0,0,1,1,0,0,0,
+			0,0,0,1,0,0,0,
+			0,0,0,1,0,0,0,
+			0,0,1,1,1,0,0,
+			0,0,0,0,0,0,0
+		};
+		auto pt = std::make_shared<Texture>(7, 7);
+		for (int i = 0; i < 49; i++)
+			pt->buffer[i] = image1[i] * Vector(1, 1, 1, 1);
+		return pt;
+	}
+	std::shared_ptr<Texture> CreateTextureC()
+	{
+		char imageC[49]{
+			0,0,0,0,0,0,0,
+			0,0,1,1,0,0,0,
+			0,1,0,0,1,0,0,
+			0,1,0,0,0,0,0,
+			0,1,0,0,1,0,0,
+			0,0,1,1,0,0,0,
+			0,0,0,0,0,0,0
+		};
+		auto pt = std::make_shared<Texture>(7, 7);
+		for (int i = 0; i < 49; i++)
+			pt->buffer[i] = imageC[i] * Vector(1, 1, 1, 1);
+		return pt;
 	}
 }
