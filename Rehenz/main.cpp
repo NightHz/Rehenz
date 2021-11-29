@@ -82,10 +82,11 @@ int render_soft_example()
 	// shader
 	PixelShader my_pixel_shader = [](const PixelShaderData& data, const Vertex& v0)->Vector
 	{
-		if (data.pobj->texture2 != nullptr)
+		return Vector(1 - v0.uv.x, 1 - v0.uv.y, 1, 1);
+		/*if (data.pobj->texture2 != nullptr)
 			return data.pobj->texture2->GetColor(v0.uv2);
 		else
-			return v0.c;
+			return v0.c;*/
 	};
 	// scene
 	Objects test1;
