@@ -89,12 +89,15 @@ int render_soft_example()
 	};
 	// scene
 	Objects test1;
-	for (int x = -10; x <= 10; x += 1)
+	for (float z = -10; z <= 10; z += 1)
 	{
-		auto obj_cube = std::make_shared<Object>(cube, texture_plaid, texture1);
-		obj_cube->position = Vector(static_cast<float>(x), -2, 0);
-		obj_cube->scale = Vector(0.6f, 0.6f, 0.6f);
-		test1.AddObject(obj_cube);
+		for (float x = -10; x <= 10; x += 1)
+		{
+			auto obj_cube = std::make_shared<Object>(cube, texture_plaid, texture1);
+			obj_cube->position = Vector(x, -2, z);
+			obj_cube->scale = Vector(0.4f, 0.4f, 0.4f);
+			test1.AddObject(obj_cube);
+		}
 	}
 	auto obj_sphere = std::make_shared<Object>(sphere);
 	obj_sphere->position = Vector(0, 2, 0);
