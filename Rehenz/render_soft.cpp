@@ -6,7 +6,7 @@ namespace Rehenz
 	VertexShader Camera::DefaultVertexShader = [](const VertexShaderData& data, const Vertex& v0)->Vertex
 	{
 		Vertex v(v0);
-		v.p = PointStandard(v.p * data.transform);
+		v.p = v.p * data.transform;
 		return v;
 	};
 
@@ -33,7 +33,7 @@ namespace Rehenz
 		vshader_data.mat_project = GetMatrixP(fovy, aspect, z_near, z_far);
 		int size = height * width;
 		float* zbuffer = new float[size];
-		std::fill(zbuffer, zbuffer + size, 2.0f);
+		std::fill(zbuffer, zbuffer + size, z_far + 1);
 		std::fill(buffer, buffer + size, 0U);
 		DrawerZ drawer(buffer, width, height, zbuffer);
 		for (auto pobj = objs.GetObject(nullptr); pobj != nullptr; pobj = objs.GetObject(pobj))
@@ -50,7 +50,8 @@ namespace Rehenz
 			}
 
 			// Clipping and back-face culling
-			static auto Inside = [](Vertex& v) -> bool { return v.p.x >= -1 && v.p.x <= 1 && v.p.y >= -1 && v.p.y <= 1 && v.p.z >= 0 && v.p.z <= 1; };
+			static auto Inside = [](Vertex& v) -> bool
+			{ return v.p.x > -v.p.w && v.p.x < v.p.w && v.p.y > -v.p.w && v.p.y < v.p.w && v.p.z > 0 && v.p.z < v.p.w; };
 			auto& tris_mesh = pobj->pmesh->GetTriangles();
 			std::vector<int> triangles;
 			for (size_t i = 0; i < tris_mesh.size(); i += 3)
@@ -71,8 +72,9 @@ namespace Rehenz
 			for (auto& v : vertices)
 			{
 				// (-1,-1) -> (0,h), (1,1) -> (w,0)
-				int x = static_cast<int>((v.p.x + 1) * width / 2);
-				int y = static_cast<int>((-v.p.y + 1) * height / 2);
+				auto p = PointStandard(v.p);
+				int x = static_cast<int>((p.x + 1) * width / 2);
+				int y = static_cast<int>((-p.y + 1) * height / 2);
 				x = Clamp(x, 0, width - 1);
 				y = Clamp(y, 0, height - 1);
 				screen_pos.push_back(Point2I(x, y));
