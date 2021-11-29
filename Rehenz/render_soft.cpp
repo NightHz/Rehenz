@@ -93,13 +93,13 @@ namespace Rehenz
 				// Use z-buffer merge multiple colors
 				if (render_mode == RenderMode::Wireframe)
 				{
-					drawer.Line(pa, pb, drawer.Color(1.0f, 1.0f, 1.0f), va.p.z, vb.p.z);
-					drawer.Line(pa, pc, drawer.Color(1.0f, 1.0f, 1.0f), va.p.z, vc.p.z);
-					drawer.Line(pb, pc, drawer.Color(1.0f, 1.0f, 1.0f), vb.p.z, vc.p.z);
+					drawer.Line(pa, pb, drawer.Color(1.0f, 1.0f, 1.0f));
+					drawer.Line(pa, pc, drawer.Color(1.0f, 1.0f, 1.0f));
+					drawer.Line(pb, pc, drawer.Color(1.0f, 1.0f, 1.0f));
 				}
 				else if (render_mode == RenderMode::PureWhite)
 				{
-					drawer.Triangle(pa, pb, pc, drawer.Color(1.0f, 1.0f, 1.0f), va.p.z, vb.p.z, vc.p.z);
+					drawer.Triangle(pa, pb, pc, drawer.Color(1.0f, 1.0f, 1.0f));
 				}
 				else if (render_mode == RenderMode::Color)
 				{
