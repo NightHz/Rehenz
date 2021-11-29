@@ -84,6 +84,39 @@ namespace Rehenz
 			}
 		}
 	}
+	void Drawer::Trapezoid(Point2I top_l, Point2I bottom_l, Point2I top_r, Point2I bottom_r, uint color)
+	{
+		for (int y = bottom_l.y; y <= top_l.y; y++)
+		{
+			float t = static_cast<float>(y - bottom_l.y) / (top_l.y - bottom_l.y);
+			int xl = Lerp(bottom_l.x, top_l.x, t);
+			int xr = Lerp(bottom_r.x, top_r.x, t);
+			for (int x = xl; x <= xr; x++)
+				Pixel(Point2I(x, y), color);
+		}
+	}
+	void Drawer::Triangle(Point2I p1, Point2I p2, Point2I p3, uint color)
+	{
+		if (p1.y > p2.y)
+			Swap(p1, p2);
+		if (p1.y > p3.y)
+			Swap(p1, p3);
+		if (p2.y > p3.y)
+			Swap(p2, p3);
+
+		float t = static_cast<float>(p2.y - p1.y) / (p3.y - p1.y);
+		int x = Lerp(p1.x, p3.x, t);
+		if (p2.x <= x)
+		{
+			Trapezoid(p3, p2, p3, Point2I(x, p2.y), color);
+			Trapezoid(p2, p1, Point2I(x, p2.y), p1, color);
+		}
+		else
+		{
+			Trapezoid(p3, Point2I(x, p2.y), p3, p2, color);
+			Trapezoid(Point2I(x, p2.y), p1, p2, p1, color);
+		}
+	}
 	DrawerZ::DrawerZ(uint* _buffer, int _width, int _height, float* _zbuffer)
 		: Drawer(_buffer, _width, _height), zbuffer(_zbuffer)
 	{

@@ -27,6 +27,9 @@ namespace Rehenz
 
 		void Pixel(Point2I p, uint color);
 		void Line(Point2I p1, Point2I p2, uint color);
+		// require top_l and top_r have same y, and bottom_l and bottom_r have same y
+		void Trapezoid(Point2I top_l, Point2I bottom_l, Point2I top_r, Point2I bottom_r, uint color);
+		void Triangle(Point2I p1, Point2I p2, Point2I p3, uint color);
 	};
 
 	class DrawerZ : public Drawer
