@@ -27,15 +27,18 @@ namespace Rehenz
 	// Core Function
 	const uint* Camera::RenderImage(Objects& objs, VertexShader vertex_shader, PixelShader pixel_shader)
 	{
-		VertexShaderData vshader_data;
-		PixelShaderData pshader_data;
-		vshader_data.mat_view = GetInverseMatrixT(position) * GetInverseMatrixR(at, up);
-		vshader_data.mat_project = GetMatrixP(fovy, aspect, z_near, z_far);
+		// prepare drawer
 		int size = height * width;
 		float* zbuffer = new float[size];
 		std::fill(zbuffer, zbuffer + size, z_far + 1);
 		std::fill(buffer, buffer + size, 0U);
 		DrawerZ drawer(buffer, width, height, zbuffer);
+		// prepare shader data
+		VertexShaderData vshader_data;
+		PixelShaderData pshader_data;
+		vshader_data.mat_view = GetInverseMatrixT(position) * GetInverseMatrixR(at, up);
+		vshader_data.mat_project = GetMatrixP(fovy, aspect, z_near, z_far);
+		// traverse objects
 		for (auto pobj = objs.GetObject(nullptr); pobj != nullptr; pobj = objs.GetObject(pobj))
 		{
 			// Copy and transform vertices (vertex shader)
