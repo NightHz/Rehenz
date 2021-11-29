@@ -28,6 +28,7 @@ namespace Rehenz
 	};
 
 	Vertex VertexLerp(const Vertex& v1, const Vertex& v2, float t);
+	Vertex VertexScreenLerp(const Vertex& v1, const Vertex& v2, float t);
 
 	class Mesh
 	{

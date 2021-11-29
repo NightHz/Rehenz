@@ -20,7 +20,13 @@ namespace Rehenz
 
 	Vertex VertexLerp(const Vertex& v1, const Vertex& v2, float t)
 	{
-		return Vertex(PointLerp(v1.p, v2.p, t), Lerp(v1.c, v2.c, t), Lerp(v1.uv, v2.uv, t), Lerp(v1.uv2, v2.uv2, t));
+		return Vertex(PointLerp(v1.p, v2.p, t), VectorLerp(v1.c, v2.c, t), Lerp(v1.uv, v2.uv, t), Lerp(v1.uv2, v2.uv2, t));
+	}
+
+	Vertex VertexScreenLerp(const Vertex& v1, const Vertex& v2, float t)
+	{
+		float t2 = (v1.p.w * t) / (v1.p.w * t + v2.p.w * (1 - t));
+		return VertexLerp(v1, v2, t2);
 	}
 
 
