@@ -688,17 +688,17 @@ namespace Rehenz
 		return result;
 	}
 
-	Point PointStandard(Point p1)
+	Point PointStandard(Point p1, float w)
 	{
 		Point result;
 
 		if (p1.w == 0)
 			return p1;
-		float f0 = 1 / p1.w;
+		float f0 = w / p1.w;
 		result.x = p1.x * f0;
 		result.y = p1.y * f0;
 		result.z = p1.z * f0;
-		result.w = 1.0f;
+		result.w = w;
 
 		return result;
 	}
@@ -716,7 +716,7 @@ namespace Rehenz
 
 	Vector TrianglesNormal(Point p1, Point p2, Point p3)
 	{
-		return VectorNormalize(VectorCross(p2 - p1, p3 - p1));
+		return VectorCross(PointStandard(p2, p1.w) - p1, PointStandard(p3, p1.w) - p1);
 	}
 
 	Vector2I::Vector2I()
