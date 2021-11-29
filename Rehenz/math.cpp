@@ -658,7 +658,7 @@ namespace Rehenz
 		result.x = Lerp(v1.x, v2.x, t);
 		result.y = Lerp(v1.y, v2.y, t);
 		result.z = Lerp(v1.z, v2.z, t);
-		result.w = 0.0f;
+		result.w = Lerp(v1.w, v2.w, t);
 		return result;
 	}
 
@@ -684,7 +684,7 @@ namespace Rehenz
 		result.x = Lerp(p1.x, p2.x, t);
 		result.y = Lerp(p1.y, p2.y, t);
 		result.z = Lerp(p1.z, p2.z, t);
-		result.w = 1.0f;
+		result.w = Lerp(p1.w, p2.w, t);
 		return result;
 	}
 
