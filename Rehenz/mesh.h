@@ -26,14 +26,17 @@ namespace Rehenz
 		Color c;
 		UV uv;
 		UV uv2;
+		// save 1/w(=1/z)
+		float rhw;
 
 		Vertex(Point _p);
-		explicit Vertex(Point _p, Color _c, UV _uv = UV(0, 0), UV _uv2 = UV(0, 0));
+		explicit Vertex(Point _p, Color _c, UV _uv = UV(0, 0), UV _uv2 = UV(0, 0), float _rhw = 1);
 		explicit Vertex(Point _p, UV _uv, UV _uv2 = UV(0, 0));
 	};
 
+	void VertexPerspectiveBegin(Vertex& v);
+	void VertexPerspectiveEnd(Vertex& v);
 	Vertex VertexLerp(const Vertex& v1, const Vertex& v2, float t);
-	Vertex VertexScreenLerp(const Vertex& v1, const Vertex& v2, float t);
 
 	class Mesh
 	{

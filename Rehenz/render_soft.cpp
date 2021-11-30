@@ -71,16 +71,13 @@ namespace Rehenz
 			}
 
 			// Mapping to screen
-			std::vector<Point2I> screen_pos;
 			for (auto& v : vertices)
 			{
+				VertexPerspectiveBegin(v);
+				v.p = PointStandard(v.p);
 				// (-1,-1) -> (0,h), (1,1) -> (w,0)
-				auto p = PointStandard(v.p);
-				int x = static_cast<int>((p.x + 1) * width / 2);
-				int y = static_cast<int>((-p.y + 1) * height / 2);
-				x = Clamp(x, 0, width - 1);
-				y = Clamp(y, 0, height - 1);
-				screen_pos.push_back(Point2I(x, y));
+				v.p.x = static_cast<float>(Clamp(static_cast<int>((v.p.x + 1) * width / 2), 0, width - 1));
+				v.p.y = static_cast<float>(Clamp(static_cast<int>((-v.p.y + 1) * height / 2), 0, height - 1));
 			}
 
 			// Traverse all triangles and compute color for all sampling points (pixel shader)
@@ -89,29 +86,34 @@ namespace Rehenz
 			{
 				int a = triangles[i], b = triangles[i + 1], c = triangles[i + 2];
 				Vertex& va = vertices[a], & vb = vertices[b], & vc = vertices[c];
-				Point2I pa = screen_pos[a], pb = screen_pos[b], pc = screen_pos[c];
 				// Use z-buffer merge multiple colors
 				if (render_mode == RenderMode::Wireframe)
 				{
+					Point2I pa = Point2I(va.p.x, va.p.y);
+					Point2I pb = Point2I(vb.p.x, vb.p.y);
+					Point2I pc = Point2I(vc.p.x, vc.p.y);
 					drawer.Line(pa, pb, drawer.Color(1.0f, 1.0f, 1.0f));
 					drawer.Line(pa, pc, drawer.Color(1.0f, 1.0f, 1.0f));
 					drawer.Line(pb, pc, drawer.Color(1.0f, 1.0f, 1.0f));
 				}
 				else if (render_mode == RenderMode::PureWhite)
 				{
+					Point2I pa = Point2I(va.p.x, va.p.y);
+					Point2I pb = Point2I(vb.p.x, vb.p.y);
+					Point2I pc = Point2I(vc.p.x, vc.p.y);
 					drawer.Triangle(pa, pb, pc, drawer.Color(1.0f, 1.0f, 1.0f));
 				}
 				else if (render_mode == RenderMode::Color)
 				{
-					drawer.Triangle(pa, pb, pc, &va, &vb, &vc, DefaultPixelShader, pshader_data);
+					drawer.Triangle(&va, &vb, &vc, DefaultPixelShader, pshader_data);
 				}
 				else if (render_mode == RenderMode::Texture)
 				{
-					drawer.Triangle(pa, pb, pc, &va, &vb, &vc, TexturePixelShader, pshader_data);
+					drawer.Triangle(&va, &vb, &vc, TexturePixelShader, pshader_data);
 				}
 				else if (render_mode == RenderMode::Shader)
 				{
-					drawer.Triangle(pa, pb, pc, &va, &vb, &vc, pixel_shader, pshader_data);
+					drawer.Triangle(&va, &vb, &vc, pixel_shader, pshader_data);
 				}
 			}
 		}
