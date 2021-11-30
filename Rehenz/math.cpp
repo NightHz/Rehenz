@@ -716,7 +716,7 @@ namespace Rehenz
 
 	Vector TrianglesNormal(Point p1, Point p2, Point p3)
 	{
-		return VectorCross(PointStandard(p2, p1.w) - p1, PointStandard(p3, p1.w) - p1);
+		return VectorCross(p2 - p1, p3 - p1);
 	}
 
 	Vector2I::Vector2I()

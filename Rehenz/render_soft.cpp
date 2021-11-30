@@ -61,7 +61,7 @@ namespace Rehenz
 			{
 				int a = tris_mesh[i], b = tris_mesh[i + 1], c = tris_mesh[i + 2];
 				Vertex& va = vertices[a], & vb = vertices[b], & vc = vertices[c];
-				if (TrianglesNormal(va.p, vb.p, vc.p).z < 0)
+				if (TrianglesNormal(PointStandard(va.p), PointStandard(vb.p), PointStandard(vc.p)).z < 0)
 				{
 					if (Inside(va) && Inside(vb) && Inside(vc))
 					{
