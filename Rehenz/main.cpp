@@ -184,9 +184,22 @@ int render_soft_example()
 	return 0;
 }
 
+int clip_example()
+{
+	cout << endl;
+
+	Point2 p1 = Point2(-0.3f, 0.0f);
+	Point2 p2 = Point2(1.0f, 2.0f);
+	cout << "before: p1(" << p1.x << "," << p1.y << ") p2(" << p2.x << "," << p2.y << ")" << endl;
+	cout << "clip... :" << CohenSutherlandClip2D(p1, p2) << endl;
+	cout << "after : p1(" << p1.x << "," << p1.y << ") p2(" << p2.x << "," << p2.y << ")" << endl;
+
+	return 0;
+}
+
 int main()
 {
 	cout << "Hello~ Rehenz~" << endl;
 
-	return render_soft_example();
+	return clip_example();
 }
