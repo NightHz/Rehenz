@@ -241,6 +241,8 @@ namespace Rehenz
 		Vector2();
 		explicit Vector2(float _x, float _y);
 
+		Vector2& operator*=(float);
+
 		Vector2 operator+(Vector2) const;
 		Vector2 operator-(Vector2) const;
 		Vector2 operator*(float) const;
