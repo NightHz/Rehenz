@@ -140,7 +140,7 @@ namespace Rehenz
 			zbuffer[i] = z;
 		}
 	}
-	void DrawerZ::Line(Point2I p1, Point2I p2, uint color, float z1, float z2)
+	/*void DrawerZ::Line(Point2I p1, Point2I p2, uint color, float z1, float z2)
 	{
 		if (p1.x == p2.x && p1.y == p2.y)
 			Pixel(p1, color, Min(z1, z2));
@@ -237,34 +237,33 @@ namespace Rehenz
 				Trapezoid(Point2I(x, p2.y), p1, p2, p1, color, z, z1, z2, z1);
 			}
 		}
-	}
+	}*/
 	void DrawerZ::Trapezoid(const Vertex& top_left, const Vertex& bottom_left, const Vertex& top_right, const Vertex& bottom_right,
 		PixelShader pixel_shader, PixelShaderData pshader_data)
 	{
 		if (top_left.p.y != bottom_left.p.y)
 		{
-			for (int y = bottom_left.p.y; y <= top_left.p.y; y++)
+			for (int y = static_cast<int>(bottom_left.p.y); y <= top_left.p.y; y += 1)
 			{
 				float t = static_cast<float>(y - bottom_left.p.y) / (top_left.p.y - bottom_left.p.y);
-				int xl = Lerp(bottom_left.p.x, top_left.p.x, t);
-				int xr = Lerp(bottom_right.p.x, top_right.p.x, t);
 				Vertex vl = VertexLerp(bottom_left, top_left, t);
 				Vertex vr = VertexLerp(bottom_right, top_right, t);
-				if (xl == xr)
+				if (vl.p.x == vr.p.x)
 				{
+					int x = static_cast<int>(vl.p.x);
 					VertexPerspectiveEnd(vl);
 					VertexPerspectiveEnd(vr);
-					Pixel(Point2I(xl, y), Color(pixel_shader(pshader_data, vl)), vl.p.w);
-					Pixel(Point2I(xl, y), Color(pixel_shader(pshader_data, vr)), vr.p.w);
+					Pixel(Point2I(x, y), Color(pixel_shader(pshader_data, vl)), -vl.rhw);
+					Pixel(Point2I(x, y), Color(pixel_shader(pshader_data, vr)), -vr.rhw);
 				}
 				else
 				{
-					for (int x = xl; x <= xr; x++)
+					for (int x = static_cast<int>(vl.p.x); x <= vr.p.x; x++)
 					{
-						float t2 = static_cast<float>(x - xl) / (xr - xl);
+						float t2 = static_cast<float>(x - vl.p.x) / (vr.p.x - vl.p.x);
 						Vertex v = VertexLerp(vl, vr, t2);
 						VertexPerspectiveEnd(v);
-						Pixel(Point2I(x, y), Color(pixel_shader(pshader_data, v)), v.p.w);
+						Pixel(Point2I(x, y), Color(pixel_shader(pshader_data, v)), -v.rhw);
 					}
 				}
 			}
@@ -283,9 +282,8 @@ namespace Rehenz
 		if (v3->p.y != v1->p.y)
 		{
 			float t = static_cast<float>(v2->p.y - v1->p.y) / (v3->p.y - v1->p.y);
-			int x = Lerp(v1->p.x, v3->p.x, t);
 			auto v = VertexLerp(*v1, *v3, t);
-			if (v2->p.x <= x)
+			if (v2->p.x <= v.p.x)
 			{
 				Trapezoid(*v3, *v2, *v3, v, pixel_shader, pshader_data);
 				Trapezoid(*v2, *v1, v, *v1, pixel_shader, pshader_data);

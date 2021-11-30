@@ -47,13 +47,13 @@ namespace Rehenz
 		using Drawer::Triangle;
 
 		void Pixel(Point2I p, uint color, float z);
-		// [Warning] wrong interpolation for z
+		/*// [Warning] wrong interpolation for z
 		void Line(Point2I p1, Point2I p2, uint color, float z1, float z2);
 		// [Warning] wrong interpolation for z
 		// require top_l and top_r have same y, and bottom_l and bottom_r have same y
 		void Trapezoid(Point2I top_l, Point2I bottom_l, Point2I top_r, Point2I bottom_r, uint color, float z_tl, float z_bl, float z_tr, float z_br);
 		// [Warning] wrong interpolation for z
-		void Triangle(Point2I p1, Point2I p2, Point2I p3, uint color, float z1, float z2, float z3);
+		void Triangle(Point2I p1, Point2I p2, Point2I p3, uint color, float z1, float z2, float z3);*/
 
 		// require top_l and top_r have same y, and bottom_l and bottom_r have same y
 		void Trapezoid(const Vertex& top_left, const Vertex& bottom_left, const Vertex& top_right, const Vertex& bottom_right,
