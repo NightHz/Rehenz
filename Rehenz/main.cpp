@@ -63,9 +63,9 @@ int render_soft_example()
 
 	cout << "Ready render" << endl;
 	// mesh
-	auto cube = CreateCubeMesh(std::vector<Vector>{
-		Vector(1, 1, 1, 1), Vector(1, 0, 0, 1), Vector(0, 1, 0, 1), Vector(0, 0, 1, 1),
-			Vector(1, 1, 0, 1), Vector(1, 0, 1, 1), Vector(0, 1, 1, 1), Vector(1, 1, 1, 1)});
+	auto cube = CreateCubeMesh(std::vector<Color>{
+		Color(1, 1, 1), Color(1, 0, 0), Color(0, 1, 0), Color(0, 0, 1),
+			Color(1, 1, 0), Color(1, 0, 1), Color(0, 1, 1), Color(1, 1, 1)});
 	cout << "cube    vertex count: " << cube->VertexCount() << "  \ttriangle count: " << cube->TriangleCount() << endl;
 	auto sphere = CreateSphereMesh();
 	cout << "sphere  vertex count: " << sphere->VertexCount() << "  \ttriangle count: " << sphere->TriangleCount() << endl;
@@ -80,9 +80,10 @@ int render_soft_example()
 	auto textureC = CreateTextureC();
 	auto texture_plaid = CreateTexturePlaid();
 	// shader
-	PixelShader my_pixel_shader = [](const PixelShaderData& data, const Vertex& v0)->Vector
+	PixelShader my_pixel_shader = [](const PixelShaderData& data, const Vertex& v0)->Color
 	{
-		return Vector(1 - v0.uv.x, 1 - v0.uv.y, 1, 1);
+		(data);
+		return Color(v0.uv.x, v0.uv.y, 0.8f);
 		/*if (data.pobj->texture2 != nullptr)
 			return data.pobj->texture2->GetColor(v0.uv2);
 		else

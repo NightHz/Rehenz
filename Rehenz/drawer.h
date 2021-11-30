@@ -23,7 +23,7 @@ namespace Rehenz
 
 		static uint Color(uint r, uint g, uint b);
 		static uint Color(float r, float g, float b);
-		static uint Color(Vector c);
+		static uint Color(Rehenz::Color c);
 
 		void Pixel(Point2I p, uint color);
 		void Line(Point2I p1, Point2I p2, uint color);

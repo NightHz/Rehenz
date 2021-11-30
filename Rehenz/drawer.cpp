@@ -17,9 +17,9 @@ namespace Rehenz
 	{
 		return Color(static_cast<uint>(r * 255), static_cast<uint>(g * 255), static_cast<uint>(b * 255));
 	}
-	uint Drawer::Color(Vector c)
+	uint Drawer::Color(Rehenz::Color c)
 	{
-		return Color(static_cast<uint>(c(0) * 255), static_cast<uint>(c(1) * 255), static_cast<uint>(c(2) * 255));
+		return Color(static_cast<uint>(c.x * 255), static_cast<uint>(c.y * 255), static_cast<uint>(c.z * 255));
 	}
 	void Drawer::Pixel(Point2I p, uint color)
 	{

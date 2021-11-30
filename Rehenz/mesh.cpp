@@ -2,17 +2,17 @@
 
 namespace Rehenz
 {
-	Vertex::Vertex(Point _p) : p(_p), c(1, 1, 1, 1), uv(0, 0), uv2(0, 0)
+	Vertex::Vertex(Point _p) : p(_p), c(1, 1, 1), uv(0, 0), uv2(0, 0)
 	{
 	}
 
-	Vertex::Vertex(Point _p, Vector _c, Vector2 _uv, Vector2 _uv2)
+	Vertex::Vertex(Point _p, Color _c, UV _uv, UV _uv2)
 		: p(_p), c(_c), uv(_uv), uv2(_uv2)
 	{
 	}
 
-	Vertex::Vertex(Point _p, Vector2 _uv, Vector2 _uv2)
-		: p(_p), c(1, 1, 1, 1), uv(_uv), uv2(_uv2)
+	Vertex::Vertex(Point _p, UV _uv, UV _uv2)
+		: p(_p), c(1, 1, 1), uv(_uv), uv2(_uv2)
 	{
 	}
 
@@ -20,7 +20,7 @@ namespace Rehenz
 
 	Vertex VertexLerp(const Vertex& v1, const Vertex& v2, float t)
 	{
-		return Vertex(PointLerp(v1.p, v2.p, t), VectorLerp(v1.c, v2.c, t), Lerp(v1.uv, v2.uv, t), Lerp(v1.uv2, v2.uv2, t));
+		return Vertex(PointLerp(v1.p, v2.p, t), Lerp(v1.c, v2.c, t), Lerp(v1.uv, v2.uv, t), Lerp(v1.uv2, v2.uv2, t));
 	}
 
 	Vertex VertexScreenLerp(const Vertex& v1, const Vertex& v2, float t)
@@ -61,58 +61,58 @@ namespace Rehenz
 
 
 
-	std::shared_ptr<Mesh> CreateCubeMesh(const std::vector<Vector>& colors)
+	std::shared_ptr<Mesh> CreateCubeMesh(const std::vector<Color>& colors)
 	{
 		std::vector<Vertex> vertices;
 		std::vector<int> triangles;
 
-		auto GetColor = [&colors](int i) -> Vector
+		auto GetColor = [&colors](int i) -> Color
 		{
 			if (colors.size() == 0)
-				return Vector(1, 1, 1, 1);
+				return Color(1, 1, 1);
 			else
 				return colors[i % colors.size()];
 		};
 		// front
-		vertices.push_back(Vertex(Point(-0.5f, -0.5f, -0.5f), GetColor(0), Vector2(0, 1), Vector2(0.25f, 0.5f)));
-		vertices.push_back(Vertex(Point(0.5f, -0.5f, -0.5f), GetColor(1), Vector2(1, 1), Vector2(0.5f, 0.5f)));
-		vertices.push_back(Vertex(Point(-0.5f, 0.5f, -0.5f), GetColor(2), Vector2(0, 0), Vector2(0.25f, 0.25f)));
-		vertices.push_back(Vertex(Point(0.5f, 0.5f, -0.5f), GetColor(3), Vector2(1, 0), Vector2(0.5f, 0.25f)));
+		vertices.push_back(Vertex(Point(-0.5f, -0.5f, -0.5f), GetColor(0), UV(0, 1), UV(0.25f, 0.5f)));
+		vertices.push_back(Vertex(Point(0.5f, -0.5f, -0.5f), GetColor(1), UV(1, 1), UV(0.5f, 0.5f)));
+		vertices.push_back(Vertex(Point(-0.5f, 0.5f, -0.5f), GetColor(2), UV(0, 0), UV(0.25f, 0.25f)));
+		vertices.push_back(Vertex(Point(0.5f, 0.5f, -0.5f), GetColor(3), UV(1, 0), UV(0.5f, 0.25f)));
 		triangles.push_back(0); triangles.push_back(2); triangles.push_back(1);
 		triangles.push_back(2); triangles.push_back(3); triangles.push_back(1);
 		// down
-		vertices.push_back(Vertex(Point(-0.5f, -0.5f, 0.5f), GetColor(4), Vector2(0, 1), Vector2(0.25f, 0.75f)));
-		vertices.push_back(Vertex(Point(0.5f, -0.5f, 0.5f), GetColor(5), Vector2(1, 1), Vector2(0.5f, 0.75f)));
-		vertices.push_back(Vertex(Point(-0.5f, -0.5f, -0.5f), GetColor(0), Vector2(0, 0), Vector2(0.25f, 0.5f)));
-		vertices.push_back(Vertex(Point(0.5f, -0.5f, -0.5f), GetColor(1), Vector2(1, 0), Vector2(0.5f, 0.5f)));
+		vertices.push_back(Vertex(Point(-0.5f, -0.5f, 0.5f), GetColor(4), UV(0, 1), UV(0.25f, 0.75f)));
+		vertices.push_back(Vertex(Point(0.5f, -0.5f, 0.5f), GetColor(5), UV(1, 1), UV(0.5f, 0.75f)));
+		vertices.push_back(Vertex(Point(-0.5f, -0.5f, -0.5f), GetColor(0), UV(0, 0), UV(0.25f, 0.5f)));
+		vertices.push_back(Vertex(Point(0.5f, -0.5f, -0.5f), GetColor(1), UV(1, 0), UV(0.5f, 0.5f)));
 		triangles.push_back(4); triangles.push_back(6); triangles.push_back(5);
 		triangles.push_back(6); triangles.push_back(7); triangles.push_back(5);
 		// up
-		vertices.push_back(Vertex(Point(-0.5f, 0.5f, -0.5f), GetColor(2), Vector2(0, 1), Vector2(0.25f, 0.25f)));
-		vertices.push_back(Vertex(Point(0.5f, 0.5f, -0.5f), GetColor(3), Vector2(1, 1), Vector2(0.5f, 0.25f)));
-		vertices.push_back(Vertex(Point(-0.5f, 0.5f, 0.5f), GetColor(6), Vector2(0, 0), Vector2(0.25f, 0)));
-		vertices.push_back(Vertex(Point(0.5f, 0.5f, 0.5f), GetColor(7), Vector2(1, 0), Vector2(0.5f, 0)));
+		vertices.push_back(Vertex(Point(-0.5f, 0.5f, -0.5f), GetColor(2), UV(0, 1), UV(0.25f, 0.25f)));
+		vertices.push_back(Vertex(Point(0.5f, 0.5f, -0.5f), GetColor(3), UV(1, 1), UV(0.5f, 0.25f)));
+		vertices.push_back(Vertex(Point(-0.5f, 0.5f, 0.5f), GetColor(6), UV(0, 0), UV(0.25f, 0)));
+		vertices.push_back(Vertex(Point(0.5f, 0.5f, 0.5f), GetColor(7), UV(1, 0), UV(0.5f, 0)));
 		triangles.push_back(8); triangles.push_back(10); triangles.push_back(9);
 		triangles.push_back(10); triangles.push_back(11); triangles.push_back(9);
 		// back
-		vertices.push_back(Vertex(Point(-0.5f, 0.5f, 0.5f), GetColor(6), Vector2(0, 1), Vector2(0.25f, 1)));
-		vertices.push_back(Vertex(Point(0.5f, 0.5f, 0.5f), GetColor(7), Vector2(1, 1), Vector2(0.5f, 1)));
-		vertices.push_back(Vertex(Point(-0.5f, -0.5f, 0.5f), GetColor(4), Vector2(0, 0), Vector2(0.25f, 0.75f)));
-		vertices.push_back(Vertex(Point(0.5f, -0.5f, 0.5f), GetColor(5), Vector2(1, 0), Vector2(0.5f, 0.75f)));
+		vertices.push_back(Vertex(Point(-0.5f, 0.5f, 0.5f), GetColor(6), UV(0, 1), UV(0.25f, 1)));
+		vertices.push_back(Vertex(Point(0.5f, 0.5f, 0.5f), GetColor(7), UV(1, 1), UV(0.5f, 1)));
+		vertices.push_back(Vertex(Point(-0.5f, -0.5f, 0.5f), GetColor(4), UV(0, 0), UV(0.25f, 0.75f)));
+		vertices.push_back(Vertex(Point(0.5f, -0.5f, 0.5f), GetColor(5), UV(1, 0), UV(0.5f, 0.75f)));
 		triangles.push_back(12); triangles.push_back(14); triangles.push_back(13);
 		triangles.push_back(14); triangles.push_back(15); triangles.push_back(13);
 		// left
-		vertices.push_back(Vertex(Point(-0.5f, -0.5f, 0.5f), GetColor(4), Vector2(0, 1), Vector2(0, 0.5f)));
-		vertices.push_back(Vertex(Point(-0.5f, -0.5f, -0.5f), GetColor(0), Vector2(1, 1), Vector2(0.25f, 0.5f)));
-		vertices.push_back(Vertex(Point(-0.5f, 0.5f, 0.5f), GetColor(6), Vector2(0, 0), Vector2(0, 0.25f)));
-		vertices.push_back(Vertex(Point(-0.5f, 0.5f, -0.5f), GetColor(2), Vector2(1, 0), Vector2(0.25f, 0.25f)));
+		vertices.push_back(Vertex(Point(-0.5f, -0.5f, 0.5f), GetColor(4), UV(0, 1), UV(0, 0.5f)));
+		vertices.push_back(Vertex(Point(-0.5f, -0.5f, -0.5f), GetColor(0), UV(1, 1), UV(0.25f, 0.5f)));
+		vertices.push_back(Vertex(Point(-0.5f, 0.5f, 0.5f), GetColor(6), UV(0, 0), UV(0, 0.25f)));
+		vertices.push_back(Vertex(Point(-0.5f, 0.5f, -0.5f), GetColor(2), UV(1, 0), UV(0.25f, 0.25f)));
 		triangles.push_back(16); triangles.push_back(18); triangles.push_back(17);
 		triangles.push_back(18); triangles.push_back(19); triangles.push_back(17);
 		// right
-		vertices.push_back(Vertex(Point(0.5f, -0.5f, -0.5f), GetColor(1), Vector2(0, 1), Vector2(0.5f, 0.5f)));
-		vertices.push_back(Vertex(Point(0.5f, -0.5f, 0.5f), GetColor(5), Vector2(1, 1), Vector2(0.75f, 0.5f)));
-		vertices.push_back(Vertex(Point(0.5f, 0.5f, -0.5f), GetColor(3), Vector2(0, 0), Vector2(0.5f, 0.25f)));
-		vertices.push_back(Vertex(Point(0.5f, 0.5f, 0.5f), GetColor(7), Vector2(1, 0), Vector2(0.75f, 0.25f)));
+		vertices.push_back(Vertex(Point(0.5f, -0.5f, -0.5f), GetColor(1), UV(0, 1), UV(0.5f, 0.5f)));
+		vertices.push_back(Vertex(Point(0.5f, -0.5f, 0.5f), GetColor(5), UV(1, 1), UV(0.75f, 0.5f)));
+		vertices.push_back(Vertex(Point(0.5f, 0.5f, -0.5f), GetColor(3), UV(0, 0), UV(0.5f, 0.25f)));
+		vertices.push_back(Vertex(Point(0.5f, 0.5f, 0.5f), GetColor(7), UV(1, 0), UV(0.75f, 0.25f)));
 		triangles.push_back(20); triangles.push_back(22); triangles.push_back(21);
 		triangles.push_back(22); triangles.push_back(23); triangles.push_back(21);
 
@@ -403,10 +403,10 @@ namespace Rehenz
 
 		return std::make_shared<Mesh>(vertices, triangles);
 	}
-	Texture::Texture(int _width, int _height) : width(_width), height(_height), buffer(new Vector[static_cast<size_t>(_width) * _height])
+	Texture::Texture(int _width, int _height) : width(_width), height(_height), buffer(new Color[static_cast<size_t>(_width) * _height])
 	{
 	}
-	Texture::Texture(const Texture& t) : width(t.width), height(t.height), buffer(new Vector[static_cast<size_t>(t.width) * t.height])
+	Texture::Texture(const Texture& t) : width(t.width), height(t.height), buffer(new Color[static_cast<size_t>(t.width) * t.height])
 	{
 		std::copy(t.buffer, t.buffer + static_cast<size_t>(width) * height, buffer);
 	}
@@ -414,15 +414,15 @@ namespace Rehenz
 	{
 		delete[] buffer;
 	}
-	Vector Texture::GetColor(float u, float v)
+	Color Texture::GetColor(float u, float v)
 	{
-		int x = static_cast<int>(Clamp(u, 0.0f, 1.0f) * width);
-		int y = static_cast<int>(Clamp(v, 0.0f, 1.0f) * height);
-		x = (x == width ? width - 1 : x);
-		y = (y == height ? height - 1 : y);
+		int x = static_cast<int>(u * width);
+		int y = static_cast<int>(v * height);
+		x = Clamp(x, 0, width - 1);
+		y = Clamp(y, 0, height - 1);
 		return buffer[y * width + x];
 	}
-	Vector Texture::GetColor(Vector2 uv)
+	Color Texture::GetColor(UV uv)
 	{
 		return GetColor(uv.x, uv.y);
 	}
@@ -439,7 +439,7 @@ namespace Rehenz
 		};
 		auto pt = std::make_shared<Texture>(7, 7);
 		for (int i = 0; i < 49; i++)
-			pt->buffer[i] = (image1[i] + 1) / 2.0f * Vector(1, 1, 1, 1);
+			pt->buffer[i] = (image1[i] + 1) / 2.0f * Color(1, 1, 1);
 		return pt;
 	}
 	std::shared_ptr<Texture> CreateTextureC()
@@ -455,7 +455,7 @@ namespace Rehenz
 		};
 		auto pt = std::make_shared<Texture>(7, 7);
 		for (int i = 0; i < 49; i++)
-			pt->buffer[i] = (imageC[i] + 1) / 2.0f * Vector(1, 1, 1, 1);
+			pt->buffer[i] = (imageC[i] + 1) / 2.0f * Color(1, 1, 1);
 		return pt;
 	}
 	std::shared_ptr<Texture> CreateTexturePlaid()
@@ -464,9 +464,9 @@ namespace Rehenz
 		for (int i = 0; i < 81; i++)
 		{
 			if (i % 2 == 0)
-				pt->buffer[i] = Vector(1, 1, 1, 1);
+				pt->buffer[i] = Color(1, 1, 1);
 			else
-				pt->buffer[i] = Vector(0, 0, 1, 1);
+				pt->buffer[i] = Color(0, 0, 1);
 		}
 		return pt;
 	}

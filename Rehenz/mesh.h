@@ -6,6 +6,11 @@
 
 namespace Rehenz
 {
+	// 4-component color, r=x, b=y, g=z, a=w, defualt a=1
+	typedef Point Color;
+	// 2-component uv coordinates, u=x, v=y
+	typedef Vector2 UV;
+
 	struct Vertex;
 	class Mesh;
 	class Texture;
@@ -18,13 +23,13 @@ namespace Rehenz
 		// position
 		Point p;
 		// color
-		Vector c;
-		Vector2 uv;
-		Vector2 uv2;
+		Color c;
+		UV uv;
+		UV uv2;
 
 		Vertex(Point _p);
-		explicit Vertex(Point _p, Vector _c, Vector2 _uv = Vector2(0, 0), Vector2 _uv2 = Vector2(0, 0));
-		explicit Vertex(Point _p, Vector2 _uv, Vector2 _uv2 = Vector2(0, 0));
+		explicit Vertex(Point _p, Color _c, UV _uv = UV(0, 0), UV _uv2 = UV(0, 0));
+		explicit Vertex(Point _p, UV _uv, UV _uv2 = UV(0, 0));
 	};
 
 	Vertex VertexLerp(const Vertex& v1, const Vertex& v2, float t);
@@ -57,7 +62,7 @@ namespace Rehenz
 	// color : use colors fill, and default is white
 	// uv    : each faces map to the whole texture
 	// uv2   : expanded faces map to the texture
-	std::shared_ptr<Mesh> CreateCubeMesh(const std::vector<Vector>& colors = std::vector<Vector>());
+	std::shared_ptr<Mesh> CreateCubeMesh(const std::vector<Color>& colors = std::vector<Color>());
 
 	// create sphere mesh which includes pos info
 	// pos   : unit sphere, and (0,0,0) is center point
@@ -75,15 +80,15 @@ namespace Rehenz
 	public:
 		const int width;
 		const int height;
-		Vector* const buffer;
+		Color* const buffer;
 
 		Texture(int _width, int _height);
 		Texture(const Texture& t);
 		Texture& operator=(const Texture&) = delete;
 		~Texture();
 
-		Vector GetColor(float u, float v);
-		Vector GetColor(Vector2 uv);
+		Color GetColor(float u, float v);
+		Color GetColor(UV uv);
 	};
 
 	// create digit 1 texture

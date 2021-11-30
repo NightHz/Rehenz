@@ -10,13 +10,13 @@ namespace Rehenz
 		return v;
 	};
 
-	PixelShader Camera::DefaultPixelShader = [](const PixelShaderData& data, const Vertex& v0)->Vector
+	PixelShader Camera::DefaultPixelShader = [](const PixelShaderData& data, const Vertex& v0)->Color
 	{
 		(data); // unreferenced
 		return v0.c;
 	};
 
-	PixelShader Camera::TexturePixelShader = [](const PixelShaderData& data, const Vertex& v0)->Vector
+	PixelShader Camera::TexturePixelShader = [](const PixelShaderData& data, const Vertex& v0)->Color
 	{
 		if (data.pobj->texture != nullptr)
 			return data.pobj->texture->GetColor(v0.uv);
