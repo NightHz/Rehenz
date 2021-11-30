@@ -93,7 +93,7 @@ namespace Rehenz
 		int GetWidth() { return width; }
 		const uint* GetLastImage() { return buffer; }
 
-		void SetSize(int _height, int _width, float _fovy);
+		void SetSize(int _height, int _width, float _aspect);
 
 		const uint* RenderImage(Objects& objs = Objects::global_objs,
 			VertexShader vertex_shader = DefaultVertexShader, PixelShader pixel_shader = DefaultPixelShader);
