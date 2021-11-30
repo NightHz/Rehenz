@@ -20,15 +20,15 @@ namespace Rehenz
 		float GetNoise(float x);
 	};
 
-	struct Point2Compare
-	{
-		bool operator() (const Point2& lhs, const Point2& rhs) const;
-	};
-
 	// 2-dim Perlin noise
 	class PerlinNoise2D
 	{
 	private:
+		struct Point2Compare
+		{
+			bool operator() (const Point2& lhs, const Point2& rhs) const;
+		};
+
 		unsigned int seed;
 		std::map<Point2, Vector2, Point2Compare> grads;
 		Vector2 GetGrad(int x, int y);
@@ -41,15 +41,15 @@ namespace Rehenz
 		float GetNoiseSumAbsSin(float x, float y);
 	};
 
-	struct Point3Compare
-	{
-		bool operator() (const Point3& lhs, const Point3& rhs) const;
-	};
-
 	// 3-dim Perlin noise
 	class PerlinNoise3D
 	{
 	private:
+		struct Point3Compare
+		{
+			bool operator() (const Point3& lhs, const Point3& rhs) const;
+		};
+
 		unsigned int seed;
 		std::map<Point3, Vector3, Point3Compare> grads;
 		Vector3 GetGrad(int x, int y, int z);

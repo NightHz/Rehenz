@@ -155,7 +155,7 @@ namespace Rehenz
 		return s;
 	}
 
-	bool Point2Compare::operator()(const Point2& lhs, const Point2& rhs) const
+	bool PerlinNoise2D::Point2Compare::operator()(const Point2& lhs, const Point2& rhs) const
 	{
 		if (lhs.y < rhs.y)
 			return true;
@@ -226,7 +226,7 @@ namespace Rehenz
 		return Fade(n4, n5, zf);
 	}
 
-	bool Point3Compare::operator()(const Point3& lhs, const Point3& rhs) const
+	bool PerlinNoise3D::Point3Compare::operator()(const Point3& lhs, const Point3& rhs) const
 	{
 		if (lhs.z < rhs.z)
 			return true;
