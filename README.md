@@ -14,6 +14,7 @@ some code writed by NightHz
 
 ## file description
 
+- `clipper.h`: clip geometry
 - `drawer.h`: draw geometry
 - `math.h`: math
 - `mesh.h`: save model

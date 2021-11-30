@@ -1,4 +1,5 @@
 #pragma once
+#include "clipper.h"
 #include "drawer.h"
 #include "math.h"
 #include "mesh.h"

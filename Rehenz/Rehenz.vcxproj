@@ -136,6 +136,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="clipper.cpp" />
     <ClCompile Include="drawer.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="math.cpp" />
@@ -145,6 +146,7 @@
     <ClCompile Include="surface_dx8.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="clipper.h" />
     <ClInclude Include="drawer.h" />
     <ClInclude Include="math.h" />
     <ClInclude Include="mesh.h" />

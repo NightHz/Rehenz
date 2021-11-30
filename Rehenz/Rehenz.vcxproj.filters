@@ -36,6 +36,9 @@
     <ClCompile Include="drawer.cpp">
       <Filter>source</Filter>
     </ClCompile>
+    <ClCompile Include="clipper.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="math.h">
@@ -60,6 +63,9 @@
       <Filter>header</Filter>
     </ClInclude>
     <ClInclude Include="drawer.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="clipper.h">
       <Filter>header</Filter>
     </ClInclude>
   </ItemGroup>
