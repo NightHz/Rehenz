@@ -546,6 +546,12 @@ namespace Rehenz
 		y = 0;
 	}
 
+	Vector2::Vector2(const Vector& v)
+	{
+		x = v.x;
+		y = v.y;
+	}
+
 	Vector2::Vector2(float _x, float _y)
 	{
 		x = _x;
@@ -592,6 +598,13 @@ namespace Rehenz
 		x = 0;
 		y = 0;
 		z = 0;
+	}
+
+	Vector3::Vector3(const Vector& v)
+	{
+		x = v.x;
+		y = v.y;
+		z = v.z;
 	}
 
 	Vector3::Vector3(float _x, float _y, float _z)
@@ -730,6 +743,18 @@ namespace Rehenz
 	{
 		x = 0;
 		y = 0;
+	}
+
+	Vector2I::Vector2I(const Vector2& v)
+	{
+		x = static_cast<int>(v.x);
+		y = static_cast<int>(v.y);
+	}
+
+	Vector2I::Vector2I(const Vector& v)
+	{
+		x = static_cast<int>(v.x);
+		y = static_cast<int>(v.y);
 	}
 
 	Vector2I::Vector2I(int _x, int _y)

@@ -239,6 +239,7 @@ namespace Rehenz
 		float y;
 
 		Vector2();
+		Vector2(const Vector& v);
 		explicit Vector2(float _x, float _y);
 
 		Vector2& operator*=(float);
@@ -263,6 +264,7 @@ namespace Rehenz
 		float z;
 
 		Vector3();
+		Vector3(const Vector& v);
 		explicit Vector3(float _x, float _y, float _z);
 
 		Vector3 operator*(float) const;
@@ -324,6 +326,8 @@ namespace Rehenz
 		int y;
 
 		Vector2I();
+		Vector2I(const Vector2& v);
+		Vector2I(const Vector& v);
 		explicit Vector2I(int _x, int _y);
 	};
 
