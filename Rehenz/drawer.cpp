@@ -84,15 +84,15 @@ namespace Rehenz
 			}
 		}
 	}
-	void Drawer::Trapezoid(Point2I top_l, Point2I bottom_l, Point2I top_r, Point2I bottom_r, uint color)
+	void Drawer::Trapezoid(Point2I top_l, Point2I top_r, Point2I bottom_l, Point2I bottom_r, uint color)
 	{
 		if (top_l.y != bottom_l.y)
 		{
-			for (int y = bottom_l.y; y <= top_l.y; y++)
+			for (int y = top_l.y; y <= bottom_l.y; y++)
 			{
-				float t = static_cast<float>(y - bottom_l.y) / (top_l.y - bottom_l.y);
-				int xl = Lerp(bottom_l.x, top_l.x, t);
-				int xr = Lerp(bottom_r.x, top_r.x, t);
+				float t = static_cast<float>(y - top_l.y) / (bottom_l.y - top_l.y);
+				int xl = Lerp(top_l.x, bottom_l.x, t);
+				int xr = Lerp(top_r.x, bottom_r.x, t);
 				for (int x = xl; x <= xr; x++)
 					Pixel(Point2I(x, y), color);
 			}
@@ -113,13 +113,13 @@ namespace Rehenz
 			int x = Lerp(p1.x, p3.x, t);
 			if (p2.x <= x)
 			{
-				Trapezoid(p3, p2, p3, Point2I(x, p2.y), color);
-				Trapezoid(p2, p1, Point2I(x, p2.y), p1, color);
+				Trapezoid(p1, p1, p2, Point2I(x, p2.y), color);
+				Trapezoid(p2, Point2I(x, p2.y), p3, p3, color);
 			}
 			else
 			{
-				Trapezoid(p3, Point2I(x, p2.y), p3, p2, color);
-				Trapezoid(Point2I(x, p2.y), p1, p2, p1, color);
+				Trapezoid(p1, p1, Point2I(x, p2.y), p2, color);
+				Trapezoid(Point2I(x, p2.y), p2, p3, p3, color);
 			}
 		}
 	}
@@ -141,19 +141,19 @@ namespace Rehenz
 		}
 	}
 
-	void DrawerZ::Trapezoid(Point2I top_l, Point2I bottom_l, Point2I top_r, Point2I bottom_r,
-		const Vertex& v_tl, const Vertex& v_bl, const Vertex& v_tr, const Vertex& v_br,
+	void DrawerZ::Trapezoid(Point2I top_l, Point2I top_r, Point2I bottom_l, Point2I bottom_r,
+		const Vertex& v_tl, const Vertex& v_tr, const Vertex& v_bl, const Vertex& v_br,
 		PixelShader pixel_shader, PixelShaderData pshader_data)
 	{
 		if (top_l.y != bottom_l.y)
 		{
-			for (int y = bottom_l.y; y <= top_l.y; y++)
+			for (int y = top_l.y; y <= bottom_l.y; y++)
 			{
-				float t = static_cast<float>(y - bottom_l.y) / (top_l.y - bottom_l.y);
-				int xl = Lerp(bottom_l.x, top_l.x, t);
-				int xr = Lerp(bottom_r.x, top_r.x, t);
-				Vertex vl = VertexScreenLerp(v_bl, v_tl, t);
-				Vertex vr = VertexScreenLerp(v_br, v_tr, t);
+				float t = static_cast<float>(y - top_l.y) / (bottom_l.y - top_l.y);
+				int xl = Lerp(top_l.x, bottom_l.x, t);
+				int xr = Lerp(top_r.x, bottom_r.x, t);
+				Vertex vl = VertexScreenLerp(v_tl, v_bl, t);
+				Vertex vr = VertexScreenLerp(v_tr, v_br, t);
 				if (xl == xr)
 				{
 					VertexPerspectiveEnd(vl);
@@ -192,13 +192,13 @@ namespace Rehenz
 			auto v = VertexScreenLerp(*v1, *v3, t);
 			if (p2.x <= x)
 			{
-				Trapezoid(p3, p2, p3, Point2I(x, p2.y), *v3, *v2, *v3, v, pixel_shader, pshader_data);
-				Trapezoid(p2, p1, Point2I(x, p2.y), p1, *v2, *v1, v, *v1, pixel_shader, pshader_data);
+				Trapezoid(p1, p1, p2, Point2I(x, p2.y), *v1, *v1, *v2, v, pixel_shader, pshader_data);
+				Trapezoid(p2, Point2I(x, p2.y), p3, p3, *v2, v, *v3, *v3, pixel_shader, pshader_data);
 			}
 			else
 			{
-				Trapezoid(p3, Point2I(x, p2.y), p3, p2, *v3, v, *v3, *v2, pixel_shader, pshader_data);
-				Trapezoid(Point2I(x, p2.y), p1, p2, p1, v, *v1, *v2, *v1, pixel_shader, pshader_data);
+				Trapezoid(p1, p1, Point2I(x, p2.y), p2, *v1, *v1, v, *v2, pixel_shader, pshader_data);
+				Trapezoid(Point2I(x, p2.y), p2, p3, p3, v, *v2, *v3, *v3, pixel_shader, pshader_data);
 			}
 		}
 	}
