@@ -30,7 +30,7 @@ namespace Rehenz
 		// prepare drawer
 		int size = height * width;
 		float* zbuffer = new float[size];
-		std::fill(zbuffer, zbuffer + size, 0.0f);
+		std::fill(zbuffer, zbuffer + size, z_far + 1);
 		std::fill(buffer, buffer + size, 0U);
 		DrawerZ drawer(buffer, width, height, zbuffer);
 		// prepare shader data
@@ -89,13 +89,19 @@ namespace Rehenz
 				// Use z-buffer merge multiple colors
 				if (render_mode == RenderMode::Wireframe)
 				{
-					drawer.Line(va.p, vb.p, drawer.Color(1.0f, 1.0f, 1.0f));
-					drawer.Line(va.p, vc.p, drawer.Color(1.0f, 1.0f, 1.0f));
-					drawer.Line(vb.p, vc.p, drawer.Color(1.0f, 1.0f, 1.0f));
+					Point2I pa = Point2I(va.p.x, va.p.y);
+					Point2I pb = Point2I(vb.p.x, vb.p.y);
+					Point2I pc = Point2I(vc.p.x, vc.p.y);
+					drawer.Line(pa, pb, drawer.Color(1.0f, 1.0f, 1.0f));
+					drawer.Line(pa, pc, drawer.Color(1.0f, 1.0f, 1.0f));
+					drawer.Line(pb, pc, drawer.Color(1.0f, 1.0f, 1.0f));
 				}
 				else if (render_mode == RenderMode::PureWhite)
 				{
-					drawer.Triangle(va.p, vb.p, vc.p, drawer.Color(1.0f, 1.0f, 1.0f));
+					Point2I pa = Point2I(va.p.x, va.p.y);
+					Point2I pb = Point2I(vb.p.x, vb.p.y);
+					Point2I pc = Point2I(vc.p.x, vc.p.y);
+					drawer.Triangle(pa, pb, pc, drawer.Color(1.0f, 1.0f, 1.0f));
 				}
 				else if (render_mode == RenderMode::Color)
 				{
