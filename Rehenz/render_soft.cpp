@@ -84,14 +84,15 @@ namespace Rehenz
 				screen_pos.push_back(Point2I(x, y));
 			}
 
-			// Traverse all triangles and compute color for all sampling points (pixel shader)
+			// Traverse all triangles and sampling
+			// Compute color for all sampling points (pixel shader)
+			// Use z-buffer merge multiple colors
 			pshader_data.pobj = pobj;
 			for (size_t i = 0; i < triangles.size(); i += 3)
 			{
 				int a = triangles[i], b = triangles[i + 1], c = triangles[i + 2];
 				Vertex& va = vertices[a], & vb = vertices[b], & vc = vertices[c];
 				Point2I pa = screen_pos[a], pb = screen_pos[b], pc = screen_pos[c];
-				// Use z-buffer merge multiple colors
 				if (render_mode == RenderMode::Wireframe)
 				{
 					drawer.Line(pa, pb, drawer.Color(1.0f, 1.0f, 1.0f));

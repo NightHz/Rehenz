@@ -41,5 +41,12 @@ some code writed by NightHz
 - Copy and transform vertices (vertex shader)
 - Clipping and back-face culling
 - Mapping to screen
-- Traverse all triangles and compute color for all sampling points (pixel shader)
+- Traverse all triangles and sampling
+- Compute color for all sampling points (pixel shader)
 - Use z-buffer merge multiple colors
+
+**rasterization rules**
+
+- [-1,1]x[1,-1] map to [0,w]x[0,h], then take the integer part. Specially, (1,-1) map to (w,h) then become (w-1,h-1)
+- When rasterize lines, draw all end points
+- When rasterize triangles, draw all edges
