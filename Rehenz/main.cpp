@@ -127,10 +127,11 @@ int render_soft_example()
 	Camera camera(height, width);
 	Objects* scene = &test2;
 	cout << "hold Enter to render" << endl;
-	cout << "press 1/2/3/4/5 to switch render mode" << endl;
-	cout << "press W/A/S/D to move camera" << endl;
-	cout << "press I/J/K/L to rotate cube" << endl;
-	cout << "press 8/9 to switch scene" << endl;
+	cout << "press 1/2/3/4/5   to switch render mode" << endl;
+	cout << "press W/A/S/D     to move camera" << endl;
+	cout << "press I/J/K/L     to rotate cube" << endl;
+	cout << "press T/F/G/H/R/Y to move cube" << endl;
+	cout << "press 8/9         to switch scene" << endl;
 
 	cout << "Start fps counter" << endl;
 	int fps[2] = { 0,0 };
@@ -155,6 +156,12 @@ int render_soft_example()
 		else if (KeyIsDown('K')) obj_cube->rotation.theta -= 0.05f;
 		if (KeyIsDown('J'))      obj_cube->rotation.psi += 0.05f;
 		else if (KeyIsDown('L')) obj_cube->rotation.psi -= 0.05f;
+		if (KeyIsDown('F'))      obj_cube->position.x -= 0.1f;
+		else if (KeyIsDown('H')) obj_cube->position.x += 0.1f;
+		if (KeyIsDown('T'))      obj_cube->position.y += 0.1f;
+		else if (KeyIsDown('G')) obj_cube->position.y -= 0.1f;
+		if (KeyIsDown('R'))      obj_cube->position.z -= 0.1f;
+		else if (KeyIsDown('Y')) obj_cube->position.z += 0.1f;
 		if (KeyIsDown('8'))      scene = &test2;
 		else if (KeyIsDown('9')) scene = &test1;
 		if (KeyIsDown(VK_RETURN))
