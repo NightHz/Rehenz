@@ -19,6 +19,33 @@ namespace Rehenz
 		rhw = 1;
 	}
 
+	Vertex Vertex::operator+(const VertexDistance& dv)
+	{
+		return Vertex(p + dv.dp, c + dv.dc, uv + dv.duv, uv2 + dv.duv2, rhw + dv.drhw);
+	}
+
+	VertexDistance Vertex::operator-(const Vertex& v)
+	{
+		return VertexDistance(*this, v);
+	}
+
+	VertexDistance::VertexDistance(const Vertex& v1, const Vertex& v2)
+		: dp(v1.p - v2.p), dc(v1.c - v2.c), duv(v1.uv - v2.uv), duv2(v1.uv2 - v2.uv2)
+	{
+		drhw = v1.rhw - v2.rhw;
+	}
+
+	VertexDistance::VertexDistance(Vector _dp, Color _dc, UV _duv, UV _duv2, float _drhw)
+		: dp(_dp), dc(_dc), duv(_duv), duv2(_duv2)
+	{
+		drhw = _drhw;
+	}
+
+	VertexDistance VertexDistance::operator*(float f)
+	{
+		return VertexDistance(dp * f, dc * f, duv * f, duv2 * f, drhw * f);
+	}
+
 
 
 	void VertexPerspectiveBegin(Vertex& v)

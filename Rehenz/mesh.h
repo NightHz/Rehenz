@@ -15,6 +15,8 @@ namespace Rehenz
 	class Mesh;
 	class Texture;
 
+	struct VertexDistance;
+
 
 
 	struct Vertex
@@ -32,6 +34,24 @@ namespace Rehenz
 		Vertex(Point _p);
 		explicit Vertex(Point _p, Color _c, UV _uv = UV(0, 0), UV _uv2 = UV(0, 0), float _rhw = 1);
 		explicit Vertex(Point _p, UV _uv, UV _uv2 = UV(0, 0));
+
+		Vertex operator+(const VertexDistance&);
+		VertexDistance operator-(const Vertex&);
+	};
+
+	struct VertexDistance
+	{
+		friend struct Vertex;
+	private:
+		Vector dp;
+		Color dc;
+		UV duv;
+		UV duv2;
+		float drhw;
+		explicit VertexDistance(const Vertex& v1, const Vertex& v2);
+		explicit VertexDistance(Vector _dp, Color _dc, UV _duv, UV _duv2, float _drhw);
+	public:
+		VertexDistance operator*(float);
 	};
 
 	void VertexPerspectiveBegin(Vertex& v);
