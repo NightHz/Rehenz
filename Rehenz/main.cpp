@@ -136,7 +136,9 @@ int render_soft_example()
 	cout << "Start fps counter" << endl;
 	int fps[2] = { 0,0 };
 	auto fps_t0 = timeGetTime();
-	cout << "Lock fps" << endl;
+	bool lock_fps = true;
+	if (lock_fps)
+		cout << "Lock fps" << endl;
 	auto t0 = timeGetTime();
 	cout << "press Q to exit" << endl;
 	while (srf_dx8.GetWindowState())
@@ -179,8 +181,9 @@ int render_soft_example()
 			fps_t0 = fps_t1;
 		}
 		// sleep
-		while (16 >= (timeGetTime() - t0))
-			;
+		if (lock_fps)
+			while (16 >= (timeGetTime() - t0))
+				;
 		t0 = timeGetTime();
 		// exit
 		if (KeyIsDown('Q'))
