@@ -156,8 +156,10 @@ namespace Rehenz
 				Vertex vr = VertexScreenLerp(v_br, v_tr, t);
 				if (xl == xr)
 				{
-					Pixel(Point2I(xl, y), Color(pixel_shader(pshader_data, vl)), vl.p.w);
-					Pixel(Point2I(xl, y), Color(pixel_shader(pshader_data, vr)), vr.p.w);
+					VertexPerspectiveEnd(vl);
+					VertexPerspectiveEnd(vr);
+					Pixel(Point2I(xl, y), Color(pixel_shader(pshader_data, vl)), 1 / vl.rhw);
+					Pixel(Point2I(xl, y), Color(pixel_shader(pshader_data, vr)), 1 / vr.rhw);
 				}
 				else
 				{
@@ -165,7 +167,8 @@ namespace Rehenz
 					{
 						float t2 = static_cast<float>(x - xl) / (xr - xl);
 						Vertex v = VertexScreenLerp(vl, vr, t2);
-						Pixel(Point2I(x, y), Color(pixel_shader(pshader_data, v)), v.p.w);
+						VertexPerspectiveEnd(v);
+						Pixel(Point2I(x, y), Color(pixel_shader(pshader_data, v)), 1 / v.rhw);
 					}
 				}
 			}

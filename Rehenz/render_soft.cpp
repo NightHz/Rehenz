@@ -75,6 +75,7 @@ namespace Rehenz
 			for (auto& v : vertices)
 			{
 				// (-1,-1) -> (0,h), (1,1) -> (w,0)
+				VertexPerspectiveBegin(v);
 				auto p = PointStandard(v.p);
 				int x = static_cast<int>((p.x + 1) * width / 2);
 				int y = static_cast<int>((-p.y + 1) * height / 2);
