@@ -76,8 +76,8 @@ namespace Rehenz
 				VertexPerspectiveBegin(v);
 				v.p = PointStandard(v.p);
 				// (-1,-1) -> (0,h), (1,1) -> (w,0)
-				v.p.x = static_cast<float>(Clamp(static_cast<int>((v.p.x + 1) * width / 2), 0, width - 1));
-				v.p.y = static_cast<float>(Clamp(static_cast<int>((-v.p.y + 1) * height / 2), 0, height - 1));
+				v.p.x = (v.p.x + 1) * width / 2;
+				v.p.y = (-v.p.y + 1) * height / 2;
 			}
 
 			// Traverse all triangles and compute color for all sampling points (pixel shader)

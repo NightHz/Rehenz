@@ -30,20 +30,26 @@ namespace Rehenz
 	void Drawer::Line(Point2I p1, Point2I p2, uint color)
 	{
 		if (p1.x == p2.x && p1.y == p2.y)
-			Pixel(p1, color);
+			return;
 		else if (p1.y == p2.y)
 		{
-			if (p2.x < p1.x)
-				Swap(p1, p2);
-			for (int x = p1.x; x <= p2.x; x++)
-				Pixel(Point2I(x, p1.y), color);
+			if (p1.y != h)
+			{
+				if (p2.x < p1.x)
+					Swap(p1, p2);
+				for (int x = p1.x; x < p2.x; x++)
+					Pixel(Point2I(x, p1.y), color);
+			}
 		}
 		else if (p1.x == p2.x)
 		{
-			if (p2.y < p1.y)
-				Swap(p1, p2);
-			for (int y = p1.y; y <= p2.y; y++)
-				Pixel(Point2I(p1.x, y), color);
+			if (p1.x != w)
+			{
+				if (p2.y < p1.y)
+					Swap(p1, p2);
+				for (int y = p1.y; y <= p2.y; y++)
+					Pixel(Point2I(p1.x, y), color);
+			}
 		}
 		else
 		{
@@ -53,8 +59,8 @@ namespace Rehenz
 				if (p2.x < p1.x)
 					Swap(p1, p2);
 				int y_move = (p2.y >= p1.y) ? 1 : -1;
-				int y_offset = dx / 2; // dx times of 1/2
-				for (auto p = p1; p.x <= p2.x; p.x++)
+				int y_offset = 0; // 0 times of 0
+				for (auto p = p1; p.x < p2.x; p.x++)
 				{
 					Pixel(p, color);
 					y_offset += dy;     // dx times of dy/dx
@@ -70,8 +76,8 @@ namespace Rehenz
 				if (p2.y < p1.y)
 					Swap(p1, p2);
 				int x_move = (p2.x >= p1.x) ? 1 : -1;
-				int x_offset = dy / 2;
-				for (auto p = p1; p.y <= p2.y; p.y++)
+				int x_offset = 0;
+				for (auto p = p1; p.y < p2.y; p.y++)
 				{
 					Pixel(p, color);
 					x_offset += dx;
@@ -84,15 +90,15 @@ namespace Rehenz
 			}
 		}
 	}
-	void Drawer::Trapezoid(Point2I top_l, Point2I bottom_l, Point2I top_r, Point2I bottom_r, uint color)
+	void Drawer::Trapezoid(Point2I top_l, Point2I top_r, Point2I bottom_l, Point2I bottom_r, uint color)
 	{
 		if (top_l.y != bottom_l.y)
 		{
-			for (int y = bottom_l.y; y <= top_l.y; y++)
+			for (int y = top_l.y; y < bottom_l.y; y++)
 			{
-				float t = static_cast<float>(y - bottom_l.y) / (top_l.y - bottom_l.y);
-				int xl = Lerp(bottom_l.x, top_l.x, t);
-				int xr = Lerp(bottom_r.x, top_r.x, t);
+				float t = static_cast<float>(y - top_l.y) / (bottom_l.y - top_l.y);
+				int xl = Lerp(top_l.x, bottom_l.x, t);
+				int xr = Lerp(top_r.x, bottom_r.x, t);
 				for (int x = xl; x <= xr; x++)
 					Pixel(Point2I(x, y), color);
 			}
@@ -113,16 +119,33 @@ namespace Rehenz
 			int x = Lerp(p1.x, p3.x, t);
 			if (p2.x <= x)
 			{
-				Trapezoid(p3, p2, p3, Point2I(x, p2.y), color);
-				Trapezoid(p2, p1, Point2I(x, p2.y), p1, color);
+				Trapezoid(p1, p1, p2, Point2I(x, p2.y), color);
+				Trapezoid(p2, Point2I(x, p2.y), p3, p3, color);
 			}
 			else
 			{
-				Trapezoid(p3, Point2I(x, p2.y), p3, p2, color);
-				Trapezoid(Point2I(x, p2.y), p1, p2, p1, color);
+				Trapezoid(p1, p1, Point2I(x, p2.y), p2, color);
+				Trapezoid(Point2I(x, p2.y), p2, p3, p3, color);
 			}
 		}
 	}
+
+	void Drawer::Line(Point2 p1, Point2 p2, uint color)
+	{
+		Point2I p1_i(p1), p2_i(p2);
+		Line(p1_i, p2_i, color);
+	}
+
+	void Drawer::Trapezoid(Point2 top_l, Point2 top_r, Point2 bottom_l, Point2 bottom_r, uint color)
+	{
+	}
+
+	void Drawer::Triangle(Point2 p1, Point2 p2, Point2 p3, uint color)
+	{
+		Point2I p1_i(p1), p2_i(p2), p3_i(p3);
+		Triangle(p1_i, p2_i, p3_i, color);
+	}
+
 	DrawerZ::DrawerZ(uint* _buffer, int _width, int _height, float* _zbuffer)
 		: Drawer(_buffer, _width, _height), zbuffer(_zbuffer)
 	{
@@ -140,104 +163,20 @@ namespace Rehenz
 			zbuffer[i] = z;
 		}
 	}
-	/*void DrawerZ::Line(Point2I p1, Point2I p2, uint color, float z1, float z2)
-	{
-		if (p1.x == p2.x && p1.y == p2.y)
-			Pixel(p1, color, Min(z1, z2));
-		else if (p1.y == p2.y)
-		{
-			if (p2.x < p1.x)
-				Swap(p1, p2), Swap(z1, z2);
-			for (int x = p1.x; x <= p2.x; x++)
-			{
-				float t = static_cast<float>(x - p1.x) / (p2.x - p1.x);
-				Pixel(Point2I(x, p1.y), color, Lerp(z1, z2, t));
-			}
-		}
-		else if (p1.x == p2.x)
-		{
-			if (p2.y < p1.y)
-				Swap(p1, p2), Swap(z1, z2);
-			for (int y = p1.y; y <= p2.y; y++)
-			{
-				float t = static_cast<float>(y - p1.y) / (p2.y - p1.y);
-				Pixel(Point2I(p1.x, y), color, Lerp(z1, z2, t));
-			}
-		}
-		else
-		{
-			int dx = abs(p1.x - p2.x), dy = abs(p1.y - p2.y);
-			if (dx >= dy)
-			{
-				if (p2.x < p1.x)
-					Swap(p1, p2), Swap(z1, z2);
-				for (auto p = p1; p.x <= p2.x; p.x++)
-				{
-					float t = static_cast<float>(p.x - p1.x) / (p2.x - p1.x);
-					p.y = Lerp(p1.y, p2.y, t);
-					Pixel(p, color, Lerp(z1, z2, t));
-				}
-			}
-			else
-			{
-				if (p2.y < p1.y)
-					Swap(p1, p2), Swap(z1, z2);
-				for (auto p = p1; p.y <= p2.y; p.y++)
-				{
-					float t = static_cast<float>(p.y - p1.y) / (p2.y - p1.y);
-					p.x = Lerp(p1.x, p2.x, t);
-					Pixel(p, color, Lerp(z1, z2, t));
-				}
-			}
-		}
-	}
-	void DrawerZ::Trapezoid(Point2I top_l, Point2I bottom_l, Point2I top_r, Point2I bottom_r, uint color, float z_tl, float z_bl, float z_tr, float z_br)
+	void Drawer::Trapezoid(Point2I top_l, Point2I top_r, Point2I bottom_l, Point2I bottom_r, uint color)
 	{
 		if (top_l.y != bottom_l.y)
 		{
-			for (int y = bottom_l.y; y <= top_l.y; y++)
+			for (int y = top_l.y; y < bottom_l.y; y++)
 			{
-				float t = static_cast<float>(y - bottom_l.y) / (top_l.y - bottom_l.y);
-				int xl = Lerp(bottom_l.x, top_l.x, t);
-				int xr = Lerp(bottom_r.x, top_r.x, t);
-				float zl = Lerp(z_bl, z_tl, t);
-				float zr = Lerp(z_br, z_tr, t);
-				if (xl == xr)
-					Pixel(Point2I(xl, y), color, Min(zl, zr));
-				else
-				{
-					for (int x = xl; x <= xr; x++)
-						Pixel(Point2I(x, y), color, Lerp(zl, zr, static_cast<float>(x - xl) / (xr - xl)));
-				}
+				float t = static_cast<float>(y - top_l.y) / (bottom_l.y - top_l.y);
+				int xl = Lerp(top_l.x, bottom_l.x, t);
+				int xr = Lerp(top_r.x, bottom_r.x, t);
+				for (int x = xl; x <= xr; x++)
+					Pixel(Point2I(x, y), color);
 			}
 		}
 	}
-	void DrawerZ::Triangle(Point2I p1, Point2I p2, Point2I p3, uint color, float z1, float z2, float z3)
-	{
-		if (p1.y > p2.y)
-			Swap(p1, p2), Swap(z1, z2);
-		if (p1.y > p3.y)
-			Swap(p1, p3), Swap(z1, z3);
-		if (p2.y > p3.y)
-			Swap(p2, p3), Swap(z2, z3);
-
-		if (p3.y != p1.y)
-		{
-			float t = static_cast<float>(p2.y - p1.y) / (p3.y - p1.y);
-			int x = Lerp(p1.x, p3.x, t);
-			float z = Lerp(z1, z3, t);
-			if (p2.x <= x)
-			{
-				Trapezoid(p3, p2, p3, Point2I(x, p2.y), color, z3, z2, z3, z);
-				Trapezoid(p2, p1, Point2I(x, p2.y), p1, color, z2, z1, z, z1);
-			}
-			else
-			{
-				Trapezoid(p3, Point2I(x, p2.y), p3, p2, color, z3, z, z3, z2);
-				Trapezoid(Point2I(x, p2.y), p1, p2, p1, color, z, z1, z2, z1);
-			}
-		}
-	}*/
 	void DrawerZ::Trapezoid(const Vertex& top_left, const Vertex& bottom_left, const Vertex& top_right, const Vertex& bottom_right,
 		PixelShader pixel_shader, PixelShaderData pshader_data)
 	{
