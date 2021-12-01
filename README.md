@@ -43,5 +43,3 @@ some code writed by NightHz
 - Mapping to screen
 - Traverse all triangles and compute color for all sampling points (pixel shader)
 - Use z-buffer merge multiple colors
-
-**rasterization rules**

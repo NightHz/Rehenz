@@ -326,8 +326,8 @@ namespace Rehenz
 		int y;
 
 		Vector2I();
-		explicit Vector2I(const Vector2& v);
-		explicit Vector2I(const Vector& v);
+		Vector2I(const Vector2& v);
+		Vector2I(const Vector& v);
 		explicit Vector2I(int _x, int _y);
 	};
 
