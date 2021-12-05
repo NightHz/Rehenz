@@ -17,4 +17,8 @@ namespace Rehenz
 	bool ClipLine3DCohenSutherland(Point3& p1, Point3& p2, float _xmin, float _xmax, float _ymin, float _ymax, float _zmin, float _zmax);
 
 	bool ClipLineCohenSutherland(Point& p1, Point& p2);
+
+	// return the number of small triangles, up to 5
+	// this is a wrong implement, and not correctly handle the trianlge which surrounds corner
+	int ClipTriangle(const Point& p1, const Point& p2, const Point& p3, Point ps_out[15]);
 }
