@@ -4,76 +4,64 @@ namespace Rehenz
 {
 	Vertex::Vertex(Point _p) : p(_p), c(1, 1, 1), uv(0, 0), uv2(0, 0)
 	{
-		rhw = 1;
+		coef = 1;
 	}
 
 	Vertex::Vertex(Point _p, Color _c, UV _uv, UV _uv2, float _rhw)
 		: p(_p), c(_c), uv(_uv), uv2(_uv2)
 	{
-		rhw = _rhw;
+		coef = _rhw;
 	}
 
 	Vertex::Vertex(Point _p, UV _uv, UV _uv2)
 		: p(_p), c(1, 1, 1), uv(_uv), uv2(_uv2)
 	{
-		rhw = 1;
+		coef = 1;
 	}
 
-	Vertex Vertex::operator+(const VertexDistance& dv)
+	Vertex& Vertex::operator*=(float f)
 	{
-		return Vertex(p + dv.dp, c + dv.dc, uv + dv.duv, uv2 + dv.duv2, rhw + dv.drhw);
+		p *= f;
+		c *= f;
+		uv *= f;
+		uv2 *= f;
+		coef *= f;
+		return *this;
 	}
 
-	VertexDistance Vertex::operator-(const Vertex& v)
+	Vertex& Vertex::operator+=(const Vertex& v)
 	{
-		return VertexDistance(*this, v);
+		p += v.p;
+		c += v.c;
+		uv += v.uv;
+		uv2 += v.uv2;
+		coef += v.coef;
+		return *this;
 	}
 
-	VertexDistance::VertexDistance(const Vertex& v1, const Vertex& v2)
-		: dp(v1.p - v2.p), dc(v1.c - v2.c), duv(v1.uv - v2.uv), duv2(v1.uv2 - v2.uv2)
+	Vertex Vertex::operator*(float f) const
 	{
-		drhw = v1.rhw - v2.rhw;
+		return Vertex(p * f, c * f, uv * f, uv2 * f, coef * f);
 	}
 
-	VertexDistance::VertexDistance(Vector _dp, Color _dc, UV _duv, UV _duv2, float _drhw)
-		: dp(_dp), dc(_dc), duv(_duv), duv2(_duv2)
+	Vertex Vertex::operator+(const Vertex& v) const
 	{
-		drhw = _drhw;
+		return Vertex(p + v.p, c + v.c, uv + v.uv, uv2 + v.uv2, coef + v.coef);
 	}
 
-	VertexDistance VertexDistance::operator*(float f)
+	Vertex Vertex::operator-(const Vertex& v) const
 	{
-		return VertexDistance(dp * f, dc * f, duv * f, duv2 * f, drhw * f);
+		return Vertex(p - v.p, c - v.c, uv - v.uv, uv2 - v.uv2, coef - v.coef);
 	}
 
-
-
-	void VertexPerspectiveBegin(Vertex& v)
+	void VertexNormalize(Vertex& v)
 	{
-		v.rhw = 1 / v.p.w;
-		v.c *= v.rhw;
-		v.uv *= v.rhw;
-		v.uv2 *= v.rhw;
-	}
-
-	void VertexPerspectiveEnd(Vertex& v)
-	{
-		float w = 1 / v.rhw;
-		v.c *= w;
-		v.uv *= w;
-		v.uv2 *= w;
+		v *= 1 / v.coef;
 	}
 
 	Vertex VertexLerp(const Vertex& v1, const Vertex& v2, float t)
 	{
-		return Vertex(PointLerp(v1.p, v2.p, t), Lerp(v1.c, v2.c, t), Lerp(v1.uv, v2.uv, t), Lerp(v1.uv2, v2.uv2, t));
-	}
-
-	Vertex VertexScreenLerp(const Vertex& v1, const Vertex& v2, float t)
-	{
-		return Vertex(Point(), Lerp(v1.c, v2.c, t), Lerp(v1.uv, v2.uv, t), Lerp(v1.uv2, v2.uv2, t), Lerp(v1.rhw, v2.rhw, t));
-		//float t2 = (v1.p.w * t) / (v1.p.w * t + v2.p.w * (1 - t));
-		//return VertexLerp(v1, v2, t2);
+		return Vertex(PointLerp(v1.p, v2.p, t), Lerp(v1.c, v2.c, t), Lerp(v1.uv, v2.uv, t), Lerp(v1.uv2, v2.uv2, t), Lerp(v1.coef, v2.coef, t));
 	}
 
 

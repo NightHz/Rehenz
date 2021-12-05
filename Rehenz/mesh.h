@@ -28,36 +28,24 @@ namespace Rehenz
 		Color c;
 		UV uv;
 		UV uv2;
-		// save 1/z(=1/w)
-		float rhw;
+		// default value is 1, save multiplication factor
+		// when multiply by 1/w to standardize p, save 1/w
+		float coef;
 
 		Vertex(Point _p);
 		explicit Vertex(Point _p, Color _c, UV _uv = UV(0, 0), UV _uv2 = UV(0, 0), float _rhw = 1);
 		explicit Vertex(Point _p, UV _uv, UV _uv2 = UV(0, 0));
 
-		Vertex operator+(const VertexDistance&);
-		VertexDistance operator-(const Vertex&);
+		Vertex& operator*=(float);
+		Vertex& operator+=(const Vertex&);
+
+		Vertex operator*(float) const;
+		Vertex operator+(const Vertex&) const;
+		Vertex operator-(const Vertex&) const;
 	};
 
-	struct VertexDistance
-	{
-		friend struct Vertex;
-	private:
-		Vector dp;
-		Color dc;
-		UV duv;
-		UV duv2;
-		float drhw;
-		explicit VertexDistance(const Vertex& v1, const Vertex& v2);
-		explicit VertexDistance(Vector _dp, Color _dc, UV _duv, UV _duv2, float _drhw);
-	public:
-		VertexDistance operator*(float);
-	};
-
-	void VertexPerspectiveBegin(Vertex& v);
-	void VertexPerspectiveEnd(Vertex& v);
+	void VertexNormalize(Vertex& v);
 	Vertex VertexLerp(const Vertex& v1, const Vertex& v2, float t);
-	Vertex VertexScreenLerp(const Vertex& v1, const Vertex& v2, float t);
 
 	class Mesh
 	{

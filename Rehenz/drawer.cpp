@@ -152,23 +152,23 @@ namespace Rehenz
 				float t = static_cast<float>(y - top_l.y) / (bottom_l.y - top_l.y);
 				int xl = Lerp(top_l.x, bottom_l.x, t);
 				int xr = Lerp(top_r.x, bottom_r.x, t);
-				Vertex vl = VertexScreenLerp(v_tl, v_bl, t);
-				Vertex vr = VertexScreenLerp(v_tr, v_br, t);
+				Vertex vl = VertexLerp(v_tl, v_bl, t);
+				Vertex vr = VertexLerp(v_tr, v_br, t);
 				if (xl == xr)
 				{
-					VertexPerspectiveEnd(vl);
-					VertexPerspectiveEnd(vr);
-					Pixel(Point2I(xl, y), Color(pixel_shader(pshader_data, vl)), 1 / vl.rhw);
-					Pixel(Point2I(xl, y), Color(pixel_shader(pshader_data, vr)), 1 / vr.rhw);
+					VertexNormalize(vl);
+					VertexNormalize(vr);
+					Pixel(Point2I(xl, y), Color(pixel_shader(pshader_data, vl)), vl.p.w);
+					Pixel(Point2I(xl, y), Color(pixel_shader(pshader_data, vr)), vr.p.w);
 				}
 				else
 				{
 					for (int x = xl; x <= xr; x++)
 					{
 						float t2 = static_cast<float>(x - xl) / (xr - xl);
-						Vertex v = VertexScreenLerp(vl, vr, t2);
-						VertexPerspectiveEnd(v);
-						Pixel(Point2I(x, y), Color(pixel_shader(pshader_data, v)), 1 / v.rhw);
+						Vertex v = VertexLerp(vl, vr, t2);
+						VertexNormalize(v);
+						Pixel(Point2I(x, y), Color(pixel_shader(pshader_data, v)), v.p.w);
 					}
 				}
 			}
@@ -189,7 +189,7 @@ namespace Rehenz
 		{
 			float t = static_cast<float>(p2.y - p1.y) / (p3.y - p1.y);
 			int x = Lerp(p1.x, p3.x, t);
-			auto v = VertexScreenLerp(*v1, *v3, t);
+			auto v = VertexLerp(*v1, *v3, t);
 			if (p2.x <= x)
 			{
 				Trapezoid(p1, p1, p2, Point2I(x, p2.y), *v1, *v1, *v2, v, pixel_shader, pshader_data);
