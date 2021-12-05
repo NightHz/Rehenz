@@ -163,12 +163,14 @@ namespace Rehenz
 				}
 				else
 				{
+					Vertex v_step = (vr - vl) * (1 / static_cast<float>(xr - xl));
+					Vertex v_current = vl;
 					for (int x = xl; x <= xr; x++)
 					{
-						float t2 = static_cast<float>(x - xl) / (xr - xl);
-						Vertex v = VertexLerp(vl, vr, t2);
+						Vertex v = v_current;
 						VertexNormalize(v);
 						Pixel(Point2I(x, y), Color(pixel_shader(pshader_data, v)), v.p.w);
+						v_current += v_step;
 					}
 				}
 			}
