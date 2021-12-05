@@ -47,12 +47,13 @@ some code writed by NightHz
 
 **rasterization rules**
 
-- [-1,1]x[1,-1] map to [0,w]x[0,h], then take the integer part. Specially, (1,-1) map to (w,h) then become (w-1,h-1)
+- `[-1,1]x[1,-1]` map to `[0,w]x[0,h]`, then take the integer part. Specially, `(1,-1)` map to `(w,h)` then become `(w-1,h-1)`
 - When rasterize lines, draw all end points
 - When rasterize triangles, draw all edges
 
 **comments**
 
-- Two attempts of perspective control interpolation
-  1. When screen point is linearly interpolated according to t, it's according to t' that vertex is linearly interpolated, and t' = (w1 * t) / (w1 * t + w2 * (1 - t))
-  2. Vertex times 1/w is linearly interpolated according to t which be same with screen point
+Two attempts of perspective control interpolation
+
+1. When screen point is linearly interpolated according to `t`, it's according to `t'` that vertex is linearly interpolated, and `t' = (w1 * t) / (w1 * t + w2 * (1 - t))`
+2. Vertex times `1/w` is linearly interpolated according to `t` which be same with screen point
