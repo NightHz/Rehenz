@@ -201,8 +201,14 @@ int clip_example()
 	Point2 p1 = Point2(-0.3f, 0.0f);
 	Point2 p2 = Point2(1.0f, 2.0f);
 	cout << "before: p1(" << p1.x << "," << p1.y << ") p2(" << p2.x << "," << p2.y << ")" << endl;
-	cout << "clip... :" << CohenSutherlandClip2D(p1, p2) << endl;
+	cout << "clip... :" << ClipLine2DCohenSutherland(p1, p2, 1, 1) << endl;
 	cout << "after : p1(" << p1.x << "," << p1.y << ") p2(" << p2.x << "," << p2.y << ")" << endl;
+
+	Point3 p3 = Point3(-0.3f, -1.0f, -3.2f);
+	Point3 p4 = Point3(1.0f, 2.0f, 5.0f);
+	cout << "before: p3(" << p3.x << "," << p3.y << "," << p3.z << ") p4(" << p4.x << "," << p4.y << "," << p4.z << ")" << endl;
+	cout << "clip... :" << ClipLine3DCohenSutherland(p3, p4, 1, 1, 1) << endl;
+	cout << "after : p3(" << p3.x << "," << p3.y << "," << p3.z << ") p4(" << p4.x << "," << p4.y << "," << p4.z << ")" << endl;
 
 	return 0;
 }
@@ -212,6 +218,6 @@ int main()
 	cout << "Hello~ Rehenz~" << endl;
 
 	//return noise_example();
-	return render_soft_example();
+	//return render_soft_example();
 	return clip_example();
 }

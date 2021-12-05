@@ -3,17 +3,9 @@
 
 namespace Rehenz
 {
-	namespace ClipState
-	{
-		const int inside = 0; // 000000
-		const int left = 1;   // 000001
-		const int right = 2;  // 000010
-		const int down = 4;   // 000100
-		const int top = 8;    // 001000
-		const int front = 16; // 010000
-		const int back = 32;  // 100000
-	};
+	bool ClipLine2DCohenSutherland(Point2& p1, Point2& p2, float _xmax, float _ymax);
+	bool ClipLine2DCohenSutherland(Point2& p1, Point2& p2, float _xmin, float _xmax, float _ymin, float _ymax);
 
-	int ComputeClipState(Point2 p);
-	bool CohenSutherlandClip2D(Point2& p1, Point2& p2);
+	bool ClipLine3DCohenSutherland(Point3& p1, Point3& p2, float _xmax, float _ymax, float _zmax);
+	bool ClipLine3DCohenSutherland(Point3& p1, Point3& p2, float _xmin, float _xmax, float _ymin, float _ymax, float _zmin, float _zmax);
 }
