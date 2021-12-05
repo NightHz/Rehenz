@@ -268,7 +268,13 @@ namespace Rehenz
 		Vector3(const Vector& v);
 		explicit Vector3(float _x, float _y, float _z);
 
+		Vector3& operator+=(Vector3);
+		Vector3& operator*=(float);
+
+		Vector3 operator+(Vector3) const;
+		Vector3 operator-(Vector3) const;
 		Vector3 operator*(float) const;
+
 		bool operator==(Vector3) const;
 		bool operator!=(Vector3) const;
 	};

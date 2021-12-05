@@ -621,6 +621,32 @@ namespace Rehenz
 		z = _z;
 	}
 
+	Vector3& Vector3::operator+=(Vector3 v)
+	{
+		x += v.x;
+		y += v.y;
+		z += v.z;
+		return *this;
+	}
+
+	Vector3& Vector3::operator*=(float f)
+	{
+		x *= f;
+		y *= f;
+		z *= f;
+		return *this;
+	}
+
+	Vector3 Vector3::operator+(Vector3 v) const
+	{
+		return Vector3(x + v.x, y + v.y, z + v.z);
+	}
+
+	Vector3 Vector3::operator-(Vector3 v) const
+	{
+		return Vector3(x - v.x, y - v.y, z - v.z);
+	}
+
 	Vector3 Vector3::operator*(float f) const
 	{
 		return Vector3(f * x, f * y, f * z);
