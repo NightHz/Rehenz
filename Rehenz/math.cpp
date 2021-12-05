@@ -558,6 +558,13 @@ namespace Rehenz
 		y = _y;
 	}
 
+	Vector2& Vector2::operator+=(Vector2 v)
+	{
+		x += v.x;
+		y += v.y;
+		return *this;
+	}
+
 	Vector2& Vector2::operator*=(float f)
 	{
 		x *= f;
