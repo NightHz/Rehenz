@@ -79,15 +79,16 @@ int render_soft_example()
 	auto texture1 = CreateTexture1();
 	auto textureC = CreateTextureC();
 	auto texture_plaid = CreateTexturePlaid();
+	auto texture_dice = CreateTextureDice();
 	// shader
 	PixelShader my_pixel_shader = [](const PixelShaderData& data, const Vertex& v0)->Color
 	{
-		(data);
-		return Color(v0.uv.x, v0.uv.y, 0.8f);
-		/*if (data.pobj->texture2 != nullptr)
+		//(data);
+		//return Color(v0.uv.x, v0.uv.y, 0.8f);
+		if (data.pobj->texture2 != nullptr)
 			return data.pobj->texture2->GetColor(v0.uv2);
 		else
-			return v0.c;*/
+			return Color(0.1f, 0.1f, 0.1f);
 	};
 	// scene
 	Objects test1;
@@ -118,7 +119,7 @@ int render_soft_example()
 	obj_sphere4->scale = Vector(1, 1, 1);
 	test1.AddObject(obj_sphere4);
 	Objects test2;
-	auto obj_cube = std::make_shared<Object>(cube, texture_plaid, texture1);
+	auto obj_cube = std::make_shared<Object>(cube, texture_plaid, texture_dice);
 	obj_cube->position = Vector(0, 0, 0);
 	obj_cube->rotation = EulerAngles(0, -pi / 4, pi / 4 + pi / 24);
 	obj_cube->scale = Vector(2.2f, 2.2f, 2.2f);
