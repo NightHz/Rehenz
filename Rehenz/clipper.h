@@ -1,5 +1,6 @@
 #pragma once
 #include "math.h"
+#include "mesh.h"
 
 namespace Rehenz
 {
@@ -21,4 +22,6 @@ namespace Rehenz
 	// return the number of small triangles, up to 5
 	// this is a wrong implement, and not correctly handle the trianlge which surrounds corner
 	int ClipTriangle(const Point& p1, const Point& p2, const Point& p3, Point ps_out[15]);
+
+	void ClipTriangle(std::vector<Vertex>& vertices, std::vector<int>& triangles, int _a, int _b, int _c);
 }

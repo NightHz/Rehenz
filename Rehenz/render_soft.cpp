@@ -1,5 +1,6 @@
 #include "render_soft.h"
 #include "drawer.h"
+#include "clipper.h"
 
 namespace Rehenz
 {
@@ -66,6 +67,10 @@ namespace Rehenz
 					if (Inside(va) && Inside(vb) && Inside(vc))
 					{
 						triangles.push_back(a); triangles.push_back(b); triangles.push_back(c);
+					}
+					else
+					{
+						ClipTriangle(vertices, triangles, a, b, c);
 					}
 				}
 			}

@@ -1,4 +1,5 @@
 #include "clipper.h"
+#include <stack>
 
 namespace Rehenz
 {
@@ -9,8 +10,8 @@ namespace Rehenz
 		const int right = 2;  // 000010
 		const int down = 4;   // 000100
 		const int top = 8;    // 001000
-		const int front = 16; // 010000
-		const int back = 32;  // 100000
+		const int back = 16;  // 010000
+		const int front = 32; // 100000
 	};
 
 	float xmin = 0, xmax = 1;
@@ -233,26 +234,32 @@ namespace Rehenz
 				if (state & ClipState::front)
 				{
 					p = p1 + dp * ((p1.w - p1.z) / (dp.z - dp.w));
+					p.z = p.w;
 				}
 				else if (state & ClipState::back)
 				{
 					p = p1 + dp * (-p1.z / dp.z);
+					p.z = 0;
 				}
 				else if (state & ClipState::top)
 				{
 					p = p1 + dp * ((p1.w - p1.y) / (dp.y - dp.w));
+					p.y = p.w;
 				}
 				else if (state & ClipState::down)
 				{
 					p = p1 + dp * ((-p1.w - p1.y) / (dp.y + dp.w));
+					p.y = -p.w;
 				}
 				else if (state & ClipState::right)
 				{
 					p = p1 + dp * ((p1.w - p1.x) / (dp.x - dp.w));
+					p.x = p.w;
 				}
 				else if (state & ClipState::left)
 				{
 					p = p1 + dp * ((-p1.w - p1.x) / (dp.x + dp.w));
+					p.x = -p.w;
 				}
 
 				if (state == p1_state)
@@ -281,7 +288,7 @@ namespace Rehenz
 		ps_out[i] = p3, ps_out[i + 1] = p1;
 		if (ClipLineCohenSutherland(ps_out[i], ps_out[i + 1]))
 			i += 2;
-		
+
 		if (i == 6)
 		{
 			ps_out[11] = ps_out[5];
@@ -303,4 +310,287 @@ namespace Rehenz
 			return 0;
 		}
 	}
+
+	void ClipTriangle(std::vector<Vertex>& vertices, std::vector<int>& triangles, int _a, int _b, int _c)
+	{
+		std::stack<int> tris_wait_clip;
+		tris_wait_clip.push(_c); tris_wait_clip.push(_b); tris_wait_clip.push(_a);
+		while (!tris_wait_clip.empty())
+		{
+			// get three vertices of the triangle
+			int a = tris_wait_clip.top(); tris_wait_clip.pop();
+			int b = tris_wait_clip.top(); tris_wait_clip.pop();
+			int c = tris_wait_clip.top(); tris_wait_clip.pop();
+
+			// Cohen Sutherland algorithm
+			// compute clip state
+			int a_state = ComputeClipState(vertices[a].p);
+			int b_state = ComputeClipState(vertices[b].p);
+			int c_state = ComputeClipState(vertices[c].p);
+
+			while (true)
+			{
+				// 1 if all inside
+				if (a_state == ClipState::inside && b_state == ClipState::inside && c_state == ClipState::inside)
+				{
+					triangles.push_back(a); triangles.push_back(b); triangles.push_back(c);
+					break;
+				}
+				// 2 if all in one side
+				else if (a_state & b_state & c_state)
+				{
+					break;
+				}
+				// 3 if need clip
+				else
+				{
+					// sort to a >= b,c
+					if (b_state > a_state && b_state >= c_state)
+					{
+						int temp_state = a_state;
+						int temp = a;
+						a_state = b_state, a = b;
+						b_state = c_state, b = c;
+						c_state = temp_state, c = temp;
+					}
+					else if (c_state > a_state && c_state >= b_state)
+					{
+						int temp_state = a_state;
+						int temp = a;
+						a_state = c_state, a = c;
+						c_state = b_state, c = b;
+						b_state = temp_state, b = temp;
+					}
+					Vertex& va = vertices[a], & vb = vertices[b], & vc = vertices[c];
+					Vertex dv(Point(0)), vd(Point(0)), ve(Point(0));
+					int condition = 0;
+
+					// compute clip point
+					if (a_state & ClipState::front)
+					{
+						// 3-x-1 if a,b outside
+						if (b_state & ClipState::front)
+						{
+							condition = 1;
+							dv = va - vc;
+							vd = vc + dv * ((vc.p.w - vc.p.z) / (dv.p.z - dv.p.w));
+							vd.p.z = vd.p.w;
+							dv = vb - vc;
+							ve = vc + dv * ((vc.p.w - vc.p.z) / (dv.p.z - dv.p.w));
+							ve.p.z = ve.p.w;
+						}
+						// 3-x-2 if a,c outside
+						else if (c_state & ClipState::front)
+						{
+							condition = 2;
+							dv = va - vb;
+							vd = vb + dv * ((vb.p.w - vb.p.z) / (dv.p.z - dv.p.w));
+							vd.p.z = vd.p.w;
+							dv = vc - vb;
+							ve = vb + dv * ((vb.p.w - vb.p.z) / (dv.p.z - dv.p.w));
+							ve.p.z = ve.p.w;
+						}
+						// 3-x-3 if only a outside
+						else
+						{
+							condition = 3;
+							dv = va - vb;
+							vd = vb + dv * ((vb.p.w - vb.p.z) / (dv.p.z - dv.p.w));
+							vd.p.z = vd.p.w;
+							dv = va - vc;
+							ve = vc + dv * ((vc.p.w - vc.p.z) / (dv.p.z - dv.p.w));
+							ve.p.z = ve.p.w;
+						}
+					}
+					else if (a_state & ClipState::back)
+					{
+						if (b_state & ClipState::back)
+						{
+							condition = 1;
+							dv = va - vc;
+							vd = vc + dv * (-vc.p.z / dv.p.z);
+							vd.p.z = 0;
+							dv = vb - vc;
+							ve = vc + dv * (-vc.p.z / dv.p.z);
+							ve.p.z = 0;
+						}
+						else if (c_state & ClipState::back)
+						{
+							condition = 2;
+							dv = va - vb;
+							vd = vb + dv * (-vb.p.z / dv.p.z);
+							vd.p.z = 0;
+							dv = vc - vb;
+							ve = vb + dv * (-vb.p.z / dv.p.z);
+							ve.p.z = 0;
+						}
+						else
+						{
+							condition = 3;
+							dv = va - vb;
+							vd = vb + dv * (-vb.p.z / dv.p.z);
+							vd.p.z = 0;
+							dv = va - vc;
+							ve = vc + dv * (-vc.p.z / dv.p.z);
+							ve.p.z = 0;
+						}
+					}
+					else if (a_state & ClipState::top)
+					{
+						if (b_state & ClipState::top)
+						{
+							condition = 1;
+							dv = va - vc;
+							vd = vc + dv * ((vc.p.w - vc.p.y) / (dv.p.y - dv.p.w));
+							vd.p.y = vd.p.w;
+							dv = vb - vc;
+							ve = vc + dv * ((vc.p.w - vc.p.y) / (dv.p.y - dv.p.w));
+							ve.p.y = ve.p.w;
+						}
+						else if (c_state & ClipState::top)
+						{
+							condition = 2;
+							dv = va - vb;
+							vd = vb + dv * ((vb.p.w - vb.p.y) / (dv.p.y - dv.p.w));
+							vd.p.y = vd.p.w;
+							dv = vc - vb;
+							ve = vb + dv * ((vb.p.w - vb.p.y) / (dv.p.y - dv.p.w));
+							ve.p.y = ve.p.w;
+						}
+						else
+						{
+							condition = 3;
+							dv = va - vb;
+							vd = vb + dv * ((vb.p.w - vb.p.y) / (dv.p.y - dv.p.w));
+							vd.p.y = vd.p.w;
+							dv = va - vc;
+							ve = vc + dv * ((vc.p.w - vc.p.y) / (dv.p.y - dv.p.w));
+							ve.p.y = ve.p.w;
+						}
+					}
+					else if (a_state & ClipState::down)
+					{
+						if (b_state & ClipState::down)
+						{
+							condition = 1;
+							dv = va - vc;
+							vd = vc + dv * ((-vc.p.w - vc.p.y) / (dv.p.y + dv.p.w));
+							vd.p.y = -vd.p.w;
+							dv = vb - vc;
+							ve = vc + dv * ((-vc.p.w - vc.p.y) / (dv.p.y + dv.p.w));
+							ve.p.y = -ve.p.w;
+						}
+						else if (c_state & ClipState::down)
+						{
+							condition = 2;
+							dv = va - vb;
+							vd = vb + dv * ((-vb.p.w - vb.p.y) / (dv.p.y + dv.p.w));
+							vd.p.y = -vd.p.w;
+							dv = vc - vb;
+							ve = vb + dv * ((-vb.p.w - vb.p.y) / (dv.p.y + dv.p.w));
+							ve.p.y = -ve.p.w;
+						}
+						else
+						{
+							condition = 3;
+							dv = va - vb;
+							vd = vb + dv * ((-vb.p.w - vb.p.y) / (dv.p.y + dv.p.w));
+							vd.p.y = -vd.p.w;
+							dv = va - vc;
+							ve = vc + dv * ((-vc.p.w - vc.p.y) / (dv.p.y + dv.p.w));
+							ve.p.y = -ve.p.w;
+						}
+					}
+					else if (a_state & ClipState::right)
+					{
+						if (b_state & ClipState::right)
+						{
+							condition = 1;
+							dv = va - vc;
+							vd = vc + dv * ((vc.p.w - vc.p.x) / (dv.p.x - dv.p.w));
+							vd.p.x = vd.p.w;
+							dv = vb - vc;
+							ve = vc + dv * ((vc.p.w - vc.p.x) / (dv.p.x - dv.p.w));
+							ve.p.x = ve.p.w;
+						}
+						else if (c_state & ClipState::right)
+						{
+							condition = 2;
+							dv = va - vb;
+							vd = vb + dv * ((vb.p.w - vb.p.x) / (dv.p.x - dv.p.w));
+							vd.p.x = vd.p.w;
+							dv = vc - vb;
+							ve = vb + dv * ((vb.p.w - vb.p.x) / (dv.p.x - dv.p.w));
+							ve.p.x = ve.p.w;
+						}
+						else
+						{
+							condition = 3;
+							dv = va - vb;
+							vd = vb + dv * ((vb.p.w - vb.p.x) / (dv.p.x - dv.p.w));
+							vd.p.x = vd.p.w;
+							dv = va - vc;
+							ve = vc + dv * ((vc.p.w - vc.p.x) / (dv.p.x - dv.p.w));
+							ve.p.x = ve.p.w;
+						}
+					}
+					else if (a_state & ClipState::left)
+					{
+						if (b_state & ClipState::left)
+						{
+							condition = 1;
+							dv = va - vc;
+							vd = vc + dv * ((-vc.p.w - vc.p.x) / (dv.p.x + dv.p.w));
+							vd.p.x = -vd.p.w;
+							dv = vb - vc;
+							ve = vc + dv * ((-vc.p.w - vc.p.x) / (dv.p.x + dv.p.w));
+							ve.p.x = -ve.p.w;
+						}
+						else if (c_state & ClipState::left)
+						{
+							condition = 2;
+							dv = va - vb;
+							vd = vb + dv * ((-vb.p.w - vb.p.x) / (dv.p.x + dv.p.w));
+							vd.p.x = -vd.p.w;
+							dv = vc - vb;
+							ve = vb + dv * ((-vb.p.w - vb.p.x) / (dv.p.x + dv.p.w));
+							ve.p.x = -ve.p.w;
+						}
+						else
+						{
+							condition = 3;
+							dv = va - vb;
+							vd = vb + dv * ((-vb.p.w - vb.p.x) / (dv.p.x + dv.p.w));
+							vd.p.x = -vd.p.w;
+							dv = va - vc;
+							ve = vc + dv * ((-vc.p.w - vc.p.x) / (dv.p.x + dv.p.w));
+							ve.p.x = -ve.p.w;
+						}
+					}
+
+					// update vertices
+					vertices.push_back(vd);
+					vertices.push_back(ve);
+					int e = static_cast<int>(vertices.size()) - 1;
+					int d = e - 1;
+					if (condition == 1)
+					{
+						a = d, a_state = ComputeClipState(vd.p);
+						b = e, b_state = ComputeClipState(ve.p);
+					}
+					else if (condition == 2)
+					{
+						a = d, a_state = ComputeClipState(vd.p);
+						c = e, c_state = ComputeClipState(ve.p);
+					}
+					else
+					{
+						a = d, a_state = ComputeClipState(vd.p);
+						tris_wait_clip.push(c); tris_wait_clip.push(d); tris_wait_clip.push(e);
+					}
+				}
+			}
+		}
+	}
+
 }

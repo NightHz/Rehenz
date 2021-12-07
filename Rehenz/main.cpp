@@ -218,6 +218,6 @@ int main()
 	cout << "Hello~ Rehenz~" << endl;
 
 	//return noise_example();
-	//return render_soft_example();
+	return render_soft_example();
 	return clip_example();
 }
