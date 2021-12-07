@@ -70,7 +70,7 @@ namespace Rehenz
 					}
 					else
 					{
-						ClipTriangle(vertices, triangles, a, b, c);
+						ClipTriangleCohenSutherland(vertices, triangles, a, b, c);
 					}
 				}
 			}

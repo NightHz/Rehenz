@@ -276,42 +276,7 @@ namespace Rehenz
 		}
 	}
 
-	int ClipTriangle(const Point& p1, const Point& p2, const Point& p3, Point ps_out[15])
-	{
-		int i = 0;
-		ps_out[i] = p1, ps_out[i + 1] = p2;
-		if (ClipLineCohenSutherland(ps_out[i], ps_out[i + 1]))
-			i += 2;
-		ps_out[i] = p2, ps_out[i + 1] = p3;
-		if (ClipLineCohenSutherland(ps_out[i], ps_out[i + 1]))
-			i += 2;
-		ps_out[i] = p3, ps_out[i + 1] = p1;
-		if (ClipLineCohenSutherland(ps_out[i], ps_out[i + 1]))
-			i += 2;
-
-		if (i == 6)
-		{
-			ps_out[11] = ps_out[5];
-			ps_out[8] = ps_out[10] = ps_out[4];
-			ps_out[5] = ps_out[7] = ps_out[3];
-			ps_out[4] = ps_out[2];
-			ps_out[3] = ps_out[6] = ps_out[9] = ps_out[0];
-			return 4;
-		}
-		else if (i == 4)
-		{
-			ps_out[5] = ps_out[3];
-			ps_out[4] = ps_out[2];
-			ps_out[3] = ps_out[0];
-			return 2;
-		}
-		else
-		{
-			return 0;
-		}
-	}
-
-	void ClipTriangle(std::vector<Vertex>& vertices, std::vector<int>& triangles, int _a, int _b, int _c)
+	void ClipTriangleCohenSutherland(std::vector<Vertex>& vertices, std::vector<int>& triangles, int _a, int _b, int _c)
 	{
 		std::stack<int> tris_wait_clip;
 		tris_wait_clip.push(_c); tris_wait_clip.push(_b); tris_wait_clip.push(_a);
