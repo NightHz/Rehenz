@@ -52,6 +52,21 @@ namespace Rehenz
 		return state;
 	}
 
+	bool ClipPointInside(Point2 p)
+	{
+		return ComputeClipState(p) == ClipState::inside;
+	}
+
+	bool ClipPointInside(Point3 p)
+	{
+		return ComputeClipState(p) == ClipState::inside;
+	}
+
+	bool ClipPointInside(Point p)
+	{
+		return ComputeClipState(p) == ClipState::inside;
+	}
+
 	bool ClipLine2DCohenSutherland(Point2& p1, Point2& p2, float _xmax, float _ymax)
 	{
 		return ClipLine2DCohenSutherland(p1, p2, 0, _xmax, 0, _ymax);

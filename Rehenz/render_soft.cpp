@@ -54,8 +54,6 @@ namespace Rehenz
 			}
 
 			// Clipping and back-face culling
-			static auto Inside = [](Vertex& v) -> bool
-			{ return v.p.x > -v.p.w && v.p.x < v.p.w && v.p.y > -v.p.w && v.p.y < v.p.w && v.p.z > 0 && v.p.z < v.p.w; };
 			auto& tris_mesh = pobj->pmesh->GetTriangles();
 			std::vector<int> triangles;
 			for (size_t i = 0; i < tris_mesh.size(); i += 3)
@@ -64,7 +62,7 @@ namespace Rehenz
 				Vertex& va = vertices[a], & vb = vertices[b], & vc = vertices[c];
 				if (TrianglesNormal(PointStandard(va.p), PointStandard(vb.p), PointStandard(vc.p)).z < 0)
 				{
-					if (Inside(va) && Inside(vb) && Inside(vc))
+					if (ClipPointInside(va.p) && ClipPointInside(vb.p) && ClipPointInside(vc.p))
 					{
 						triangles.push_back(a); triangles.push_back(b); triangles.push_back(c);
 					}

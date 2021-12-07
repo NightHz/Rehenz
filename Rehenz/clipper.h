@@ -4,12 +4,9 @@
 
 namespace Rehenz
 {
-	// inside return 0
-	int ComputeClipState(Point2 p);
-	// inside return 0
-	int ComputeClipState(Point3 p);
-	// inside return 0
-	int ComputeClipState(Point p);
+	bool ClipPointInside(Point2 p);
+	bool ClipPointInside(Point3 p);
+	bool ClipPointInside(Point p);
 
 	bool ClipLine2DCohenSutherland(Point2& p1, Point2& p2, float _xmax, float _ymax);
 	bool ClipLine2DCohenSutherland(Point2& p1, Point2& p2, float _xmin, float _xmax, float _ymin, float _ymax);
