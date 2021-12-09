@@ -56,17 +56,23 @@ namespace Rehenz
 			// Clipping and back-face culling
 			auto& tris_mesh = pobj->pmesh->GetTriangles();
 			std::vector<int> triangles;
+			Point origin = GetOriginP(z_near, z_far);
 			for (size_t i = 0; i < tris_mesh.size(); i += 3)
 			{
 				int a = tris_mesh[i], b = tris_mesh[i + 1], c = tris_mesh[i + 2];
 				Vertex& va = vertices[a], & vb = vertices[b], & vc = vertices[c];
-				if (TrianglesNormal(PointStandard(va.p), PointStandard(vb.p), PointStandard(vc.p)).z < 0)
+
+				auto sight = va.p - origin;
+				auto normal = TrianglesNormal(va.p, vb.p, vc.p);
+				auto dot_sight_normal = VectorDot(sight, normal);
+
+				if (dot_sight_normal < 0) // judge back-face
 				{
 					if (ClipPointInside(va.p) && ClipPointInside(vb.p) && ClipPointInside(vc.p))
 					{
 						triangles.push_back(a); triangles.push_back(b); triangles.push_back(c);
 					}
-					else
+					else // clipping
 					{
 						ClipTriangleCohenSutherland(vertices, triangles, a, b, c);
 					}
