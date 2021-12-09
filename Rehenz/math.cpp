@@ -357,6 +357,11 @@ namespace Rehenz
 		return result;
 	}
 
+	Point GetOriginP(float z_near, float z_far)
+	{
+		return Point(0, 0, -z_near * z_far / (z_far - z_near), 0);
+	}
+
 	Matrix GetMatrixE(float psi, float theta, float phi)
 	{
 		Matrix result;
