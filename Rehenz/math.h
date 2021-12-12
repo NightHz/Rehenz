@@ -245,16 +245,23 @@ namespace Rehenz
 		Vector2(const Vector& v);
 		explicit Vector2(float _x, float _y);
 
+		// some operator
 		Vector2& operator+=(Vector2);
+		Vector2& operator-=(Vector2);
 		Vector2& operator*=(float);
+		Vector2& operator/=(float);
+
+		Vector2 operator-() const;
 
 		Vector2 operator+(Vector2) const;
 		Vector2 operator-(Vector2) const;
 		Vector2 operator*(float) const;
+		Vector2 operator/(float) const;
 
 		bool operator==(Vector2) const;
 		bool operator!=(Vector2) const;
 	};
+	Vector2 operator*(float, Vector2);
 
 	// 2-component point
 	typedef Vector2 Point2;
@@ -271,16 +278,23 @@ namespace Rehenz
 		Vector3(const Vector& v);
 		explicit Vector3(float _x, float _y, float _z);
 
+		// some operator
 		Vector3& operator+=(Vector3);
+		Vector3& operator-=(Vector3);
 		Vector3& operator*=(float);
+		Vector3& operator/=(float);
+
+		Vector3 operator-() const;
 
 		Vector3 operator+(Vector3) const;
 		Vector3 operator-(Vector3) const;
 		Vector3 operator*(float) const;
+		Vector3 operator/(float) const;
 
 		bool operator==(Vector3) const;
 		bool operator!=(Vector3) const;
 	};
+	Vector3 operator*(float, Vector3);
 
 	// 3-component point without w
 	typedef Vector3 Point3;
@@ -307,11 +321,17 @@ namespace Rehenz
 	// vector cross
 	Vector VectorCross(Vector v1, Vector v2);
 
+	// vector cross
+	Vector3 VectorCross(Vector3 v1, Vector3 v2);
+
 	// vector lerp
 	Vector VectorLerp(Vector v1, Vector v2, float t);
 
 	// vector normalize
 	Vector VectorNormalize(Vector v1);
+
+	// vector normalize
+	Vector3 VectorNormalize(Vector3 v);
 
 	// point lerp
 	Point PointLerp(Point p1, Point p2, float t);
@@ -324,6 +344,9 @@ namespace Rehenz
 
 	// get point distance
 	float PointDistance(Point2 p1, Point2 p2);
+
+	// get point distance
+	float PointDistance(Point3 p1, Point3 p2);
 
 	// get triangles normal vector
 	Vector TrianglesNormal(Point p1, Point p2, Point p3);

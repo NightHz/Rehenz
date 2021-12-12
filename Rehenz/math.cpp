@@ -570,11 +570,30 @@ namespace Rehenz
 		return *this;
 	}
 
+	Vector2& Vector2::operator-=(Vector2 v)
+	{
+		x -= v.x;
+		y -= v.y;
+		return *this;
+	}
+
 	Vector2& Vector2::operator*=(float f)
 	{
 		x *= f;
 		y *= f;
 		return *this;
+	}
+
+	Vector2& Vector2::operator/=(float f)
+	{
+		x /= f;
+		y /= f;
+		return *this;
+	}
+
+	Vector2 Vector2::operator-() const
+	{
+		return Vector2(-x, -y);
 	}
 
 	Vector2 Vector2::operator+(Vector2 v) const
@@ -590,6 +609,11 @@ namespace Rehenz
 	Vector2 Vector2::operator*(float f) const
 	{
 		return Vector2(f * x, f * y);
+	}
+
+	Vector2 Vector2::operator/(float f) const
+	{
+		return Vector2(x / f, y / f);
 	}
 
 	bool Vector2::operator==(Vector2 v) const
@@ -634,12 +658,34 @@ namespace Rehenz
 		return *this;
 	}
 
+	Vector3& Vector3::operator-=(Vector3 v)
+	{
+		x -= v.x;
+		y -= v.y;
+		z -= v.z;
+		return *this;
+	}
+
 	Vector3& Vector3::operator*=(float f)
 	{
 		x *= f;
 		y *= f;
 		z *= f;
 		return *this;
+	}
+
+	Vector3& Vector3::operator/=(float f)
+	{
+		float f0 = 1 / f;
+		x *= f0;
+		y *= f0;
+		z *= f0;
+		return *this;
+	}
+
+	Vector3 Vector3::operator-() const
+	{
+		return Vector3(-x, -y, -z);
 	}
 
 	Vector3 Vector3::operator+(Vector3 v) const
@@ -657,6 +703,12 @@ namespace Rehenz
 		return Vector3(f * x, f * y, f * z);
 	}
 
+	Vector3 Vector3::operator/(float f) const
+	{
+		float f0 = 1 / f;
+		return Vector3(x * f0, y * f0, z * f0);
+	}
+
 	bool Vector3::operator==(Vector3 v) const
 	{
 		if (v.x == x && v.y == y && v.z == z)
@@ -668,6 +720,16 @@ namespace Rehenz
 	bool Vector3::operator!=(Vector3 v) const
 	{
 		return !(*this == v);
+	}
+
+	Vector2 operator*(float f, Vector2 v)
+	{
+		return v * f;
+	}
+
+	Vector3 operator*(float f, Vector3 v)
+	{
+		return v * f;
 	}
 
 	float VectorLength(Vector v1)
@@ -710,6 +772,15 @@ namespace Rehenz
 		return result;
 	}
 
+	Vector3 VectorCross(Vector3 v1, Vector3 v2)
+	{
+		Vector3 result;
+		result.x = v1.y * v2.z - v1.z * v2.y;
+		result.y = v1.z * v2.x - v1.x * v2.z;
+		result.z = v1.x * v2.y - v1.y * v2.x;
+		return result;
+	}
+
 	Vector VectorLerp(Vector v1, Vector v2, float t)
 	{
 		Vector result;
@@ -734,6 +805,15 @@ namespace Rehenz
 		result.w = 0.0f;
 
 		return result;
+	}
+
+	Vector3 VectorNormalize(Vector3 v)
+	{
+		float length = VectorLength(v);
+		if (length == 0)
+			return v;
+
+		return v / length;
 	}
 
 	Point PointLerp(Point p1, Point p2, float t)
@@ -770,6 +850,11 @@ namespace Rehenz
 	float PointDistance(Point2 p1, Point2 p2)
 	{
 		return sqrtf((float)((p1.x - p2.x) * (p1.x - p2.x) + (p1.y - p2.y) * (p1.y - p2.y)));
+	}
+
+	float PointDistance(Point3 p1, Point3 p2)
+	{
+		return VectorLength(p1 - p2);
 	}
 
 	Vector TrianglesNormal(Point p1, Point p2, Point p3)
