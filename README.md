@@ -2,6 +2,8 @@
 
 some code writed by NightHz
 
+include [a renderer](#render_soft) and noise generation algorithm.
+
 ## code style
 
 - file: `render_soft.h`
@@ -20,7 +22,7 @@ some code writed by NightHz
 - `mesh.h`: save model
 - `noise_gen.h`: generate a noise, such as Perlin noise
 - `rehenz.h`: include all header file
-- `render_soft.h`: use cpu to render 3-dim world
+- `render_soft.h`: **a renderer** which use cpu to render 3-dim world
 - `surface_dx8.h`: use DirectDraw in DirectX8 to create surface which can draw image
 - `type.h`: define basic type such as `uint`
 
