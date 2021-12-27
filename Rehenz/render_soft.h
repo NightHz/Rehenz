@@ -8,10 +8,10 @@
 
 namespace Rehenz
 {
-	class Object;
+	class RenderObject;
 	class Camera;
 
-	class Objects;
+	class RenderObjects;
 
 	struct VertexShaderData;
 	struct PixelShaderData;
@@ -20,7 +20,7 @@ namespace Rehenz
 
 
 
-	class Object
+	class RenderObject
 	{
 	private:
 	public:
@@ -31,33 +31,33 @@ namespace Rehenz
 		EulerAngles rotation;
 		Vector scale;
 
-		Object();
-		explicit Object(std::shared_ptr<Mesh> _pmesh);
-		explicit Object(std::shared_ptr<Mesh> _pmesh, std::shared_ptr<Texture> _pt, std::shared_ptr<Texture> _pt2 = nullptr);
-		~Object();
+		RenderObject();
+		explicit RenderObject(std::shared_ptr<Mesh> _pmesh);
+		explicit RenderObject(std::shared_ptr<Mesh> _pmesh, std::shared_ptr<Texture> _pt, std::shared_ptr<Texture> _pt2 = nullptr);
+		~RenderObject();
 	};
 
-	void AddObject(std::shared_ptr<Object> pobj);
-	bool RemoveObject(std::shared_ptr<Object> pobj);
+	void AddObject(std::shared_ptr<RenderObject> pobj);
+	bool RemoveObject(std::shared_ptr<RenderObject> pobj);
 	// use nullptr get first object, and input last object will return nullptr
-	std::shared_ptr<Object> GetObject(std::shared_ptr<Object> prev);
+	std::shared_ptr<RenderObject> GetObject(std::shared_ptr<RenderObject> prev);
 
-	class Objects
+	class RenderObjects
 	{
 	private:
 		// save all objects to render
-		std::vector<std::shared_ptr<Object>> objs;
+		std::vector<std::shared_ptr<RenderObject>> objs;
 
 	public:
-		Objects();
-		~Objects();
+		RenderObjects();
+		~RenderObjects();
 
-		void AddObject(std::shared_ptr<Object> pobj);
-		bool RemoveObject(std::shared_ptr<Object> pobj);
+		void AddObject(std::shared_ptr<RenderObject> pobj);
+		bool RemoveObject(std::shared_ptr<RenderObject> pobj);
 		// use nullptr get first object, and input last object will return nullptr
-		std::shared_ptr<Object> GetObject(std::shared_ptr<Object> prev);
+		std::shared_ptr<RenderObject> GetObject(std::shared_ptr<RenderObject> prev);
 
-		static Objects global_objs;
+		static RenderObjects global_objs;
 	};
 
 	class Camera
@@ -95,7 +95,7 @@ namespace Rehenz
 
 		void SetSize(int _height, int _width, float _aspect);
 
-		const uint* RenderImage(Objects& objs = Objects::global_objs,
+		const uint* RenderImage(RenderObjects& objs = RenderObjects::global_objs,
 			VertexShader vertex_shader = DefaultVertexShader, PixelShader pixel_shader = DefaultPixelShader);
 		const uint* RenderImage(VertexShader vertex_shader, PixelShader pixel_shader = DefaultPixelShader);
 	};
@@ -103,7 +103,7 @@ namespace Rehenz
 	struct VertexShaderData
 	{
 	public:
-		std::shared_ptr<Object> pobj;
+		std::shared_ptr<RenderObject> pobj;
 		Matrix mat_world;
 		Matrix mat_view;
 		Matrix mat_project;
@@ -114,6 +114,6 @@ namespace Rehenz
 	struct PixelShaderData
 	{
 	public:
-		std::shared_ptr<Object> pobj;
+		std::shared_ptr<RenderObject> pobj;
 	};
 }

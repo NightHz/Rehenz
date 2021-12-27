@@ -91,42 +91,42 @@ int render_soft_example()
 			return Color(0.1f, 0.1f, 0.1f);
 	};
 	// scene
-	Objects test1;
+	RenderObjects test1;
 	for (float z = -10; z <= 10; z += 1)
 	{
 		for (float x = -10; x <= 10; x += 1)
 		{
-			auto obj_cube = std::make_shared<Object>(cube, texture_plaid, texture1);
+			auto obj_cube = std::make_shared<RenderObject>(cube, texture_plaid, texture1);
 			obj_cube->position = Vector(x, -2, z);
 			obj_cube->scale = Vector(0.4f, 0.4f, 0.4f);
 			test1.AddObject(obj_cube);
 		}
 	}
-	auto obj_sphere = std::make_shared<Object>(sphere);
+	auto obj_sphere = std::make_shared<RenderObject>(sphere);
 	obj_sphere->position = Vector(0, 2, 0);
 	obj_sphere->scale = Vector(0.4f, 0.4f, 0.4f);
 	test1.AddObject(obj_sphere);
-	auto obj_sphere2 = std::make_shared<Object>(sphereB);
+	auto obj_sphere2 = std::make_shared<RenderObject>(sphereB);
 	obj_sphere2->position = Vector(-2, 2, 0);
 	obj_sphere2->scale = Vector(0.4f, 0.4f, 0.4f);
 	test1.AddObject(obj_sphere2);
-	auto obj_sphere3 = std::make_shared<Object>(sphereC);
+	auto obj_sphere3 = std::make_shared<RenderObject>(sphereC);
 	obj_sphere3->position = Vector(2, 2, 0);
 	obj_sphere3->scale = Vector(0.4f, 0.4f, 0.4f);
 	test1.AddObject(obj_sphere3);
-	auto obj_sphere4 = std::make_shared<Object>(sphereD);
+	auto obj_sphere4 = std::make_shared<RenderObject>(sphereD);
 	obj_sphere4->position = Vector(0, 0, 0);
 	obj_sphere4->scale = Vector(1, 1, 1);
 	test1.AddObject(obj_sphere4);
-	Objects test2;
-	auto obj_cube = std::make_shared<Object>(cube, texture_plaid, texture_dice);
+	RenderObjects test2;
+	auto obj_cube = std::make_shared<RenderObject>(cube, texture_plaid, texture_dice);
 	obj_cube->position = Vector(0, 0, 0);
 	obj_cube->rotation = EulerAngles(0, -pi / 4, pi / 4 + pi / 24);
 	obj_cube->scale = Vector(2.2f, 2.2f, 2.2f);
 	test2.AddObject(obj_cube);
 	// camera
 	Camera camera(height, width);
-	Objects* scene = &test2;
+	RenderObjects* scene = &test2;
 	cout << "hold Enter to render" << endl;
 	cout << "press 1/2/3/4/5   to switch render mode" << endl;
 	cout << "press W/A/S/D     to move camera" << endl;

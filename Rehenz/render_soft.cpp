@@ -26,7 +26,7 @@ namespace Rehenz
 	};
 
 	// Core Function
-	const uint* Camera::RenderImage(Objects& objs, VertexShader vertex_shader, PixelShader pixel_shader)
+	const uint* Camera::RenderImage(RenderObjects& objs, VertexShader vertex_shader, PixelShader pixel_shader)
 	{
 		// prepare drawer
 		int size = height * width;
@@ -132,22 +132,22 @@ namespace Rehenz
 
 	const uint* Camera::RenderImage(VertexShader vertex_shader, PixelShader pixel_shader)
 	{
-		return RenderImage(Objects::global_objs, vertex_shader, pixel_shader);
+		return RenderImage(RenderObjects::global_objs, vertex_shader, pixel_shader);
 	}
 
 
 
-	Object::Object() : pmesh(nullptr), texture(nullptr), texture2(nullptr), position(), rotation(), scale(1, 1, 1, 0)
+	RenderObject::RenderObject() : pmesh(nullptr), texture(nullptr), texture2(nullptr), position(), rotation(), scale(1, 1, 1, 0)
 	{
 	}
-	Object::Object(std::shared_ptr<Mesh> _pmesh) : pmesh(_pmesh), texture(nullptr), texture2(nullptr), position(), rotation(), scale(1, 1, 1, 0)
+	RenderObject::RenderObject(std::shared_ptr<Mesh> _pmesh) : pmesh(_pmesh), texture(nullptr), texture2(nullptr), position(), rotation(), scale(1, 1, 1, 0)
 	{
 	}
-	Object::Object(std::shared_ptr<Mesh> _pmesh, std::shared_ptr<Texture> _pt, std::shared_ptr<Texture> _pt2)
+	RenderObject::RenderObject(std::shared_ptr<Mesh> _pmesh, std::shared_ptr<Texture> _pt, std::shared_ptr<Texture> _pt2)
 		: pmesh(_pmesh), texture(_pt), texture2(_pt2), position(), rotation(), scale(1, 1, 1, 0)
 	{
 	}
-	Object::~Object()
+	RenderObject::~RenderObject()
 	{
 	}
 	Camera::Camera() : position(0, 0, -5, 0), at(0, 0, 1, 0), up(0, 1, 0, 0), render_mode(RenderMode::Wireframe)
@@ -199,30 +199,30 @@ namespace Rehenz
 
 
 
-	Objects Objects::global_objs = Objects();
-	Objects::Objects()
+	RenderObjects RenderObjects::global_objs = RenderObjects();
+	RenderObjects::RenderObjects()
 	{
 	}
-	Objects::~Objects()
+	RenderObjects::~RenderObjects()
 	{
 	}
-	void AddObject(std::shared_ptr<Object> pobj)
+	void AddObject(std::shared_ptr<RenderObject> pobj)
 	{
-		Objects::global_objs.AddObject(pobj);
+		RenderObjects::global_objs.AddObject(pobj);
 	}
-	bool RemoveObject(std::shared_ptr<Object> pobj)
+	bool RemoveObject(std::shared_ptr<RenderObject> pobj)
 	{
-		return Objects::global_objs.RemoveObject(pobj);
+		return RenderObjects::global_objs.RemoveObject(pobj);
 	}
-	std::shared_ptr<Object> GetObject(std::shared_ptr<Object> prev)
+	std::shared_ptr<RenderObject> GetObject(std::shared_ptr<RenderObject> prev)
 	{
-		return Objects::global_objs.GetObject(prev);
+		return RenderObjects::global_objs.GetObject(prev);
 	}
-	void Objects::AddObject(std::shared_ptr<Object> pobj)
+	void RenderObjects::AddObject(std::shared_ptr<RenderObject> pobj)
 	{
 		objs.push_back(pobj);
 	}
-	bool Objects::RemoveObject(std::shared_ptr<Object> pobj)
+	bool RenderObjects::RemoveObject(std::shared_ptr<RenderObject> pobj)
 	{
 		for (auto it = objs.begin(); it != objs.end(); it++)
 		{
@@ -234,7 +234,7 @@ namespace Rehenz
 		}
 		return false;
 	}
-	std::shared_ptr<Object> Objects::GetObject(std::shared_ptr<Object> prev)
+	std::shared_ptr<RenderObject> RenderObjects::GetObject(std::shared_ptr<RenderObject> prev)
 	{
 		if (prev == nullptr)
 			return objs.front();
