@@ -142,6 +142,7 @@
     <ClCompile Include="math.cpp" />
     <ClCompile Include="mesh.cpp" />
     <ClCompile Include="noise_gen.cpp" />
+    <ClCompile Include="path_finding.cpp" />
     <ClCompile Include="render_soft.cpp" />
     <ClCompile Include="surface_dx8.cpp" />
   </ItemGroup>
@@ -151,6 +152,7 @@
     <ClInclude Include="math.h" />
     <ClInclude Include="mesh.h" />
     <ClInclude Include="noise_gen.h" />
+    <ClInclude Include="path_finding.h" />
     <ClInclude Include="rehenz.h" />
     <ClInclude Include="render_soft.h" />
     <ClInclude Include="surface_dx8.h" />

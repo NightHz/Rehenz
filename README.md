@@ -7,6 +7,7 @@ some code writed by NightHz
 - 噪点生成算法（`noise_gen.h`）
 - 打开一个可绘制图像的窗口（`surface_dx8.h`）
 - [3D渲染器](#render_soft)（`render_soft.h`）
+- 寻路算法（`path_finding.h`）
 
 
 ## 代码规范
@@ -26,6 +27,7 @@ some code writed by NightHz
 - `math.h`: 数学
 - `mesh.h`: 存储3D网格
 - `noise_gen.h`: 生成一张噪点图，例如 Perlin 噪点
+- `path_finding.h`: 寻路算法
 - `rehenz.h`: 包含所有的头文件
 - `render_soft.h`: 渲染3维世界的软件**渲染器**
 - `surface_dx8.h`: 使用 DirectDraw(in DirectX8) 创建一个能够绘制图像的窗口
