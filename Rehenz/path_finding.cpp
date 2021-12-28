@@ -5,7 +5,7 @@ namespace Rehenz
 {
 	struct PathFindingNodePtrCompare
 	{
-		bool operator() (const PathFindingNode*& lhs, const PathFindingNode*& rhs) const
+		bool operator() (const PathFindingNode* lhs, const PathFindingNode* rhs) const
 		{
 			return lhs->f < rhs->f;
 		}
@@ -44,7 +44,7 @@ namespace Rehenz
 					continue;
 				else if (open_set.find(neighbor) != open_set.end())
 				{
-					unsigned int new_g = min->g + min->GetDistance(i);
+					uint new_g = min->g + min->GetDistance(i);
 					if (neighbor->g > new_g)
 					{
 						open_set.erase(neighbor);
@@ -104,7 +104,7 @@ namespace Rehenz
 					continue;
 				else if (open_set.find(neighbor) != open_set.end())
 				{
-					unsigned int new_g = min->g + min->GetDistance(i);
+					uint new_g = min->g + min->GetDistance(i);
 					if (neighbor->g > new_g)
 					{
 						open_set.erase(neighbor);
