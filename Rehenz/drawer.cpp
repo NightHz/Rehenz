@@ -21,6 +21,12 @@ namespace Rehenz
 	{
 		return Color(static_cast<uint>(c.x * 255), static_cast<uint>(c.y * 255), static_cast<uint>(c.z * 255));
 	}
+	void Drawer::Fill(uint color)
+	{
+		int s = w * h;
+		for (int i = 0; i < s; i++)
+			buffer[i] = color;
+	}
 	void Drawer::Pixel(Point2I p, uint color)
 	{
 		//if (p.x >= 0 && p.x < w && p.y >= 0 && p.y < h)
@@ -121,6 +127,14 @@ namespace Rehenz
 				Trapezoid(p1, p1, Point2I(x, p2.y), p2, color);
 				Trapezoid(Point2I(x, p2.y), p2, p3, p3, color);
 			}
+		}
+	}
+	void Drawer::Rectangle(Point2I top_left, Point2I bottom_right, uint color)
+	{
+		for (int y = top_left.y; y <= bottom_right.y; y++)
+		{
+			for (int x = top_left.x; x <= bottom_right.x; x++)
+				Pixel(Point2I(x, y), color);
 		}
 	}
 	DrawerZ::DrawerZ(uint* _buffer, int _width, int _height, float* _zbuffer)

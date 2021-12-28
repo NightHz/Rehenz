@@ -25,6 +25,9 @@ namespace Rehenz
 		static uint Color(float r, float g, float b);
 		static uint Color(Rehenz::Color c);
 
+		// fill with a color
+		void Fill(uint color);
+
 		// draw a pixel
 		void Pixel(Point2I p, uint color);
 
@@ -35,6 +38,8 @@ namespace Rehenz
 		void Trapezoid(Point2I top_l, Point2I top_r, Point2I bottom_l, Point2I bottom_r, uint color);
 		// draw triangle including all edges
 		void Triangle(Point2I p1, Point2I p2, Point2I p3, uint color);
+		// draw rectangle including all edges
+		void Rectangle(Point2I top_left, Point2I bottom_right, uint color);
 	};
 
 	class DrawerZ : public Drawer
