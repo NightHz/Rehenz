@@ -42,6 +42,9 @@
     <ClCompile Include="path_finding.cpp">
       <Filter>source</Filter>
     </ClCompile>
+    <ClCompile Include="tilemap.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="math.h">
@@ -72,6 +75,9 @@
       <Filter>header</Filter>
     </ClInclude>
     <ClInclude Include="path_finding.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="tilemap.h">
       <Filter>header</Filter>
     </ClInclude>
   </ItemGroup>

@@ -145,6 +145,7 @@
     <ClCompile Include="path_finding.cpp" />
     <ClCompile Include="render_soft.cpp" />
     <ClCompile Include="surface_dx8.cpp" />
+    <ClCompile Include="tilemap.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="clipper.h" />
@@ -156,6 +157,7 @@
     <ClInclude Include="rehenz.h" />
     <ClInclude Include="render_soft.h" />
     <ClInclude Include="surface_dx8.h" />
+    <ClInclude Include="tilemap.h" />
     <ClInclude Include="type.h" />
   </ItemGroup>
   <ItemGroup>

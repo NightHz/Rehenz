@@ -8,6 +8,7 @@ some code writed by NightHz
 - 打开一个可绘制图像的窗口（`surface_dx8.h`）
 - [3D渲染器](#render_soft)（`render_soft.h`）
 - 寻路算法（`path_finding.h`）
+- 创建一个网格地图（`tilemap.h`）
 
 
 ## 代码规范
@@ -31,6 +32,7 @@ some code writed by NightHz
 - `rehenz.h`: 包含所有的头文件
 - `render_soft.h`: 渲染3维世界的软件**渲染器**
 - `surface_dx8.h`: 使用 DirectDraw(in DirectX8) 创建一个能够绘制图像的窗口
+- `tilemap.h`: 创建一个可渲染的2D网格地图
 - `type.h`: 定义基本数据类型，例如 `uint`
 
 

@@ -214,11 +214,66 @@ int clip_example()
 	return 0;
 }
 
+int tilemap_and_path_finding_example()
+{
+	cout << endl << "Open a surface with dx8" << endl;
+	SurfaceDx8 srf_dx8;
+	String title = "surface by dx8";
+	const int width = 800;
+	const int height = 600;
+	std::unique_ptr<uint[]> image = std::make_unique<uint[]>(width * height);
+	srf_dx8.Create(GetModuleHandle(nullptr), width, height, title.c_str());
+
+	cout << "Create a tilemap" << endl;
+	Tilemap tilemap(40, 40);
+	for (int y = 0; y < 40; y++)
+		for (int x = 0; x < 40; x++)
+			tilemap(x, y) = (x + y) % 12;
+
+	cout << "Start fps counter" << endl;
+	int fps[2] = { 0,0 };
+	auto fps_t0 = timeGetTime();
+	bool lock_fps = true;
+	if (lock_fps)
+		cout << "Lock fps" << endl;
+	auto t0 = timeGetTime();
+	cout << "press Q to exit" << endl;
+	while (srf_dx8.GetWindowState())
+	{
+		// render
+		srf_dx8.FillFromImage(tilemap.Render(image.get(), width, height));
+		// refresh
+		srf_dx8.Present();
+		// compute fps and set title
+		fps[1]++;
+		auto fps_t1 = timeGetTime();
+		if (fps_t1 - fps_t0 >= 500)
+		{
+			srf_dx8.SetTitle((title + " fps: " + std::to_string(fps[0] + fps[1])).c_str());
+			fps[0] = fps[1];
+			fps[1] = 0;
+			fps_t0 = fps_t1;
+		}
+		// sleep
+		if (lock_fps)
+			while (16 >= (timeGetTime() - t0))
+				;
+		t0 = timeGetTime();
+		// exit
+		if (KeyIsDown('Q'))
+			break;
+	}
+	srf_dx8.Destroy();
+
+	return 0;
+}
+
 int main()
 {
 	cout << "Hello~ Rehenz~" << endl;
 
 	//return noise_example();
-	return render_soft_example();
-	return clip_example();
+	//return render_soft_example();
+	//return clip_example();
+	return tilemap_and_path_finding_example();
 }
