@@ -5,6 +5,7 @@ using std::endl;
 #include "rehenz.h"
 using namespace Rehenz;
 #include <string>
+#include <Windows.h>
 #include <timeapi.h>
 
 int noise_example()
@@ -231,12 +232,12 @@ int tilemap_and_path_finding_example()
 			tilemap(x, y) = (x + y) % 12;
 
 	cout << "Start fps counter" << endl;
-	int fps[2] = { 0,0 };
-	auto fps_t0 = timeGetTime();
-	bool lock_fps = true;
-	if (lock_fps)
-		cout << "Lock fps" << endl;
-	auto t0 = timeGetTime();
+	FpsCounter fps_counter;
+	fps_counter.UpdateFpsCallback = [&srf_dx8, &title](uint fps)
+	{
+		srf_dx8.SetTitle((title + " fps: " + std::to_string(fps)).c_str());
+	};
+
 	cout << "press Q to exit" << endl;
 	while (srf_dx8.GetWindowState())
 	{
@@ -244,21 +245,8 @@ int tilemap_and_path_finding_example()
 		srf_dx8.FillFromImage(tilemap.Render(image.get(), width, height));
 		// refresh
 		srf_dx8.Present();
-		// compute fps and set title
-		fps[1]++;
-		auto fps_t1 = timeGetTime();
-		if (fps_t1 - fps_t0 >= 500)
-		{
-			srf_dx8.SetTitle((title + " fps: " + std::to_string(fps[0] + fps[1])).c_str());
-			fps[0] = fps[1];
-			fps[1] = 0;
-			fps_t0 = fps_t1;
-		}
-		// sleep
-		if (lock_fps)
-			while (16 >= (timeGetTime() - t0))
-				;
-		t0 = timeGetTime();
+		// update fps
+		fps_counter.Present();
 		// exit
 		if (KeyIsDown('Q'))
 			break;
