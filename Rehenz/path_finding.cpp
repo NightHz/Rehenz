@@ -44,7 +44,7 @@ namespace Rehenz
 					continue;
 				else if (open_set.find(neighbor) != open_set.end())
 				{
-					uint new_g = min->g + min->GetDistance(i);
+					float new_g = min->g + min->GetDistance(i);
 					if (neighbor->g > new_g)
 					{
 						open_set.erase(neighbor);
@@ -104,7 +104,7 @@ namespace Rehenz
 					continue;
 				else if (open_set.find(neighbor) != open_set.end())
 				{
-					uint new_g = min->g + min->GetDistance(i);
+					float new_g = min->g + min->GetDistance(i);
 					if (neighbor->g > new_g)
 					{
 						open_set.erase(neighbor);

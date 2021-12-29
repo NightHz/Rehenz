@@ -2,6 +2,8 @@
 #include "type.h"
 #include "math.h"
 #include <functional>
+#include "path_finding.h"
+#include <vector>
 
 namespace Rehenz
 {
@@ -14,7 +16,6 @@ namespace Rehenz
 		uint* tiles;
 
 	public:
-		static const uint tile_value_no_render;
 		static TileShader DefaultTileShader;
 
 		// size info
@@ -41,5 +42,45 @@ namespace Rehenz
 
 		// render to image
 		uint* Render(uint* image, uint screen_width, uint screen_height);
+	};
+
+	// tile node for path finding
+	class TilePF : public PathFindingNode
+	{
+		friend class TilemapPF;
+	private:
+		int x, y;
+		std::vector<TilePF*> neighbor;
+		std::vector<float> distance;
+
+		TilePF();
+		TilePF(const TilePF&) = delete;
+		TilePF& operator=(const TilePF&) = delete;
+		~TilePF();
+
+	public:
+		int GetX() { return x; }
+		int GetY() { return y; }
+
+		size_t GetNeighborNodeCount() override;
+		PathFindingNode* GetNeighborNode(size_t index) override;
+		float GetDistance(size_t index) override;
+		float GuessDistance(PathFindingNode* end) override;
+	};
+
+	// tile node array for path finding
+	class TilemapPF
+	{
+	private:
+		Tilemap* tilemap;
+		TilePF* tiles;
+
+	public:
+		TilemapPF(Tilemap* _tilemap);
+		~TilemapPF();
+
+		TilePF& operator()(uint x, uint y);
+
+		Tilemap* GetTilemap() { return tilemap; }
 	};
 }

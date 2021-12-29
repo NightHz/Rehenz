@@ -228,8 +228,19 @@ int tilemap_and_path_finding_example()
 	cout << "Create a tilemap" << endl;
 	Tilemap tilemap(40, 40);
 	for (int y = 0; y < 40; y++)
+	{
 		for (int x = 0; x < 40; x++)
 			tilemap(x, y) = (x + y) % 12;
+	}
+
+	cout << "Finding path of (0,0) and (10,20)" << endl;
+	TilemapPF tilemap_PF(&tilemap);
+	auto path = PathFindingDijkstra(&tilemap_PF(0, 0), &tilemap_PF(10, 20));
+	for (auto node : path)
+	{
+		auto tile = static_cast<TilePF*>(node);
+		cout << "(" << tile->GetX() << "," << tile->GetY() << ") \t";
+	}
 
 	cout << "Start fps counter" << endl;
 	FpsCounter fps_counter;

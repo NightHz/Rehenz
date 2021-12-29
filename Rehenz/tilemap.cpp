@@ -1,5 +1,6 @@
 #include "tilemap.h"
 #include "drawer.h"
+#include <math.h>
 
 namespace Rehenz
 {
@@ -113,5 +114,72 @@ namespace Rehenz
 		}
 
 		return image;
+	}
+
+	TilePF::TilePF()
+	{
+		x = 0;
+		y = 0;
+	}
+
+	TilePF::~TilePF()
+	{
+	}
+
+	size_t TilePF::GetNeighborNodeCount()
+	{
+		return neighbor.size();
+	}
+
+	PathFindingNode* TilePF::GetNeighborNode(size_t index)
+	{
+		return neighbor[index];
+	}
+
+	float TilePF::GetDistance(size_t index)
+	{
+		return distance[index];
+	}
+
+	float TilePF::GuessDistance(PathFindingNode* end)
+	{
+		TilePF* tile = static_cast<TilePF*>(end);
+		int dx = x - tile->x;
+		int dy = y - tile->y;
+		return sqrtf(static_cast<float>(dx * dx + dy * dy));
+	}
+
+	TilemapPF::TilemapPF(Tilemap* _tilemap)
+	{
+		tilemap = _tilemap;
+		int w = tilemap->width;
+		int h = tilemap->height;
+		int size = w * h;
+		tiles = new TilePF[size];
+		for (int i = 0; i < size; i++)
+		{
+			tiles[i].x = i % w;
+			tiles[i].y = i / w;
+			int offset[4]{ -w,-1,+1,+w };
+			for (int j = 0; j < 4; j++)
+			{
+				int i2 = i + offset[j];
+				if (i2 >= 0 && i2 < size)
+				{
+					tiles[i].neighbor.push_back(tiles + i2);
+					tiles->distance.push_back(1.0f);
+				}
+			}
+		}
+	}
+
+	TilemapPF::~TilemapPF()
+	{
+		delete[] tiles;
+	}
+
+	TilePF& TilemapPF::operator()(uint x, uint y)
+	{
+		return tiles[x + y * tilemap->width];
 	}
 }
