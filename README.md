@@ -9,6 +9,7 @@ some code writed by NightHz
 - [3D渲染器](#render_soft)（`render_soft.h`）
 - 寻路算法（`path_finding.h`）
 - 创建一个网格地图（`tilemap.h`）
+- 帧率计数器（`fps_counter.h`）
 
 
 ## 代码规范
@@ -25,6 +26,7 @@ some code writed by NightHz
 
 - `clipper.h`: 裁切一个几何元
 - `drawer.h`: 绘制/光栅化一个几何元
+- `fps_counter.h`: 帧率计数器
 - `math.h`: 数学
 - `mesh.h`: 存储3D网格
 - `noise_gen.h`: 生成一张噪点图，例如 Perlin 噪点

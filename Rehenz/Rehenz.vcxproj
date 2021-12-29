@@ -138,6 +138,7 @@
   <ItemGroup>
     <ClCompile Include="clipper.cpp" />
     <ClCompile Include="drawer.cpp" />
+    <ClCompile Include="fps_counter.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="math.cpp" />
     <ClCompile Include="mesh.cpp" />
@@ -150,6 +151,7 @@
   <ItemGroup>
     <ClInclude Include="clipper.h" />
     <ClInclude Include="drawer.h" />
+    <ClInclude Include="fps_counter.h" />
     <ClInclude Include="math.h" />
     <ClInclude Include="mesh.h" />
     <ClInclude Include="noise_gen.h" />

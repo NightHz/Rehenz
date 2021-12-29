@@ -45,6 +45,9 @@
     <ClCompile Include="tilemap.cpp">
       <Filter>source</Filter>
     </ClCompile>
+    <ClCompile Include="fps_counter.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="math.h">
@@ -78,6 +81,9 @@
       <Filter>header</Filter>
     </ClInclude>
     <ClInclude Include="tilemap.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="fps_counter.h">
       <Filter>header</Filter>
     </ClInclude>
   </ItemGroup>
