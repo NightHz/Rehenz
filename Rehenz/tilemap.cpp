@@ -149,36 +149,42 @@ namespace Rehenz
 		return sqrtf(static_cast<float>(dx * dx + dy * dy));
 	}
 
-	TilemapPF::TilemapPF(Tilemap* _tilemap)
+	TilesPF::TilesPF(Tilemap* _tilemap)
+		: w(_tilemap->width), h(_tilemap->height), size(_tilemap->width* _tilemap->height)
 	{
 		tilemap = _tilemap;
-		int w = tilemap->width;
-		int h = tilemap->height;
-		int size = w * h;
 		tiles = new TilePF[size];
 		for (int i = 0; i < size; i++)
 		{
 			tiles[i].x = i % w;
 			tiles[i].y = i / w;
-			int offset[4]{ -w,-1,+1,+w };
-			for (int j = 0; j < 4; j++)
+			std::vector<int> offset;
+			if (tiles[i].x != 0)
+				offset.push_back(-1);
+			if (tiles[i].x != w - 1)
+				offset.push_back(+1);
+			if (tiles[i].y != 0)
+				offset.push_back(-w);
+			if (tiles[i].y != h - 1)
+				offset.push_back(+w);
+			for (int o : offset)
 			{
-				int i2 = i + offset[j];
+				int i2 = i + o;
 				if (i2 >= 0 && i2 < size)
 				{
 					tiles[i].neighbor.push_back(tiles + i2);
-					tiles->distance.push_back(1.0f);
+					tiles[i].distance.push_back(1.0f);
 				}
 			}
 		}
 	}
 
-	TilemapPF::~TilemapPF()
+	TilesPF::~TilesPF()
 	{
 		delete[] tiles;
 	}
 
-	TilePF& TilemapPF::operator()(uint x, uint y)
+	TilePF& TilesPF::operator()(uint x, uint y)
 	{
 		return tiles[x + y * tilemap->width];
 	}

@@ -47,7 +47,7 @@ namespace Rehenz
 	// tile node for path finding
 	class TilePF : public PathFindingNode
 	{
-		friend class TilemapPF;
+		friend class TilesPF;
 	private:
 		int x, y;
 		std::vector<TilePF*> neighbor;
@@ -69,15 +69,16 @@ namespace Rehenz
 	};
 
 	// tile node array for path finding
-	class TilemapPF
+	class TilesPF
 	{
 	private:
+		const int w, h, size;
 		Tilemap* tilemap;
 		TilePF* tiles;
 
 	public:
-		TilemapPF(Tilemap* _tilemap);
-		~TilemapPF();
+		TilesPF(Tilemap* _tilemap);
+		~TilesPF();
 
 		TilePF& operator()(uint x, uint y);
 

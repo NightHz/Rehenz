@@ -234,13 +234,23 @@ int tilemap_and_path_finding_example()
 	}
 
 	cout << "Finding path of (0,0) and (10,20)" << endl;
-	TilemapPF tilemap_PF(&tilemap);
+	TilesPF tilemap_PF(&tilemap);
+	cout << "Dijkstra Path : " << endl;
 	auto path = PathFindingDijkstra(&tilemap_PF(0, 0), &tilemap_PF(10, 20));
 	for (auto node : path)
 	{
 		auto tile = static_cast<TilePF*>(node);
-		cout << "(" << tile->GetX() << "," << tile->GetY() << ") \t";
+		cout << "(" << tile->GetX() << "," << tile->GetY() << ")  \t";
 	}
+	cout << endl;
+	cout << "A star Path : " << endl;
+	auto path2 = PathFindingAStar(&tilemap_PF(0, 0), &tilemap_PF(10, 20));
+	for (auto node : path2)
+	{
+		auto tile = static_cast<TilePF*>(node);
+		cout << "(" << tile->GetX() << "," << tile->GetY() << ")  \t";
+	}
+	cout << endl;
 
 	cout << "Start fps counter" << endl;
 	FpsCounter fps_counter;

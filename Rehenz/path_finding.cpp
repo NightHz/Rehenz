@@ -7,7 +7,12 @@ namespace Rehenz
 	{
 		bool operator() (const PathFindingNode* lhs, const PathFindingNode* rhs) const
 		{
-			return lhs->f < rhs->f;
+			if (lhs->f < rhs->f)
+				return true;
+			else if (lhs->f > rhs->f)
+				return false;
+			else
+				return lhs < rhs;
 		}
 	};
 
