@@ -19,13 +19,6 @@ namespace Rehenz
 		virtual uint GuessDistance(PathFindingNode* end) = 0;
 	};
 
-	class TilemapPF : PathFindingNode
-	{
-	private:
-		int x, y;
-	public:
-	};
-
 	std::vector<PathFindingNode*> PathFindingDijkstra(PathFindingNode* start, PathFindingNode* end);
 	std::vector<PathFindingNode*> PathFindingAStar(PathFindingNode* start, PathFindingNode* end);
 }
