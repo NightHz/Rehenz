@@ -146,10 +146,10 @@ namespace Rehenz
 		TilePF* tile = static_cast<TilePF*>(end);
 		int dx = x - tile->x;
 		int dy = y - tile->y;
-		return sqrtf(static_cast<float>(dx * dx + dy * dy));
+		return 2 * sqrtf(static_cast<float>(dx * dx + dy * dy));
 	}
 
-	TilesPF::TilesPF(Tilemap* _tilemap, std::set<uint> wall)
+	TilesPF::TilesPF(Tilemap* _tilemap, std::set<uint> wall, bool diag)
 		: w(_tilemap->width), h(_tilemap->height), size(_tilemap->width* _tilemap->height)
 	{
 		tilemap = _tilemap;
@@ -176,6 +176,27 @@ namespace Rehenz
 					{
 						tiles[i].neighbor.push_back(tiles + i2);
 						tiles[i].distance.push_back(1.0f);
+					}
+				}
+				if (diag)
+				{
+					offset.clear();
+					if (tiles[i].x != 0 && tiles[i].y != 0)
+						offset.push_back(-1 - w);
+					if (tiles[i].x != w - 1 && tiles[i].y != 0)
+						offset.push_back(+1 - w);
+					if (tiles[i].x != 0 && tiles[i].y != h - 1)
+						offset.push_back(-1 + w);
+					if (tiles[i].x != w - 1 && tiles[i].y != h - 1)
+						offset.push_back(+1 + w);
+					for (int o : offset)
+					{
+						int i2 = i + o;
+						if (i2 >= 0 && i2 < size && wall.find(tilemap->tiles[i2]) == wall.end())
+						{
+							tiles[i].neighbor.push_back(tiles + i2);
+							tiles[i].distance.push_back(1.414f);
+						}
 					}
 				}
 			}

@@ -298,8 +298,10 @@ int tilemap_and_path_finding_example()
 	cout << endl;
 
 	cout << "Start path finding coroutine" << endl;
-	PathFinding path_finding(&tilemap_PF(0, 0), &tilemap_PF(10, 20), "A");
+	PathFinding path_finding(&tilemap_PF(0, 0), &tilemap_PF(10, 20), "AStar");
 	path_finding.Start();
+	tilemap(0, 0) = 4;
+	tilemap(10, 20) = 4;
 	cout << "press N or M to next" << endl;
 	bool press_n = false, press_m = false;
 	cout << "press C to next faster" << endl;
@@ -310,7 +312,7 @@ int tilemap_and_path_finding_example()
 	{
 		srf_dx8.SetTitle((title + " fps: " + std::to_string(fps)).c_str());
 	};
-	fps_counter.LockFps(120);
+	fps_counter.LockFps(140);
 
 	cout << "press Q to exit" << endl;
 	while (srf_dx8.GetWindowState())

@@ -150,7 +150,7 @@ namespace Rehenz
 		end = _end;
 
 		if (mode == "AStar" || mode == "A" || mode == "F")
-			c_g = 1, c_h = 2;
+			c_g = 1, c_h = 1;
 		else if (mode == "Dijkstra" || mode == "D" || mode == "G")
 			c_g = 1, c_h = 0;
 		else if (mode == "H")
@@ -261,7 +261,7 @@ namespace Rehenz
 
 	int PathFinding::SearchCount()
 	{
-		return open_set.size() + close_set.size();
+		return static_cast<int>(open_set.size() + close_set.size());
 	}
 
 }

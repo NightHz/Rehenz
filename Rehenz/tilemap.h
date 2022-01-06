@@ -78,7 +78,7 @@ namespace Rehenz
 		TilePF* tiles;
 
 	public:
-		TilesPF(Tilemap* _tilemap, std::set<uint> wall = std::set<uint>());
+		TilesPF(Tilemap* _tilemap, std::set<uint> wall = std::set<uint>(), bool diag = true);
 		TilesPF(const TilesPF&) = delete;
 		TilesPF& operator=(const TilesPF&) = delete;
 		~TilesPF();
