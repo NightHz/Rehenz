@@ -75,18 +75,18 @@ some code writed by NightHz
 
 **Dijkstra**
 
-![](img\PF_Dijkstra.gif)
+![](img/PF_Dijkstra.gif)
 
 **A\***
 
 h = 欧氏距离
 
-![](img\PF_AStar1.gif)
+![](img/PF_AStar1.gif)
 
 h = 两倍欧氏距离
 
-![](img\PF_AStar2.gif)
+![](img/PF_AStar2.gif)
 
 令 h 远大于 g
 
-![](img\PF_OnlyH.gif)
+![](img/PF_OnlyH.gif)
