@@ -78,6 +78,8 @@ namespace Rehenz
 
 	public:
 		TilesPF(Tilemap* _tilemap);
+		TilesPF(const TilesPF&) = delete;
+		TilesPF& operator=(const TilesPF&) = delete;
 		~TilesPF();
 
 		TilePF& operator()(uint x, uint y);
