@@ -259,4 +259,9 @@ namespace Rehenz
 			return nullptr;
 	}
 
+	int PathFinding::SearchCount()
+	{
+		return open_set.size() + close_set.size();
+	}
+
 }

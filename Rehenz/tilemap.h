@@ -12,6 +12,7 @@ namespace Rehenz
 
 	class Tilemap
 	{
+		friend class TilesPF;
 	private:
 		uint* tiles;
 
@@ -77,7 +78,7 @@ namespace Rehenz
 		TilePF* tiles;
 
 	public:
-		TilesPF(Tilemap* _tilemap);
+		TilesPF(Tilemap* _tilemap, std::set<uint> wall = std::set<uint>());
 		TilesPF(const TilesPF&) = delete;
 		TilesPF& operator=(const TilesPF&) = delete;
 		~TilesPF();

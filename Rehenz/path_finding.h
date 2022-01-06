@@ -71,5 +71,6 @@ namespace Rehenz
 		std::vector<PathFindingNode*> GetPath();
 
 		PathFindingNode* GetMinOpenNode();
+		int SearchCount();
 	};
 }
