@@ -7,7 +7,7 @@ some code writed by NightHz
 - 噪点生成算法（`noise_gen.h`）
 - 打开一个可绘制图像的窗口（`surface_dx8.h`）
 - [3D渲染器](#render_soft)（`render_soft.h`）
-- 寻路算法（`path_finding.h`）
+- [寻路算法](#path_finding)（`path_finding.h`）
 - 创建一个网格地图（`tilemap.h`）
 - 帧率计数器（`fps_counter.h`）
 
@@ -70,3 +70,23 @@ some code writed by NightHz
 
 1. 屏幕点按 `t` 线性插值时，顶点会按 `t'` 线性插值，其中 `t' = (w1 * t) / (w1 * t + w2 * (1 - t))`
 2. `1/w` 倍的顶点与屏幕点按照相同的 `t` 线性插值
+
+### path_finding
+
+**Dijkstra**
+
+![](img\PF_Dijkstra.gif)
+
+**A\***
+
+h = 欧氏距离
+
+![](img\PF_AStar1.gif)
+
+h = 两倍欧氏距离
+
+![](img\PF_AStar2.gif)
+
+令 h 远大于 g
+
+![](img\PF_OnlyH.gif)
