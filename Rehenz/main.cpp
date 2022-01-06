@@ -233,10 +233,10 @@ int tilemap_and_path_finding_example()
 			tilemap(x, y) = (x + y) % 12;
 	}
 
-	cout << "Finding path of (0,0) and (10,20)" << endl;
+	cout << "Finding path of (0,0) and (0,0)" << endl;
 	TilesPF tilemap_PF(&tilemap);
 	cout << "Dijkstra Path : " << endl;
-	auto path = PathFindingDijkstra(&tilemap_PF(0, 0), &tilemap_PF(10, 20));
+	auto path = PathFindingDijkstra(&tilemap_PF(0, 0), &tilemap_PF(0, 0));
 	for (auto node : path)
 	{
 		auto tile = static_cast<TilePF*>(node);
@@ -244,13 +244,20 @@ int tilemap_and_path_finding_example()
 	}
 	cout << endl;
 	cout << "A star Path : " << endl;
-	auto path2 = PathFindingAStar(&tilemap_PF(0, 0), &tilemap_PF(10, 20));
+	auto path2 = PathFindingAStar(&tilemap_PF(0, 0), &tilemap_PF(0, 0));
 	for (auto node : path2)
 	{
 		auto tile = static_cast<TilePF*>(node);
 		cout << "(" << tile->GetX() << "," << tile->GetY() << ")  \t";
 	}
 	cout << endl;
+
+	cout << "Start path finding coroutine" << endl;
+	PathFinding path_finding(&tilemap_PF(0, 0), &tilemap_PF(10, 20), "A");
+	path_finding.Start();
+	cout << "press N or M to next" << endl;
+	bool press_n = false, press_m = false;
+	cout << "press C to next faster" << endl;
 
 	cout << "Start fps counter" << endl;
 	FpsCounter fps_counter;
@@ -262,6 +269,61 @@ int tilemap_and_path_finding_example()
 	cout << "press Q to exit" << endl;
 	while (srf_dx8.GetWindowState())
 	{
+		// next
+		bool next = false;
+		if (!press_n && KeyIsDown('N'))
+			press_n = true, next = true;
+		else if (press_n && KeyIsUp('N'))
+			press_n = false;
+		if (!press_m && KeyIsDown('M'))
+			press_m = true, next = true;
+		else if (press_m && KeyIsUp('M'))
+			press_m = false;
+		if ((next || KeyIsDown('C')) && !path_finding.IsFinished())
+		{
+			cout << "run path finding once" << endl;
+			path_finding.Next(1);
+			// modify tilemap
+			if (!path_finding.IsFinished())
+			{
+				for (int y = 0; y < 40; y++)
+				{
+					for (int x = 0; x < 40; x++)
+					{
+						const auto& tile_PF = tilemap_PF(x, y);
+						if (tile_PF.IsClose())
+							tilemap(x, y) = 3;
+						else if (tile_PF.IsOpen())
+							tilemap(x, y) = 2;
+						else
+							tilemap(x, y) = 0;
+					}
+				}
+				auto min = path_finding.GetMinOpenNode();
+				if (min != nullptr)
+				{
+					auto tile_PF = static_cast<TilePF*>(min);
+					tilemap(tile_PF->GetX(), tile_PF->GetY()) = 1;
+				}
+				tilemap(0, 0) = 4;
+				tilemap(10, 20) = 4;
+			}
+			// check finish
+			else if (path_finding.IsFinished() && path_finding.ExistPath())
+			{
+				cout << "Find path : " << endl;
+				auto path3 = path_finding.GetPath();
+				for (auto node : path3)
+				{
+					auto tile_PF = static_cast<TilePF*>(node);
+					cout << "(" << tile_PF->GetX() << "," << tile_PF->GetY() << ")  \t";
+					tilemap(tile_PF->GetX(), tile_PF->GetY()) = 5;
+				}
+				cout << endl;
+				tilemap(0, 0) = 4;
+				tilemap(10, 20) = 4;
+			}
+		}
 		// render
 		srf_dx8.FillFromImage(tilemap.Render(image.get(), width, height));
 		// refresh
