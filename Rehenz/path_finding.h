@@ -39,7 +39,7 @@ namespace Rehenz
 	std::vector<PathFindingNode*> PathFindingAStar(PathFindingNode* start, PathFindingNode* end);
 
 	// path finding algorithm which runs as a coroutine
-	// don't modify path finding node or run path finding algorithm again
+	// don't modify path finding node or run path finding algorithm again before finish
 	class PathFinding
 	{
 	private:
