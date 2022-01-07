@@ -13,6 +13,24 @@
       <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
       <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
+    <Filter Include="header\render">
+      <UniqueIdentifier>{8334c603-304e-41c2-8da8-ce5dfbf6c3a7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="header\window">
+      <UniqueIdentifier>{61e7162f-d6ba-43a6-a147-a0c70417af6c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="header\base">
+      <UniqueIdentifier>{8c21198d-9e2d-4c2f-8d69-cfe666d78076}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="source\base">
+      <UniqueIdentifier>{c38569fc-c494-4cd7-997e-c208d2c83e16}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="source\render">
+      <UniqueIdentifier>{f20fc932-aff0-4633-b5dd-797f3079f084}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="source\window">
+      <UniqueIdentifier>{a58d169d-a25f-42af-8e22-b3ee7914cc36}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="noise_gen.cpp">
@@ -21,60 +39,39 @@
     <ClCompile Include="main.cpp">
       <Filter>source</Filter>
     </ClCompile>
-    <ClCompile Include="math.cpp">
-      <Filter>source</Filter>
-    </ClCompile>
-    <ClCompile Include="surface_dx8.cpp">
-      <Filter>source</Filter>
-    </ClCompile>
-    <ClCompile Include="render_soft.cpp">
-      <Filter>source</Filter>
-    </ClCompile>
-    <ClCompile Include="mesh.cpp">
-      <Filter>source</Filter>
-    </ClCompile>
-    <ClCompile Include="drawer.cpp">
-      <Filter>source</Filter>
-    </ClCompile>
-    <ClCompile Include="clipper.cpp">
-      <Filter>source</Filter>
-    </ClCompile>
     <ClCompile Include="path_finding.cpp">
       <Filter>source</Filter>
     </ClCompile>
     <ClCompile Include="tilemap.cpp">
       <Filter>source</Filter>
     </ClCompile>
+    <ClCompile Include="math.cpp">
+      <Filter>source\base</Filter>
+    </ClCompile>
+    <ClCompile Include="clipper.cpp">
+      <Filter>source\render</Filter>
+    </ClCompile>
+    <ClCompile Include="drawer.cpp">
+      <Filter>source\render</Filter>
+    </ClCompile>
+    <ClCompile Include="mesh.cpp">
+      <Filter>source\render</Filter>
+    </ClCompile>
+    <ClCompile Include="render_soft.cpp">
+      <Filter>source\render</Filter>
+    </ClCompile>
     <ClCompile Include="fps_counter.cpp">
-      <Filter>source</Filter>
+      <Filter>source\window</Filter>
+    </ClCompile>
+    <ClCompile Include="surface_dx8.cpp">
+      <Filter>source\window</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="math.h">
-      <Filter>header</Filter>
-    </ClInclude>
     <ClInclude Include="rehenz.h">
       <Filter>header</Filter>
     </ClInclude>
     <ClInclude Include="noise_gen.h">
-      <Filter>header</Filter>
-    </ClInclude>
-    <ClInclude Include="surface_dx8.h">
-      <Filter>header</Filter>
-    </ClInclude>
-    <ClInclude Include="render_soft.h">
-      <Filter>header</Filter>
-    </ClInclude>
-    <ClInclude Include="type.h">
-      <Filter>header</Filter>
-    </ClInclude>
-    <ClInclude Include="mesh.h">
-      <Filter>header</Filter>
-    </ClInclude>
-    <ClInclude Include="drawer.h">
-      <Filter>header</Filter>
-    </ClInclude>
-    <ClInclude Include="clipper.h">
       <Filter>header</Filter>
     </ClInclude>
     <ClInclude Include="path_finding.h">
@@ -83,8 +80,29 @@
     <ClInclude Include="tilemap.h">
       <Filter>header</Filter>
     </ClInclude>
+    <ClInclude Include="math.h">
+      <Filter>header\base</Filter>
+    </ClInclude>
+    <ClInclude Include="type.h">
+      <Filter>header\base</Filter>
+    </ClInclude>
+    <ClInclude Include="clipper.h">
+      <Filter>header\render</Filter>
+    </ClInclude>
+    <ClInclude Include="drawer.h">
+      <Filter>header\render</Filter>
+    </ClInclude>
+    <ClInclude Include="render_soft.h">
+      <Filter>header\render</Filter>
+    </ClInclude>
+    <ClInclude Include="mesh.h">
+      <Filter>header\render</Filter>
+    </ClInclude>
     <ClInclude Include="fps_counter.h">
-      <Filter>header</Filter>
+      <Filter>header\window</Filter>
+    </ClInclude>
+    <ClInclude Include="surface_dx8.h">
+      <Filter>header\window</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
