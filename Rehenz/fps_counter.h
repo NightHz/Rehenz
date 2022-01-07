@@ -9,9 +9,10 @@ namespace Rehenz
 	private:
 		using TimeType = unsigned long;
 
-		uint fps[2];
+		// save frames per 0.5s
+		uint fps[3];
 		TimeType fps_t0;
-		TimeType t0;
+		TimeType t0, t1;
 		TimeType lock_time;
 
 	public:
@@ -22,6 +23,9 @@ namespace Rehenz
 		~FpsCounter();
 
 		void Present();
+		uint GetLastFps();
+		// ms unit
+		uint GetLastDeltatime();
 		// input 0 to unlock fps
 		void LockFps(uint fps);
 	};
