@@ -14,12 +14,14 @@ namespace Rehenz
 		TimeType fps_t0;
 		TimeType t0, t1;
 		TimeType lock_time;
+		
+		std::function<TimeType(void)> GetTime;
 
 	public:
 		std::function<void(uint fps)> UpdateFpsCallback;
 
 		// default lock 60 fps
-		FpsCounter();
+		FpsCounter(std::function<TimeType(void)> GetTimeFunc);
 		~FpsCounter();
 
 		void Present();

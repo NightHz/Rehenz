@@ -304,7 +304,7 @@ int tilemap_and_path_finding_example()
 	cout << "press C to next faster" << endl;
 
 	cout << "Start fps counter" << endl;
-	FpsCounter fps_counter;
+	FpsCounter fps_counter(timeGetTime);
 	fps_counter.UpdateFpsCallback = [&srf_dx8, &title](uint fps)
 	{
 		srf_dx8.SetTitle((title + " fps: " + std::to_string(fps)).c_str());

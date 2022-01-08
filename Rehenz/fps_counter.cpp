@@ -1,11 +1,8 @@
 #include "fps_counter.h"
-#define WIN32_LEAN_AND_MEAN
-#include <Windows.h>
-#include <timeapi.h>
 
 namespace Rehenz
 {
-	FpsCounter::FpsCounter() : fps{ 0,0,0 }
+	FpsCounter::FpsCounter(std::function<TimeType(void)> GetTimeFunc) : fps{ 0,0,0 }, GetTime(GetTimeFunc)
 	{
 		fps_t0 = 0;
 		t0 = 0;
@@ -22,7 +19,7 @@ namespace Rehenz
 	{
 		// update fps
 		fps[2]++;
-		TimeType fps_t1 = timeGetTime();
+		TimeType fps_t1 = GetTime();
 		if (fps_t1 - fps_t0 >= 500)
 		{
 			fps[0] = fps[1];
@@ -34,7 +31,7 @@ namespace Rehenz
 		}
 		// lock fps
 		TimeType t2;
-		while (lock_time > ((t2 = timeGetTime()) - t1))
+		while (lock_time > ((t2 = GetTime()) - t1))
 			;
 		t0 = t1;
 		t1 = t2;
