@@ -31,18 +31,21 @@
     <Filter Include="source\window">
       <UniqueIdentifier>{a58d169d-a25f-42af-8e22-b3ee7914cc36}</UniqueIdentifier>
     </Filter>
+    <Filter Include="header\ai">
+      <UniqueIdentifier>{dbfe81b6-ea8c-43b6-b3f5-88d9fd998e88}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="header\game tech">
+      <UniqueIdentifier>{8e1a602f-bf88-4aaf-8555-d12467cbe816}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="source\ai">
+      <UniqueIdentifier>{81564f30-143b-4bf8-9e6f-56cd80cd8bcb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="source\game tech">
+      <UniqueIdentifier>{ba6b3bf6-e1eb-4b50-83db-bae0d69e99c1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="noise_gen.cpp">
-      <Filter>source</Filter>
-    </ClCompile>
     <ClCompile Include="main.cpp">
-      <Filter>source</Filter>
-    </ClCompile>
-    <ClCompile Include="path_finding.cpp">
-      <Filter>source</Filter>
-    </ClCompile>
-    <ClCompile Include="tilemap.cpp">
       <Filter>source</Filter>
     </ClCompile>
     <ClCompile Include="math.cpp">
@@ -66,18 +69,18 @@
     <ClCompile Include="surface_dx8.cpp">
       <Filter>source\window</Filter>
     </ClCompile>
+    <ClCompile Include="noise_gen.cpp">
+      <Filter>source\game tech</Filter>
+    </ClCompile>
+    <ClCompile Include="tilemap.cpp">
+      <Filter>source\game tech</Filter>
+    </ClCompile>
+    <ClCompile Include="path_finding.cpp">
+      <Filter>source\ai</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="rehenz.h">
-      <Filter>header</Filter>
-    </ClInclude>
-    <ClInclude Include="noise_gen.h">
-      <Filter>header</Filter>
-    </ClInclude>
-    <ClInclude Include="path_finding.h">
-      <Filter>header</Filter>
-    </ClInclude>
-    <ClInclude Include="tilemap.h">
       <Filter>header</Filter>
     </ClInclude>
     <ClInclude Include="math.h">
@@ -103,6 +106,15 @@
     </ClInclude>
     <ClInclude Include="surface_dx8.h">
       <Filter>header\window</Filter>
+    </ClInclude>
+    <ClInclude Include="noise_gen.h">
+      <Filter>header\game tech</Filter>
+    </ClInclude>
+    <ClInclude Include="path_finding.h">
+      <Filter>header\ai</Filter>
+    </ClInclude>
+    <ClInclude Include="tilemap.h">
+      <Filter>header\game tech</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
