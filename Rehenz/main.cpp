@@ -8,7 +8,7 @@ using namespace Rehenz;
 #include <Windows.h>
 #include <timeapi.h>
 
-int noise_example()
+int main_noise_example()
 {
 	float noise[50];
 	Perlin1D(123U, 0, 10, 5, noise);
@@ -40,7 +40,7 @@ int noise_example()
 	return 0;
 }
 
-int render_soft_example()
+int main_surface_dx8_and_render_soft_example()
 {
 	cout << endl << "Open a surface with dx8" << endl;
 	SurfaceDx8 srf_dx8;
@@ -196,7 +196,7 @@ int render_soft_example()
 	return 0;
 }
 
-int clip_example()
+int main_clip_test()
 {
 	cout << endl;
 
@@ -215,7 +215,7 @@ int clip_example()
 	return 0;
 }
 
-int tilemap_and_path_finding_example()
+int main_tilemap_and_path_finding_and_fps_counter_example()
 {
 	cout << endl << "Open a surface with dx8" << endl;
 	SurfaceDx8 srf_dx8;
@@ -299,9 +299,9 @@ int tilemap_and_path_finding_example()
 	path_finding.Start();
 	tilemap(0, 0) = 4;
 	tilemap(10, 20) = 4;
-	cout << "press N or M to next" << endl;
+	cout << "press N or M to next (only when key up -> key down)" << endl;
 	bool press_n = false, press_m = false;
-	cout << "press C to next faster" << endl;
+	cout << "press C to next (when key down)" << endl;
 
 	cout << "Start fps counter" << endl;
 	FpsCounter fps_counter(timeGetTime);
@@ -390,8 +390,8 @@ int main()
 {
 	cout << "Hello~ Rehenz~" << endl;
 
-	//return noise_example();
-	//return render_soft_example();
-	//return clip_example();
-	return tilemap_and_path_finding_example();
+	//return main_noise_example();
+	//return main_surface_dx8_and_render_soft_example();
+	//return main_clip_test();
+	return main_tilemap_and_path_finding_and_fps_counter_example();
 }
