@@ -78,6 +78,9 @@
     <ClCompile Include="path_finding.cpp">
       <Filter>source\ai</Filter>
     </ClCompile>
+    <ClCompile Include="window.cpp">
+      <Filter>source\window</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="rehenz.h">
@@ -115,6 +118,9 @@
     </ClInclude>
     <ClInclude Include="tilemap.h">
       <Filter>header\game tech</Filter>
+    </ClInclude>
+    <ClInclude Include="window.h">
+      <Filter>header\window</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

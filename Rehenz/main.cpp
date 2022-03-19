@@ -386,6 +386,82 @@ int main_tilemap_and_path_finding_and_fps_counter_example()
 	return 0;
 }
 
+int main_two_surface_test()
+{
+	cout << endl << "Open a surface with dx8" << endl;
+	SurfaceDx8 srf_dx8;
+	const String title = "surface by dx8";
+	const int width = 800;
+	const int height = 600;
+	std::unique_ptr<uint[]> image = std::make_unique<uint[]>(width * height);
+	srf_dx8.Create(GetModuleHandle(nullptr), width, height, title.c_str());
+
+	cout << "Start fps counter" << endl;
+	FpsCounter fps_counter(timeGetTime);
+	fps_counter.UpdateFpsCallback = [&srf_dx8, &title](uint fps)
+	{
+		srf_dx8.SetTitle((title + " fps: " + std::to_string(fps)).c_str());
+	};
+	fps_counter.LockFps(140);
+
+	cout << "Open second surface with dx8" << endl;
+	SurfaceDx8 srf_dx8_2;
+	const String title2 = "second surface by dx8";
+	std::unique_ptr<uint[]> image2 = std::make_unique<uint[]>(width * height);
+	srf_dx8_2.Create(GetModuleHandle(nullptr), width, height, title2.c_str());
+
+	cout << "Start fps counter for second surface" << endl;
+	FpsCounter fps_counter2(timeGetTime);
+	fps_counter2.UpdateFpsCallback = [&srf_dx8_2, &title2](uint fps)
+	{
+		srf_dx8_2.SetTitle((title2 + " fps: " + std::to_string(fps)).c_str());
+	};
+	fps_counter2.LockFps(100);
+
+	cout << "press Q to exit" << endl;
+	while (srf_dx8.GetWindowState() || srf_dx8_2.GetWindowState())
+	{
+		// refresh
+		srf_dx8.Present();
+		srf_dx8_2.Present();
+		// update fps
+		fps_counter.Present();
+		fps_counter2.Present();
+		// exit
+		if (KeyIsDown('Q'))
+			break;
+	}
+	srf_dx8.Destroy();
+	srf_dx8_2.Destroy();
+	return 0;
+}
+
+int main_two_window_test()
+{
+	cout << endl << "Create window" << endl;
+	const std::string title = "first window";
+	const int width = 800;
+	const int height = 600;
+	SimpleWindowWithFC window(GetModuleHandle(nullptr), width, height, title);
+	const std::string title2 = "second window";
+	SimpleWindowWithFC window2(GetModuleHandle(nullptr), width, height, title2);
+
+	cout << "press Q to exit" << endl;
+	while (window.CheckWindowState() || window2.CheckWindowState())
+	{
+		// refresh
+		window.Present();
+		window2.Present();
+		// msg
+		SimpleMessageProcess();
+		// exit
+		if (KeyIsDown('Q'))
+			break;
+	}
+
+	return 0;
+}
+
 int main()
 {
 	cout << "Hello~ Rehenz~" << endl;
@@ -393,5 +469,7 @@ int main()
 	//return main_noise_example();
 	//return main_surface_dx8_and_render_soft_example();
 	//return main_clip_test();
-	return main_tilemap_and_path_finding_and_fps_counter_example();
+	//return main_tilemap_and_path_finding_and_fps_counter_example();
+	//return main_two_surface_test();
+	return main_two_window_test();
 }

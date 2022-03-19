@@ -10,3 +10,4 @@
 #include "surface_dx8.h"
 #include "tilemap.h"
 #include "type.h"
+#include "window.h"

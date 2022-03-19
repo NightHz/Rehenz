@@ -10,6 +10,7 @@ some code writed by NightHz
 - [寻路算法](#path_finding)（`path_finding.h`）
 - 创建一个网格地图（`tilemap.h`）
 - 帧率计数器（`fps_counter.h`）
+- 创建窗口（`window.h`）
 
 
 ## 代码规范
@@ -36,6 +37,7 @@ some code writed by NightHz
 - `surface_dx8.h`: 使用 DirectDraw(in DirectX8) 创建一个能够绘制图像的窗口
 - `tilemap.h`: 创建一个可渲染的2D网格地图
 - `type.h`: 定义基本数据类型，例如 `uint`
+- `window.h`: 快速创建 windows 窗口
 
 
 ## 程序设计
