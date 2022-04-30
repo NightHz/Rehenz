@@ -40,7 +40,12 @@ namespace Rehenz
 		return m[row][col];
 	}
 
-	Matrix& Matrix::operator=(Matrix matrix0)
+	float Matrix::operator()(int row, int col) const
+	{
+		return m[row][col];
+	}
+
+	Matrix& Matrix::operator=(const Matrix& matrix0)
 	{
 		for (int i = 0; i < 4; i++)
 			for (int j = 0; j < 4; j++)
@@ -48,7 +53,7 @@ namespace Rehenz
 		return (*this);
 	}
 
-	Matrix& Matrix::operator*=(Matrix matrix0)
+	Matrix& Matrix::operator*=(const Matrix& matrix0)
 	{
 		Matrix result;
 		for (int i = 0; i < 4; i++)
@@ -60,7 +65,7 @@ namespace Rehenz
 		return (*this);
 	}
 
-	Matrix& Matrix::operator+=(Matrix matrix0)
+	Matrix& Matrix::operator+=(const Matrix& matrix0)
 	{
 		for (int i = 0; i < 4; i++)
 			for (int j = 0; j < 4; j++)
@@ -68,7 +73,7 @@ namespace Rehenz
 		return (*this);
 	}
 
-	Matrix& Matrix::operator-=(Matrix matrix0)
+	Matrix& Matrix::operator-=(const Matrix& matrix0)
 	{
 		for (int i = 0; i < 4; i++)
 			for (int j = 0; j < 4; j++)
@@ -101,7 +106,7 @@ namespace Rehenz
 		return result;
 	}
 
-	Matrix Matrix::operator*(Matrix matrix0) const
+	Matrix Matrix::operator*(const Matrix& matrix0) const
 	{
 		Matrix result;
 		for (int i = 0; i < 4; i++)
@@ -110,21 +115,21 @@ namespace Rehenz
 		return result;
 	}
 
-	Matrix Matrix::operator+(Matrix matrix0) const
+	Matrix Matrix::operator+(const Matrix& matrix0) const
 	{
 		Matrix result;
 		for (int i = 0; i < 4; i++)
 			for (int j = 0; j < 4; j++)
-				result(i, j) = result(i, j) + matrix0(i, j);
+				result(i, j) = m[i][j] + matrix0(i, j);
 		return result;
 	}
 
-	Matrix Matrix::operator-(Matrix matrix0) const
+	Matrix Matrix::operator-(const Matrix& matrix0) const
 	{
 		Matrix result;
 		for (int i = 0; i < 4; i++)
 			for (int j = 0; j < 4; j++)
-				result(i, j) = result(i, j) - matrix0(i, j);
+				result(i, j) = m[i][j] - matrix0(i, j);
 		return result;
 	}
 
@@ -133,16 +138,7 @@ namespace Rehenz
 		Matrix result;
 		for (int i = 0; i < 4; i++)
 			for (int j = 0; j < 4; j++)
-				result(i, j) = result(i, j) * f0;
-		return result;
-	}
-
-	Matrix operator*(float f0, Matrix matrix0)
-	{
-		Matrix result;
-		for (int i = 0; i < 4; i++)
-			for (int j = 0; j < 4; j++)
-				result(i, j) = f0 * matrix0(i, j);
+				result(i, j) = m[i][j] * f0;
 		return result;
 	}
 
@@ -151,11 +147,11 @@ namespace Rehenz
 		Matrix result;
 		for (int i = 0; i < 4; i++)
 			for (int j = 0; j < 4; j++)
-				result(i, j) = result(i, j) / f0;
+				result(i, j) = m[i][j] / f0;
 		return result;
 	}
 
-	bool Matrix::operator==(Matrix matrix0) const
+	bool Matrix::operator==(const Matrix& matrix0) const
 	{
 		for (int i = 0; i < 4; i++)
 			for (int j = 0; j < 4; j++)
@@ -164,13 +160,27 @@ namespace Rehenz
 		return true;
 	}
 
-	bool Matrix::operator!=(Matrix matrix0) const
+	bool Matrix::operator!=(const Matrix& matrix0) const
 	{
 		for (int i = 0; i < 4; i++)
 			for (int j = 0; j < 4; j++)
 				if (m[i][j] != matrix0(i, j))
 					return true;
 		return false;
+	}
+
+	Matrix operator*(float f0, const Matrix& matrix0)
+	{
+		return matrix0 * f0;
+	}
+
+	Matrix MatrixTranspose(const Matrix& m)
+	{
+		Matrix result;
+		for (int i = 0; i < 4; i++)
+			for (int j = 0; j < 4; j++)
+				result(i, j) = m(j, i);
+		return result;
 	}
 
 	Matrix GetMatrixT(float tx, float ty, float tz)
@@ -207,6 +217,29 @@ namespace Rehenz
 		result(3, 1) = -translation.y;
 		result(3, 2) = -translation.z;
 		return result;
+	}
+
+	Matrix GetMatrixR(Quaternion q)
+	{
+		Matrix result;
+		float q11 = q(1) * q(1), q22 = q(2) * q(2), q33 = q(3) * q(3);
+		float q12 = q(1) * q(2), q23 = q(2) * q(3), q13 = q(1) * q(3);
+		float q01 = q(0) * q(1), q02 = q(0) * q(2), q03 = q(0) * q(3);
+		result(1, 1) = 1 - 2 * (q22 + q33);
+		result(2, 2) = 1 - 2 * (q11 + q33);
+		result(3, 3) = 1 - 2 * (q11 + q22);
+		result(1, 2) = 2 * (q12 - q03);
+		result(2, 1) = 2 * (q12 + q03);
+		result(2, 3) = 2 * (q23 - q01);
+		result(3, 2) = 2 * (q23 + q01);
+		result(3, 1) = 2 * (q13 - q02);
+		result(1, 3) = 2 * (q13 + q02);
+		return result;
+	}
+
+	Matrix GetInverseMatrixR(Quaternion q)
+	{
+		return GetMatrixR(QuaternionConjugate(q));
 	}
 
 	Matrix GetMatrixR(Vector at, Vector up)
@@ -383,6 +416,21 @@ namespace Rehenz
 		return result;
 	}
 
+	Matrix GetMatrixA(float pitch, float yaw, float roll)
+	{
+		return GetMatrixRz(roll) * GetMatrixRx(pitch) * GetMatrixRy(yaw);
+	}
+
+	Matrix GetMatrixA(AircraftAxes aircraft_axes)
+	{
+		return GetMatrixRz(aircraft_axes.roll) * GetMatrixRx(aircraft_axes.pitch) * GetMatrixRy(aircraft_axes.yaw);
+	}
+
+	Matrix GetInverseMatrixA(AircraftAxes aircraft_axes)
+	{
+		return GetMatrixRy(-aircraft_axes.yaw) * GetMatrixRx(-aircraft_axes.pitch) * GetMatrixRz(-aircraft_axes.roll);
+	}
+
 	Vector::Vector()
 	{
 		v[0] = 0.0f;
@@ -414,7 +462,12 @@ namespace Rehenz
 		return v[index];
 	}
 
-	Vector& Vector::operator =(Vector vector0)
+	float Vector::operator()(int index) const
+	{
+		return v[index];
+	}
+
+	Vector& Vector::operator=(Vector vector0)
 	{
 		for (int i = 0; i < 4; i++)
 			v[i] = vector0(i);
@@ -499,14 +552,6 @@ namespace Rehenz
 		return result;
 	}
 
-	Vector operator*(float f0, Vector vector0)
-	{
-		Vector result;
-		for (int i = 0; i < 4; i++)
-			result(i) = f0 * vector0(i);
-		return result;
-	}
-
 	Vector Vector::operator/(float f0) const
 	{
 		Vector result;
@@ -531,6 +576,154 @@ namespace Rehenz
 		return false;
 	}
 
+	Vector operator*(float f0, Vector vector0)
+	{
+		return vector0 * f0;
+	}
+
+	Quaternion::Quaternion()
+	{
+		a = 1;
+		b = c = d = 0;
+	}
+
+	Quaternion::Quaternion(float _a, float _b, float _c, float _d)
+	{
+		a = _a;
+		b = _b;
+		c = _c;
+		d = _d;
+	}
+
+	float& Quaternion::operator()(int index)
+	{
+		return q[index];
+	}
+
+	float Quaternion::operator()(int index) const
+	{
+		return q[index];
+	}
+
+	Quaternion& Quaternion::operator=(Quaternion quaternion)
+	{
+		for (int i = 0; i < 4; i++)
+			q[i] = quaternion(i);
+		return (*this);
+	}
+
+	Quaternion& Quaternion::operator*=(Quaternion quaternion)
+	{
+		Quaternion result;
+		result(0) = q[0] * quaternion(0) - q[1] * quaternion(1) - q[2] * quaternion(2) - q[3] * quaternion(3);
+		result(1) = q[1] * quaternion(0) + q[0] * quaternion(1) + q[2] * quaternion(3) - q[3] * quaternion(2);
+		result(2) = q[2] * quaternion(0) + q[0] * quaternion(2) + q[3] * quaternion(1) - q[1] * quaternion(3);
+		result(3) = q[3] * quaternion(0) + q[0] * quaternion(3) + q[1] * quaternion(2) - q[2] * quaternion(1);
+
+		for (int i = 0; i < 4; i++)
+			q[i] = result(i);
+		return (*this);
+	}
+
+	Quaternion& Quaternion::operator+=(Quaternion quaternion)
+	{
+		for (int i = 0; i < 4; i++)
+			q[i] = q[i] + quaternion(i);
+		return (*this);
+	}
+
+	Quaternion& Quaternion::operator-=(Quaternion quaternion)
+	{
+		for (int i = 0; i < 4; i++)
+			q[i] = q[i] - quaternion(i);
+		return (*this);
+	}
+
+	Quaternion& Quaternion::operator*=(float f)
+	{
+		for (int i = 0; i < 4; i++)
+			q[i] = q[i] * f;
+		return (*this);
+	}
+
+	Quaternion& Quaternion::operator/=(float f)
+	{
+		for (int i = 0; i < 4; i++)
+			q[i] = q[i] / f;
+		return (*this);
+	}
+
+	Quaternion Quaternion::operator-() const
+	{
+		Quaternion result;
+		for (int i = 0; i < 4; i++)
+			result(i) = -q[i];
+		return result;
+	}
+
+	Quaternion Quaternion::operator*(Quaternion quaternion) const
+	{
+		Quaternion result;
+		result(0) = q[0] * quaternion(0) - q[1] * quaternion(1) - q[2] * quaternion(2) - q[3] * quaternion(3);
+		result(1) = q[1] * quaternion(0) + q[0] * quaternion(1) + q[2] * quaternion(3) - q[3] * quaternion(2);
+		result(2) = q[2] * quaternion(0) + q[0] * quaternion(2) + q[3] * quaternion(1) - q[1] * quaternion(3);
+		result(3) = q[3] * quaternion(0) + q[0] * quaternion(3) + q[1] * quaternion(2) - q[2] * quaternion(1);
+		return result;
+	}
+
+	Quaternion Quaternion::operator+(Quaternion quaternion) const
+	{
+		Quaternion result;
+		for (int i = 0; i < 4; i++)
+			result(i) = q[i] + quaternion(i);
+		return result;
+	}
+
+	Quaternion Quaternion::operator-(Quaternion quaternion) const
+	{
+		Quaternion result;
+		for (int i = 0; i < 4; i++)
+			result(i) = q[i] - quaternion(i);
+		return result;
+	}
+
+	Quaternion Quaternion::operator*(float f) const
+	{
+		Quaternion result;
+		for (int i = 0; i < 4; i++)
+			result(i) = q[i] * f;
+		return result;
+	}
+
+	Quaternion Quaternion::operator/(float f) const
+	{
+		Quaternion result;
+		for (int i = 0; i < 4; i++)
+			result(i) = q[i] / f;
+		return result;
+	}
+
+	bool Quaternion::operator==(Quaternion quaternion) const
+	{
+		for (int i = 0; i < 4; i++)
+			if (q[i] != quaternion(i))
+				return false;
+		return true;
+	}
+
+	bool Quaternion::operator!=(Quaternion quaternion) const
+	{
+		for (int i = 0; i < 4; i++)
+			if (q[i] != quaternion(i))
+				return true;
+		return false;
+	}
+
+	Quaternion operator*(float f, Quaternion quaternion)
+	{
+		return quaternion * f;
+	}
+
 	EulerAngles::EulerAngles()
 	{
 		psi = 0;
@@ -543,6 +736,30 @@ namespace Rehenz
 		psi = _psi;
 		theta = _theta;
 		phi = _phi;
+	}
+
+	Quaternion EulerAngles::ToQuaternion() const
+	{
+		return GetQuaternionY(phi) * GetQuaternionX(theta) * GetQuaternionY(psi);
+	}
+
+	AircraftAxes::AircraftAxes()
+	{
+		pitch = 0;
+		yaw = 0;
+		roll = 0;
+	}
+
+	AircraftAxes::AircraftAxes(float _pitch, float _yaw, float _roll)
+	{
+		pitch = _pitch;
+		yaw = _yaw;
+		roll = _roll;
+	}
+
+	Quaternion AircraftAxes::ToQuaternion() const
+	{
+		return GetQuaternionZ(roll) * GetQuaternionX(pitch) * GetQuaternionY(yaw);
 	}
 
 	Vector2::Vector2()
@@ -627,6 +844,11 @@ namespace Rehenz
 	bool Vector2::operator!=(Vector2 v) const
 	{
 		return !(*this == v);
+	}
+
+	Vector2 operator*(float f, Vector2 v)
+	{
+		return v * f;
 	}
 
 	Vector3::Vector3()
@@ -722,11 +944,6 @@ namespace Rehenz
 		return !(*this == v);
 	}
 
-	Vector2 operator*(float f, Vector2 v)
-	{
-		return v * f;
-	}
-
 	Vector3 operator*(float f, Vector3 v)
 	{
 		return v * f;
@@ -734,7 +951,7 @@ namespace Rehenz
 
 	float VectorLength(Vector v1)
 	{
-		return sqrtf(v1.x * v1.x + v1.y * v1.y + v1.z * v1.z);
+		return sqrtf(v1.x * v1.x + v1.y * v1.y + v1.z * v1.z + v1.w * v1.w);
 	}
 
 	float VectorLength(Vector2 v)
@@ -749,7 +966,7 @@ namespace Rehenz
 
 	float VectorDot(Vector v1, Vector v2)
 	{
-		return v1.x * v2.x + v1.y * v2.y + v1.z * v2.z;
+		return v1.x * v2.x + v1.y * v2.y + v1.z * v2.z + v1.w * v2.w;
 	}
 
 	float VectorDot(Vector2 v1, Vector2 v2)
@@ -798,13 +1015,7 @@ namespace Rehenz
 		if (length == 0)
 			return v1;
 
-		float f0 = 1 / length;
-		result.x = v1.x * f0;
-		result.y = v1.y * f0;
-		result.z = v1.z * f0;
-		result.w = 0.0f;
-
-		return result;
+		return v1 / length;
 	}
 
 	Vector3 VectorNormalize(Vector3 v)
@@ -830,7 +1041,7 @@ namespace Rehenz
 	{
 		Point result;
 
-		if (p1.w == 0)
+		if (p1.w == 0 || p1.w == w)
 			return p1;
 		float f0 = w / p1.w;
 		result.x = p1.x * f0;
@@ -843,13 +1054,12 @@ namespace Rehenz
 
 	float PointDistance(Point p1, Point p2)
 	{
-		Vector v1 = p1 - p2;
-		return sqrtf(v1.x * v1.x + v1.y * v1.y + v1.z * v1.z);
+		return VectorLength(p1 - p2);
 	}
 
 	float PointDistance(Point2 p1, Point2 p2)
 	{
-		return sqrtf((float)((p1.x - p2.x) * (p1.x - p2.x) + (p1.y - p2.y) * (p1.y - p2.y)));
+		return VectorLength(p1 - p2);
 	}
 
 	float PointDistance(Point3 p1, Point3 p2)
@@ -860,6 +1070,54 @@ namespace Rehenz
 	Vector TrianglesNormal(Point p1, Point p2, Point p3)
 	{
 		return VectorCross(p2 - p1, p3 - p1);
+	}
+
+	Quaternion QuaternionConjugate(Quaternion q)
+	{
+		return Quaternion(q.a, -q.b, -q.c, -q.d);
+	}
+
+	Quaternion GetQuaternionAxis(float theta, Vector axis)
+	{
+		theta /= 2;
+		float cos0 = cosf(theta);
+		float sin0 = sinf(theta);
+		axis.w = 0;
+		axis = VectorNormalize(axis);
+		return Quaternion(cos0, sin0 * axis.x, sin0 * axis.y, sin0 * axis.z);
+	}
+
+	Quaternion GetQuaternionAxis(float theta, Vector3 axis)
+	{
+		theta /= 2;
+		float cos0 = cosf(theta);
+		float sin0 = sinf(theta);
+		axis = VectorNormalize(axis);
+		return Quaternion(cos0, sin0 * axis.x, sin0 * axis.y, sin0 * axis.z);
+	}
+
+	Quaternion GetQuaternionX(float theta)
+	{
+		theta /= 2;
+		float cos0 = cosf(theta);
+		float sin0 = sinf(theta);
+		return Quaternion(cos0, sin0, 0, 0);
+	}
+
+	Quaternion GetQuaternionY(float theta)
+	{
+		theta /= 2;
+		float cos0 = cosf(theta);
+		float sin0 = sinf(theta);
+		return Quaternion(cos0, 0, sin0, 0);
+	}
+
+	Quaternion GetQuaternionZ(float theta)
+	{
+		theta /= 2;
+		float cos0 = cosf(theta);
+		float sin0 = sinf(theta);
+		return Quaternion(cos0, 0, 0, sin0);
 	}
 
 	Vector2I::Vector2I()
@@ -885,4 +1143,5 @@ namespace Rehenz
 		x = _x;
 		y = _y;
 	}
+
 }

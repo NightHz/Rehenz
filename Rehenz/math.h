@@ -69,11 +69,14 @@ namespace Rehenz
 	struct Matrix;
 	struct Vector;
 	struct Point;
+	struct Quaternion;
 	struct EulerAngles;
-	struct Vector2;
-	struct Vector3;
+	struct AircraftAxes;
+	struct Vector2; // struct Point2
+	struct Vector3; // struct Point3
+	struct Vector2I; // struct Point2I
 
-	// 4x4 matrix
+	// 4x4 matrix (row-first storage)
 	struct Matrix
 	{
 	public:
@@ -89,27 +92,31 @@ namespace Rehenz
 
 		// access date
 		float& operator()(int row, int col);
-		Matrix& operator=(Matrix);
+		float operator()(int row, int col) const;
+		Matrix& operator=(const Matrix&);
 
 		// some operator
-		Matrix& operator*=(Matrix);
-		Matrix& operator+=(Matrix);
-		Matrix& operator-=(Matrix);
+		Matrix& operator*=(const Matrix&);
+		Matrix& operator+=(const Matrix&);
+		Matrix& operator-=(const Matrix&);
 		Matrix& operator*=(float);
 		Matrix& operator/=(float);
 
 		Matrix operator-() const;
 
-		Matrix operator*(Matrix) const;
-		Matrix operator+(Matrix) const;
-		Matrix operator-(Matrix) const;
+		Matrix operator*(const Matrix&) const;
+		Matrix operator+(const Matrix&) const;
+		Matrix operator-(const Matrix&) const;
 		Matrix operator*(float) const;
 		Matrix operator/(float) const;
 
-		bool operator==(Matrix) const;
-		bool operator!=(Matrix) const;
+		bool operator==(const Matrix&) const;
+		bool operator!=(const Matrix&) const;
 	};
-	Matrix operator*(float, Matrix);
+	Matrix operator*(float, const Matrix&);
+
+	// matrix transpose
+	Matrix MatrixTranspose(const Matrix& m);
 
 	// get matrix of translation
 	Matrix GetMatrixT(float tx, float ty, float tz);
@@ -123,16 +130,25 @@ namespace Rehenz
 	// get inverse matrix of translation
 	Matrix GetInverseMatrixT(Vector translation);
 
+	// get matrix of rotation
+	Matrix GetMatrixR(Quaternion q);
+
+	// get inverse matrix of rotation
+	Matrix GetInverseMatrixR(Quaternion q);
+
 	// get matrix of rotation, +z -> at, +y -> up
 	Matrix GetMatrixR(Vector at, Vector up);
 
 	// get inverse matrix of rotation, +z -> at, +y -> up
 	Matrix GetInverseMatrixR(Vector at, Vector up);
 
+	// get matrix of rotation around x axis
 	Matrix GetMatrixRx(float theta);
 
+	// get matrix of rotation around y axis
 	Matrix GetMatrixRy(float theta);
 
+	// get matrix of rotation around z axis
 	Matrix GetMatrixRz(float theta);
 
 	// get matrix of scale
@@ -168,6 +184,15 @@ namespace Rehenz
 	// get inverse matrix of rotation defined by eular angles
 	Matrix GetInverseMatrixE(EulerAngles euler_angles);
 
+	// get matrix of rotation defined by aircraft principal axes
+	Matrix GetMatrixA(float pitch, float yaw, float roll);
+
+	// get matrix of rotation defined by aircraft principal axes
+	Matrix GetMatrixA(AircraftAxes aircraft_axes);
+
+	// get inverse matrix of rotation defined by aircraft principal axes
+	Matrix GetInverseMatrixA(AircraftAxes aircraft_axes);
+
 	// 3-component vector with w = 1x4 matrix
 	struct Vector
 	{
@@ -191,6 +216,7 @@ namespace Rehenz
 
 		// access date
 		float& operator()(int index);
+		float operator()(int index) const;
 		Vector& operator=(Vector);
 
 		// some operator
@@ -224,6 +250,50 @@ namespace Rehenz
 		explicit Point(float _x, float _y, float _z, float _w = 1) : Vector(_x, _y, _z, _w) {}
 	};
 
+	struct Quaternion
+	{
+	public:
+#pragma warning(disable:4201)
+		union {
+			float q[4];
+			struct {
+				float a;
+				float b;
+				float c;
+				float d;
+			};
+		};
+#pragma warning(default:4201)
+
+		// default (1,0,0,0)
+		Quaternion();
+		explicit Quaternion(float _a, float _b, float _c, float _d);
+
+		// access date
+		float& operator()(int index);
+		float operator()(int index) const;
+		Quaternion& operator=(Quaternion);
+
+		// some operator
+		Quaternion& operator*=(Quaternion);
+		Quaternion& operator+=(Quaternion);
+		Quaternion& operator-=(Quaternion);
+		Quaternion& operator*=(float);
+		Quaternion& operator/=(float);
+
+		Quaternion operator-() const;
+
+		Quaternion operator*(Quaternion) const;
+		Quaternion operator+(Quaternion) const;
+		Quaternion operator-(Quaternion) const;
+		Quaternion operator*(float) const;
+		Quaternion operator/(float) const;
+
+		bool operator==(Quaternion) const;
+		bool operator!=(Quaternion) const;
+	};
+	Quaternion operator*(float, Quaternion);
+
 	// eular angles
 	struct EulerAngles
 	{
@@ -234,6 +304,22 @@ namespace Rehenz
 
 		EulerAngles();
 		explicit EulerAngles(float _psi, float _theta, float _phi);
+
+		Quaternion ToQuaternion() const;
+	};
+
+	// aircraft principal axes
+	struct AircraftAxes
+	{
+	public:
+		float pitch;
+		float yaw;
+		float roll;
+
+		AircraftAxes();
+		explicit AircraftAxes(float _pitch, float _yaw, float _roll);
+
+		Quaternion ToQuaternion() const;
 	};
 
 	// 2-component vector
@@ -302,13 +388,13 @@ namespace Rehenz
 	typedef Vector3 Point3;
 
 
-	// get vector length
+	// compute vector length
 	float VectorLength(Vector v1);
 
-	// get vector length
+	// compute vector length
 	float VectorLength(Vector2 v);
 
-	// get vector length
+	// compute vector length
 	float VectorLength(Vector3 v);
 
 	// vector dot
@@ -320,7 +406,7 @@ namespace Rehenz
 	// vector dot
 	float VectorDot(Vector3 v1, Vector3 v2);
 
-	// vector cross
+	// vector cross (ignore w)
 	Vector VectorCross(Vector v1, Vector v2);
 
 	// vector cross
@@ -338,20 +424,38 @@ namespace Rehenz
 	// point lerp
 	Point PointLerp(Point p1, Point p2, float t);
 
-	// point Standardization
+	// point standardize
 	Point PointStandard(Point p1, float w = 1);
 
-	// get point distance
+	// compute point distance
 	float PointDistance(Point p1, Point p2);
 
-	// get point distance
+	// compute point distance
 	float PointDistance(Point2 p1, Point2 p2);
 
-	// get point distance
+	// compute point distance
 	float PointDistance(Point3 p1, Point3 p2);
 
-	// get triangles normal vector
+	// compute triangles normal vector (not auto standardize)
 	Vector TrianglesNormal(Point p1, Point p2, Point p3);
+
+	// quaternion conjugate
+	Quaternion QuaternionConjugate(Quaternion q);
+
+	// get quaternion defined by axis-angle
+	Quaternion GetQuaternionAxis(float theta, Vector axis);
+
+	// get quaternion defined by axis-angle
+	Quaternion GetQuaternionAxis(float theta, Vector3 axis);
+
+	// get quaternion defined by rotation around x axis
+	Quaternion GetQuaternionX(float theta);
+
+	// get quaternion defined by rotation around y axis
+	Quaternion GetQuaternionY(float theta);
+
+	// get quaternion defined by rotation around z axis
+	Quaternion GetQuaternionZ(float theta);
 
 	// 2-component vector with int type
 	struct Vector2I
