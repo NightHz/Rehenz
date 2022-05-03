@@ -1,8 +1,11 @@
 // the main content is written before 2018, and move it here
+// modify in 2022
 #pragma once
 #define WIN32_LEAN_AND_MEAN
 #include <ddraw.h>
 #include <Windows.h>
+#include "window_fc.h"
+#include "type.h"
 
 namespace Rehenz
 {
@@ -10,57 +13,35 @@ namespace Rehenz
 	class SurfaceDx8
 	{
 	private:
-		HINSTANCE hinstance;
-		HWND hwnd;
-
+		SimpleWindowWithFC* window;
 		bool window_state;
-		int width;
-		int height;
 		RECT rc_window;
-		TCHAR* title;
 
-		LPDIRECTDRAW7 pDD;
-		LPDIRECTDRAWSURFACE7 pDDSF;
-		LPDIRECTDRAWSURFACE7 pDDSB;
+		IDirectDraw7* dd;
+		IDirectDrawSurface7* dds_front;
+		IDirectDrawSurface7* dds_back;
 
-		void UpdateBounds(void);
-
-		static bool InitWindowClass(HINSTANCE hinstance);
+		void UpdateBounds();
 
 	public:
-		SurfaceDx8(void);
+		SurfaceDx8();
 		SurfaceDx8(const SurfaceDx8&) = delete;
 		SurfaceDx8& operator=(const SurfaceDx8&) = delete;
-		~SurfaceDx8(void);
+		~SurfaceDx8();
 
 		// Access functions
-		HWND GetHWnd(void) { return hwnd; }
-		bool GetWindowState() { return window_state; }
-		const TCHAR* GetTitle() { return title; }
-
-		void SetTitle(const TCHAR* _title);
+		inline SimpleWindowWithFC* GetWindow() { return window; }
+		inline bool GetWindowState() { return window_state; }
 
 		// Creation / destruction methods
-		bool Create(HINSTANCE _hinstance, int _width, int _height, const TCHAR* _title);
-		void Destroy(void);
+		bool Create(HINSTANCE _hinstance, int _width, int _height, String _title);
+		void Destroy();
 
 		// Draw Method
-		bool FillFromImage(const UINT* image);
+		bool FillFromImage(const uint* image);
 
 		// Display Method
 		bool Present();
 
 	};
-
-	// letter and number are the same as ASCII code
-	inline bool KeyIsDown(int vKey)
-	{
-		return (GetAsyncKeyState(vKey) & 0x8000);
-	}
-
-	// letter and number are the same as ASCII code
-	inline bool KeyIsUp(int vKey)
-	{
-		return !KeyIsDown(vKey);
-	}
 }

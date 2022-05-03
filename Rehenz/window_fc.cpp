@@ -10,7 +10,7 @@ namespace Rehenz
 		fps_counter.LockFps(100);
 		auto updateFps = [this](Rehenz::uint fps)
 		{
-			this->SetTitle(title_base + TEXT(" fps:") + ToString(fps));
+			this->SetTitle(this->title_base + TEXT(" fps:") + ToString(fps));
 		};
 		fps_counter.UpdateFpsCallback = updateFps;
 	}

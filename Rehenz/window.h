@@ -22,11 +22,11 @@ namespace Rehenz
 		SimpleWindow& operator=(const SimpleWindow&) = delete;
 		~SimpleWindow();
 
-		HINSTANCE GetHinstance() { return hinstance; }
-		HWND GetHwnd() { return hwnd; }
-		int GetWidth() { return width; }
-		int GetHeight() { return height; }
-		const String& GetTitle() { return title; }
+		inline HINSTANCE GetHinstance() { return hinstance; }
+		inline HWND GetHwnd() { return hwnd; }
+		inline int GetWidth() { return width; }
+		inline int GetHeight() { return height; }
+		inline const String& GetTitle() { return title; }
 
 		bool CheckWindowState();
 		void SetTitle(String _title);

@@ -47,7 +47,7 @@ int main_surface_dx8_and_render_soft_example()
 	String title = "surface by dx8";
 	int width = 800;
 	int height = 600;
-	srf_dx8.Create(GetModuleHandle(nullptr), width, height, title.c_str());
+	srf_dx8.Create(GetModuleHandle(nullptr), width, height, title);
 
 	cout << "Draw lines" << endl;
 	int size = width * height;
@@ -109,11 +109,11 @@ int main_surface_dx8_and_render_soft_example()
 	test1.AddObject(obj_sphere);
 	auto obj_sphere2 = std::make_shared<RenderObject>(sphereB);
 	obj_sphere2->position = Vector(-2, 2, 0);
-	obj_sphere2->scale = Vector(0.4f, 0.4f, 0.4f);
+	//obj_sphere2->scale = Vector(0.4f, 0.4f, 0.4f);
 	test1.AddObject(obj_sphere2);
 	auto obj_sphere3 = std::make_shared<RenderObject>(sphereC);
-	obj_sphere3->position = Vector(2, 2, 0);
-	obj_sphere3->scale = Vector(0.4f, 0.4f, 0.4f);
+	obj_sphere3->position = Vector(2, 2, -3);
+	//obj_sphere3->scale = Vector(0.4f, 0.4f, 0.4f);
 	test1.AddObject(obj_sphere3);
 	auto obj_sphere4 = std::make_shared<RenderObject>(sphereD);
 	obj_sphere4->position = Vector(0, 0, 0);
@@ -135,13 +135,6 @@ int main_surface_dx8_and_render_soft_example()
 	cout << "press T/F/G/H/R/Y to move cube" << endl;
 	cout << "press 8/9         to switch scene" << endl;
 
-	cout << "Start fps counter" << endl;
-	int fps[2] = { 0,0 };
-	auto fps_t0 = timeGetTime();
-	bool lock_fps = true;
-	if (lock_fps)
-		cout << "Lock fps" << endl;
-	auto t0 = timeGetTime();
 	cout << "press Q to exit" << endl;
 	while (srf_dx8.GetWindowState())
 	{
@@ -172,21 +165,8 @@ int main_surface_dx8_and_render_soft_example()
 			srf_dx8.FillFromImage(camera.RenderImage(*scene, camera.DefaultVertexShader, my_pixel_shader));
 		// refresh
 		srf_dx8.Present();
-		// compute fps and set title
-		fps[1]++;
-		auto fps_t1 = timeGetTime();
-		if (fps_t1 - fps_t0 >= 500)
-		{
-			srf_dx8.SetTitle((title + " fps: " + std::to_string(fps[0] + fps[1])).c_str());
-			fps[0] = fps[1];
-			fps[1] = 0;
-			fps_t0 = fps_t1;
-		}
-		// sleep
-		if (lock_fps)
-			while (16 >= (timeGetTime() - t0))
-				;
-		t0 = timeGetTime();
+		// msg
+		SimpleMessageProcess();
 		// exit
 		if (KeyIsDown('Q'))
 			break;
@@ -303,14 +283,6 @@ int main_tilemap_and_path_finding_and_fps_counter_example()
 	bool press_n = false, press_m = false;
 	cout << "press C to next (when key down)" << endl;
 
-	cout << "Start fps counter" << endl;
-	FpsCounter fps_counter(timeGetTime);
-	fps_counter.UpdateFpsCallback = [&srf_dx8, &title](uint fps)
-	{
-		srf_dx8.SetTitle((title + " fps: " + std::to_string(fps)).c_str());
-	};
-	fps_counter.LockFps(140);
-
 	cout << "press Q to exit" << endl;
 	while (srf_dx8.GetWindowState())
 	{
@@ -375,8 +347,8 @@ int main_tilemap_and_path_finding_and_fps_counter_example()
 		srf_dx8.FillFromImage(tilemap.Render(image.get(), width, height));
 		// refresh
 		srf_dx8.Present();
-		// update fps
-		fps_counter.Present();
+		// msg
+		SimpleMessageProcess();
 		// exit
 		if (KeyIsDown('Q'))
 			break;
@@ -396,27 +368,11 @@ int main_two_surface_test()
 	std::unique_ptr<uint[]> image = std::make_unique<uint[]>(width * height);
 	srf_dx8.Create(GetModuleHandle(nullptr), width, height, title.c_str());
 
-	cout << "Start fps counter" << endl;
-	FpsCounter fps_counter(timeGetTime);
-	fps_counter.UpdateFpsCallback = [&srf_dx8, &title](uint fps)
-	{
-		srf_dx8.SetTitle((title + " fps: " + std::to_string(fps)).c_str());
-	};
-	fps_counter.LockFps(140);
-
 	cout << "Open second surface with dx8" << endl;
 	SurfaceDx8 srf_dx8_2;
 	const String title2 = "second surface by dx8";
 	std::unique_ptr<uint[]> image2 = std::make_unique<uint[]>(width * height);
 	srf_dx8_2.Create(GetModuleHandle(nullptr), width, height, title2.c_str());
-
-	cout << "Start fps counter for second surface" << endl;
-	FpsCounter fps_counter2(timeGetTime);
-	fps_counter2.UpdateFpsCallback = [&srf_dx8_2, &title2](uint fps)
-	{
-		srf_dx8_2.SetTitle((title2 + " fps: " + std::to_string(fps)).c_str());
-	};
-	fps_counter2.LockFps(100);
 
 	cout << "press Q to exit" << endl;
 	while (srf_dx8.GetWindowState() || srf_dx8_2.GetWindowState())
@@ -424,9 +380,8 @@ int main_two_surface_test()
 		// refresh
 		srf_dx8.Present();
 		srf_dx8_2.Present();
-		// update fps
-		fps_counter.Present();
-		fps_counter2.Present();
+		// msg
+		SimpleMessageProcess();
 		// exit
 		if (KeyIsDown('Q'))
 			break;
@@ -467,9 +422,9 @@ int main()
 	cout << "Hello~ Rehenz~" << endl;
 
 	//return main_noise_example();
-	//return main_surface_dx8_and_render_soft_example();
+	return main_surface_dx8_and_render_soft_example();
 	//return main_clip_test();
 	//return main_tilemap_and_path_finding_and_fps_counter_example();
 	//return main_two_surface_test();
-	return main_two_window_test();
+	//return main_two_window_test();
 }

@@ -7,6 +7,7 @@ some code writed by NightHz
 - 创建窗口（`window.h`）
   - 创建带帧率的窗口（`window_fc.h`）
 - 帧率计数器（`fps_counter.h`）
+- 获取输入（`input.h`）
 - 噪点生成算法（`noise_gen.h`）
 - 打开一个可绘制图像的窗口（`surface_dx8.h`）
 - [3D渲染器](#render_soft)（`render_soft.h`）
@@ -29,6 +30,7 @@ some code writed by NightHz
 - `clipper.h`: 裁切一个几何元
 - `drawer.h`: 绘制/光栅化一个几何元
 - `fps_counter.h`: 帧率计数器
+- `input.h` : 按键状态检测
 - `math.h`: 数学
 - `mesh.h`: 存储3D网格
 - `noise_gen.h`: 生成一张噪点图，例如 Perlin 噪点

@@ -2,6 +2,7 @@
 #include "clipper.h"
 #include "drawer.h"
 #include "fps_counter.h"
+#include "input.h"
 #include "math.h"
 #include "mesh.h"
 #include "noise_gen.h"
