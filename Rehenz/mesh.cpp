@@ -226,6 +226,7 @@ namespace Rehenz
 				Vertex ve_new = VertexLerp(vb, vd, static_cast<float>(i + 1) / (j + 1));
 				if (unit_vertex)
 				{
+					ve_new.p.w = 0;
 					float length = VectorLength(ve_new.p);
 					if (length != 0)
 						ve_new.p /= length;
@@ -278,6 +279,7 @@ namespace Rehenz
 		for (int i = 1; i < smooth; i++)
 		{
 			Vertex v_new = VertexLerp(vertices[a], vertices[b], static_cast<float>(i) / smooth);
+			v_new.p.w = 0;
 			float length = VectorLength(v_new.p);
 			if (length != 0)
 				v_new.p /= length;

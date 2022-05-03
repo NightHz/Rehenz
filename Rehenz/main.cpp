@@ -1,12 +1,11 @@
 #define WIN32_LEAN_AND_MEAN
 #include <iostream>
+using std::wcout;
 using std::cout;
 using std::endl;
 #include "rehenz.h"
 using namespace Rehenz;
-#include <string>
-#include <Windows.h>
-#include <timeapi.h>
+
 
 int main_noise_example()
 {
@@ -112,7 +111,7 @@ int main_surface_dx8_and_render_soft_example()
 	//obj_sphere2->scale = Vector(0.4f, 0.4f, 0.4f);
 	test1.AddObject(obj_sphere2);
 	auto obj_sphere3 = std::make_shared<RenderObject>(sphereC);
-	obj_sphere3->position = Vector(2, 2, -3);
+	obj_sphere3->position = Vector(2, 2, 0);
 	//obj_sphere3->scale = Vector(0.4f, 0.4f, 0.4f);
 	test1.AddObject(obj_sphere3);
 	auto obj_sphere4 = std::make_shared<RenderObject>(sphereD);
