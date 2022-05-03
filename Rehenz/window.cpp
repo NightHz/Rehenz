@@ -1,5 +1,5 @@
 #include "window.h"
-#include <timeapi.h>
+#include <utility>
 
 #define WINDOW_CLASS_NAME TEXT("REHENZ")
 
@@ -20,17 +20,17 @@ namespace Rehenz
 		winclass.hIcon = nullptr;
 		winclass.hIconSm = nullptr;
 		winclass.hCursor = nullptr;
-		winclass.hbrBackground = (HBRUSH)GetStockObject(BLACK_BRUSH);
+		winclass.hbrBackground = nullptr;
 		winclass.lpszMenuName = nullptr;
 		if (!RegisterClassEx(&winclass))
 			return false;
 		return true;
 	}
 
-	SimpleWindow::SimpleWindow(HINSTANCE _hinstance, int _width, int _height, const String& _title)
+	SimpleWindow::SimpleWindow(HINSTANCE _hinstance, int _width, int _height, String _title)
 		: hinstance(_hinstance), hwnd(nullptr), width(_width), height(_height)
 	{
-		SetTitle(_title);
+		SetTitle(std::move(_title));
 
 		if (!InitDefaultWindowClass(hinstance))
 		{
@@ -66,6 +66,8 @@ namespace Rehenz
 			hwnd_find = FindWindowEx(nullptr, hwnd_find, WINDOW_CLASS_NAME, title.c_str());
 			if (!hwnd_find)
 			{
+				DestroyWindow(hwnd);
+				hwnd = nullptr;
 				return false;
 			}
 			else if (hwnd_find == hwnd)
@@ -75,12 +77,11 @@ namespace Rehenz
 			else
 				continue;
 		}
-		return false;
 	}
 
-	void SimpleWindow::SetTitle(const String& _title)
+	void SimpleWindow::SetTitle(String _title)
 	{
-		title = _title;
+		title = std::move(_title);
 		if (hwnd)
 			SetWindowText(hwnd, title.c_str());
 	}
@@ -100,23 +101,4 @@ namespace Rehenz
 		}
 	}
 
-	SimpleWindowWithFC::SimpleWindowWithFC(HINSTANCE _hinstance, int _width, int _height, const String& _title_base)
-		: SimpleWindow(_hinstance, _width, _height, _title_base), title_base(_title_base), fps_counter(timeGetTime)
-	{
-		fps_counter.LockFps(100);
-		auto updateFps = [this](Rehenz::uint fps)
-		{
-			this->SetTitle((title_base + " fps:" + std::to_string(fps)).c_str());
-		};
-		fps_counter.UpdateFpsCallback = updateFps;
-	}
-
-	SimpleWindowWithFC::~SimpleWindowWithFC()
-	{
-	}
-
-	void SimpleWindowWithFC::Present()
-	{
-		fps_counter.Present();
-	}
 }

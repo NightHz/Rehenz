@@ -18,6 +18,7 @@ namespace Rehenz
 		std::function<TimeType(void)> GetTime;
 
 	public:
+		// update per 0.5s
 		std::function<void(uint fps)> UpdateFpsCallback;
 
 		// default lock 60 fps

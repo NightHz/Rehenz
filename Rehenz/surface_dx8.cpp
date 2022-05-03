@@ -22,7 +22,7 @@ namespace Rehenz
 		winclass.hIcon = nullptr;
 		winclass.hIconSm = nullptr;
 		winclass.hCursor = nullptr;
-		winclass.hbrBackground = (HBRUSH)GetStockObject(BLACK_BRUSH);
+		winclass.hbrBackground = nullptr;
 		winclass.lpszMenuName = nullptr;
 		if (!RegisterClassEx(&winclass))
 			return false;

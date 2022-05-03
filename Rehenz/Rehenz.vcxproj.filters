@@ -81,6 +81,9 @@
     <ClCompile Include="window.cpp">
       <Filter>source\window</Filter>
     </ClCompile>
+    <ClCompile Include="window_fc.cpp">
+      <Filter>source\window</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="rehenz.h">
@@ -120,6 +123,9 @@
       <Filter>header\game tech</Filter>
     </ClInclude>
     <ClInclude Include="window.h">
+      <Filter>header\window</Filter>
+    </ClInclude>
+    <ClInclude Include="window_fc.h">
       <Filter>header\window</Filter>
     </ClInclude>
   </ItemGroup>

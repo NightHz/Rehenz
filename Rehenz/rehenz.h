@@ -11,3 +11,4 @@
 #include "tilemap.h"
 #include "type.h"
 #include "window.h"
+#include "window_fc.h"

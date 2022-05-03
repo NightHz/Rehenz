@@ -1,11 +1,11 @@
 #pragma once
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
-#include <string>
-#include "fps_counter.h"
+#include "type.h"
 
 namespace Rehenz
 {
+	// require link user32.lib
 	class SimpleWindow
 	{
 	private:
@@ -17,7 +17,7 @@ namespace Rehenz
 		static bool InitDefaultWindowClass(HINSTANCE hinstance);
 
 	public:
-		SimpleWindow(HINSTANCE _hinstance, int _width, int _height, const String& _title);
+		SimpleWindow(HINSTANCE _hinstance, int _width, int _height, String _title);
 		SimpleWindow(const SimpleWindow&) = delete;
 		SimpleWindow& operator=(const SimpleWindow&) = delete;
 		~SimpleWindow();
@@ -26,27 +26,11 @@ namespace Rehenz
 		HWND GetHwnd() { return hwnd; }
 		int GetWidth() { return width; }
 		int GetHeight() { return height; }
-		String GetTitle() { return title; }
+		const String& GetTitle() { return title; }
 
 		bool CheckWindowState();
-		void SetTitle(const String& _title);
+		void SetTitle(String _title);
 	};
 
 	void SimpleMessageProcess();
-
-
-	class SimpleWindowWithFC : public SimpleWindow
-	{
-	private:
-	public:
-		String title_base;
-		FpsCounter fps_counter;
-
-		SimpleWindowWithFC(HINSTANCE _hinstance, int _width, int _height, const String& _title_base);
-		SimpleWindowWithFC(const SimpleWindowWithFC&) = delete;
-		SimpleWindowWithFC& operator=(const SimpleWindowWithFC&) = delete;
-		~SimpleWindowWithFC();
-
-		void Present();
-	};
 }

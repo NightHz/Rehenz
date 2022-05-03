@@ -15,7 +15,9 @@ namespace Rehenz
 
 #ifdef UNICODE
 	typedef std::wstring String;
+#define ToString std::to_wstring
 #else
 	typedef std::string String;
+#define ToString std::to_string
 #endif // UNICODE
 }
