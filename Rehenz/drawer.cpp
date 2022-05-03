@@ -1,4 +1,5 @@
 #include "drawer.h"
+#include <utility>
 
 namespace Rehenz
 {
@@ -40,14 +41,14 @@ namespace Rehenz
 		else if (p1.y == p2.y)
 		{
 			if (p2.x < p1.x)
-				Swap(p1, p2);
+				std::swap(p1, p2);
 			for (int x = p1.x; x <= p2.x; x++)
 				Pixel(Point2I(x, p1.y), color);
 		}
 		else if (p1.x == p2.x)
 		{
 			if (p2.y < p1.y)
-				Swap(p1, p2);
+				std::swap(p1, p2);
 			for (int y = p1.y; y <= p2.y; y++)
 				Pixel(Point2I(p1.x, y), color);
 		}
@@ -57,7 +58,7 @@ namespace Rehenz
 			if (dx >= dy)
 			{
 				if (p2.x < p1.x)
-					Swap(p1, p2);
+					std::swap(p1, p2);
 				int y_move = (p2.y >= p1.y) ? 1 : -1;
 				int y_offset = dx / 2; // dx times of 1/2
 				for (auto p = p1; p.x <= p2.x; p.x++)
@@ -74,7 +75,7 @@ namespace Rehenz
 			else
 			{
 				if (p2.y < p1.y)
-					Swap(p1, p2);
+					std::swap(p1, p2);
 				int x_move = (p2.x >= p1.x) ? 1 : -1;
 				int x_offset = dy / 2;
 				for (auto p = p1; p.y <= p2.y; p.y++)
@@ -107,11 +108,11 @@ namespace Rehenz
 	void Drawer::Triangle(Point2I p1, Point2I p2, Point2I p3, uint color)
 	{
 		if (p1.y > p2.y)
-			Swap(p1, p2);
+			std::swap(p1, p2);
 		if (p1.y > p3.y)
-			Swap(p1, p3);
+			std::swap(p1, p3);
 		if (p2.y > p3.y)
-			Swap(p2, p3);
+			std::swap(p2, p3);
 
 		if (p3.y != p1.y)
 		{
@@ -195,11 +196,11 @@ namespace Rehenz
 		PixelShader pixel_shader, PixelShaderData pshader_data)
 	{
 		if (p1.y > p2.y)
-			Swap(p1, p2), Swap(v1, v2);
+			std::swap(p1, p2), std::swap(v1, v2);
 		if (p1.y > p3.y)
-			Swap(p1, p3), Swap(v1, v3);
+			std::swap(p1, p3), std::swap(v1, v3);
 		if (p2.y > p3.y)
-			Swap(p2, p3), Swap(v2, v3);
+			std::swap(p2, p3), std::swap(v2, v3);
 
 		if (p3.y != p1.y)
 		{

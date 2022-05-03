@@ -3,32 +3,38 @@
 
 namespace Rehenz
 {
-	const float pi = 3.14159265359f;
+	const float pi = 3.141592653590f;
+	const float pi_mul2 = 6.283185307180f;
+	const float pi_mul3 = 9.424777960769f;
+	const float pi_mul4 = 12.566370614359f;
+	const float pi_div2 = 1.570796326795f;
+	const float pi_div3 = 1.047197551197f;
+	const float pi_div4 = 0.785398163397f;
 
 	template <typename T>
 	inline T Min(T a, T b)
 	{
-		return (a <= b) ? a : b;
+		return (b < a) ? b : a;
 	}
 
 	template <typename T>
 	inline T Max(T a, T b)
 	{
-		return (a >= b) ? a : b;
+		return (a < b) ? b : a;
 	}
 
 	// limit x to [min, max]
 	template <typename T>
 	inline T Clamp(T x, T min, T max)
 	{
-		return (x < min) ? min : ((x > max) ? max : x);
+		return (x < min) ? min : ((max < x) ? max : x);
 	}
 
 	// interpolation
 	template <typename T>
 	inline T Lerp(T x1, T x2, float t)
 	{
-		return x1 + static_cast<T>((x2 - x1) * t);
+		return x1 + static_cast<decltype(x2 - x1)>((x2 - x1) * t);
 	}
 
 	// f(0)=0, f(1)=1, f(t) = 6*t^5 - 15*t^4 + 10*t^3
@@ -41,27 +47,7 @@ namespace Rehenz
 	template <typename T>
 	inline T Fade(T x1, T x2, float t)
 	{
-		return x1 + static_cast<T>((x2 - x1) * Fade(t));
-	}
-
-	// sort two number, first <= second
-	template <typename T>
-	inline void Sort(T& x1, T& x2)
-	{
-		if (x2 < x1)
-		{
-			T t = x1;
-			x1 = x2;
-			x2 = t;
-		}
-	}
-
-	template <typename T>
-	inline void Swap(T& x1, T& x2)
-	{
-		T t = x1;
-		x1 = x2;
-		x2 = t;
+		return Lerp(x1, x2, Fade(t));
 	}
 
 
@@ -250,6 +236,7 @@ namespace Rehenz
 		explicit Point(float _x, float _y, float _z, float _w = 1) : Vector(_x, _y, _z, _w) {}
 	};
 
+	// quaternion = a + bi + cj + dk
 	struct Quaternion
 	{
 	public:

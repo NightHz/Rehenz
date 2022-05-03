@@ -1,6 +1,7 @@
 #include "noise_gen.h"
 #include "math.h"
 #include <random>
+#include <utility>
 
 namespace Rehenz
 {
@@ -26,7 +27,8 @@ namespace Rehenz
 
 	float* Perlin1D(unsigned int seed, int x1, int x2, unsigned int block_size, float* noise)
 	{
-		Sort(x1, x2);
+		if (x2 < x1)
+			std::swap(x1, x2);
 		float* p = noise;
 		float g1, g2;
 		GHash(seed, x1, g1);
