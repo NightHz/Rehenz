@@ -53,13 +53,16 @@ namespace Rehenz
 
 	float PerlinNoise1D::GetGrad(int x)
 	{
-		if (grads.find(x) == grads.end())
+		auto it = grads.find(x);
+		if (it == grads.end())
 		{
 			random_engine e(Hash(seed ^ Hash(x)));
 			std::uniform_real_distribution<float> d(-1, 1);
-			grads[x] = d(e);
+			float g = d(e);
+			grads[x] = g;
+			return g;
 		}
-		return grads[x];
+		return it->second;
 	}
 
 	float PerlinNoise1D::GetNoise(float x)
@@ -74,7 +77,8 @@ namespace Rehenz
 	Vector2 PerlinNoise2D::GetGrad(int x, int y)
 	{
 		Point2 p(static_cast<float>(x), static_cast<float>(y));
-		if (grads.find(p) == grads.end())
+		auto it = grads.find(p);
+		if (it == grads.end())
 		{
 			random_engine e(Hash(seed ^ Hash(x ^ Hash(y))));
 			std::uniform_real_distribution<float> d(-1, 1);
@@ -85,12 +89,13 @@ namespace Rehenz
 				float length = VectorLength(g);
 				if (length < 1.0f && length > 0.1f)
 				{
-					grads[p] = g * (1 / length);
-					break;
+					g /= length;
+					grads[p] = g;
+					return g;
 				}
 			}
 		}
-		return grads[p];
+		return it->second;
 	}
 
 	PerlinNoise2D::PerlinNoise2D(unsigned int _seed) : grads()
@@ -172,7 +177,8 @@ namespace Rehenz
 	Vector3 PerlinNoise3D::GetGrad(int x, int y, int z)
 	{
 		Point3 p(static_cast<float>(x), static_cast<float>(y), static_cast<float>(z));
-		if (grads.find(p) == grads.end())
+		auto it = grads.find(p);
+		if (it == grads.end())
 		{
 			random_engine e(Hash(seed ^ Hash(x ^ Hash(y ^ Hash(z)))));
 			std::uniform_real_distribution<float> d(-1, 1);
@@ -183,12 +189,13 @@ namespace Rehenz
 				float length = VectorLength(g);
 				if (length < 1.0f && length > 0.1f)
 				{
-					grads[p] = g * (1 / length);
-					break;
+					g /= length;
+					grads[p] = g;
+					return g;
 				}
 			}
 		}
-		return grads[p];
+		return it->second;
 	}
 
 	PerlinNoise3D::PerlinNoise3D(unsigned int _seed)
