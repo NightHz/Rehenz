@@ -1,27 +1,31 @@
 #include "mesh.h"
+#include <utility>
 
 namespace Rehenz
 {
-	Vertex::Vertex(Point _p) : p(_p), c(1, 1, 1), uv(0, 0), uv2(0, 0)
+	Vertex::Vertex(Point _p) : p(_p), n(0, 0, 0), c(1, 1, 1), uv(0, 0), uv2(0, 0), coef(1)
 	{
-		coef = 1;
 	}
 
-	Vertex::Vertex(Point _p, Color _c, UV _uv, UV _uv2, float _rhw)
-		: p(_p), c(_c), uv(_uv), uv2(_uv2)
+	Vertex::Vertex(Point _p, Vector _n, Color _c, UV _uv, UV _uv2, float _coef)
+		: p(_p), n(_n), c(_c), uv(_uv), uv2(_uv2), coef(_coef)
 	{
-		coef = _rhw;
 	}
 
-	Vertex::Vertex(Point _p, UV _uv, UV _uv2)
-		: p(_p), c(1, 1, 1), uv(_uv), uv2(_uv2)
+	Vertex::Vertex(Point _p, Color _c, UV _uv, UV _uv2, float _coef)
+		: p(_p), n(0, 0, 0), c(_c), uv(_uv), uv2(_uv2), coef(_coef)
 	{
-		coef = 1;
+	}
+
+	Vertex::Vertex(Point _p, UV _uv, UV _uv2, float _coef)
+		: p(_p), n(0, 0, 0), c(1, 1, 1), uv(_uv), uv2(_uv2), coef(_coef)
+	{
 	}
 
 	Vertex& Vertex::operator*=(float f)
 	{
 		p *= f;
+		n *= f;
 		c *= f;
 		uv *= f;
 		uv2 *= f;
@@ -32,6 +36,7 @@ namespace Rehenz
 	Vertex& Vertex::operator+=(const Vertex& v)
 	{
 		p += v.p;
+		n += v.n;
 		c += v.c;
 		uv += v.uv;
 		uv2 += v.uv2;
@@ -41,17 +46,17 @@ namespace Rehenz
 
 	Vertex Vertex::operator*(float f) const
 	{
-		return Vertex(p * f, c * f, uv * f, uv2 * f, coef * f);
+		return Vertex(p * f, n * f, c * f, uv * f, uv2 * f, coef * f);
 	}
 
 	Vertex Vertex::operator+(const Vertex& v) const
 	{
-		return Vertex(p + v.p, c + v.c, uv + v.uv, uv2 + v.uv2, coef + v.coef);
+		return Vertex(p + v.p, n + v.n, c + v.c, uv + v.uv, uv2 + v.uv2, coef + v.coef);
 	}
 
 	Vertex Vertex::operator-(const Vertex& v) const
 	{
-		return Vertex(p - v.p, c - v.c, uv - v.uv, uv2 - v.uv2, coef - v.coef);
+		return Vertex(p - v.p, n - v.n, c - v.c, uv - v.uv, uv2 - v.uv2, coef - v.coef);
 	}
 
 	void VertexNormalize(Vertex& v)
@@ -61,7 +66,7 @@ namespace Rehenz
 
 	Vertex VertexLerp(const Vertex& v1, const Vertex& v2, float t)
 	{
-		return Vertex(PointLerp(v1.p, v2.p, t), Lerp(v1.c, v2.c, t), Lerp(v1.uv, v2.uv, t), Lerp(v1.uv2, v2.uv2, t), Lerp(v1.coef, v2.coef, t));
+		return v1 + (v2 - v1) * t;
 	}
 
 
@@ -70,6 +75,9 @@ namespace Rehenz
 	{
 	}
 	Mesh::Mesh(const std::vector<Vertex>& _vertices, const std::vector<int>& _triangles) : vertices(_vertices), triangles(_triangles)
+	{
+	}
+	Mesh::Mesh(const std::vector<Vertex>&& _vertices, const std::vector<int>&& _triangles) : vertices(_vertices), triangles(_triangles)
 	{
 	}
 	Mesh::~Mesh()
@@ -151,7 +159,7 @@ namespace Rehenz
 		triangles.push_back(20); triangles.push_back(22); triangles.push_back(21);
 		triangles.push_back(22); triangles.push_back(23); triangles.push_back(21);
 
-		return std::make_shared<Mesh>(vertices, triangles);
+		return std::make_shared<Mesh>(std::move(vertices), std::move(triangles));
 	}
 	std::shared_ptr<Mesh> CreateSphereMesh(int smooth)
 	{
@@ -202,7 +210,7 @@ namespace Rehenz
 		}
 		triangles.push_back(a); triangles.push_back(a + xn - 1); triangles.push_back(bottom);
 
-		return std::make_shared<Mesh>(vertices, triangles);
+		return std::make_shared<Mesh>(std::move(vertices), std::move(triangles));
 	}
 	// generate internal triangles as return, and internal vertices will be added automatically
 	std::vector<int> BigTriangleLerp(std::vector<Vertex>& vertices, const std::vector<int>& big_triangle, bool unit_vertex)
@@ -345,7 +353,7 @@ namespace Rehenz
 		TrianglesAppend(triangles, BigTriangleLerp(vertices, SphereBigTriangle(smooth, 6, 5, 4, 3, -12, -7, +11), true));
 		TrianglesAppend(triangles, BigTriangleLerp(vertices, SphereBigTriangle(smooth, 6, 5, 1, 4, -9, -8, +12), true));
 
-		return std::make_shared<Mesh>(vertices, triangles);
+		return std::make_shared<Mesh>(std::move(vertices), std::move(triangles));
 	}
 	std::shared_ptr<Mesh> CreateSphereMeshC(int smooth)
 	{
@@ -368,7 +376,7 @@ namespace Rehenz
 		TrianglesAppend(triangles, BigTriangleLerp(vertices, SphereBigTriangle(smooth, 4, 0, 3, 1, +3, +6, -1), true));
 		TrianglesAppend(triangles, BigTriangleLerp(vertices, SphereBigTriangle(smooth, 4, 1, 3, 2, -6, -5, -4), true));
 
-		return std::make_shared<Mesh>(vertices, triangles);
+		return std::make_shared<Mesh>(std::move(vertices), std::move(triangles));
 	}
 	std::shared_ptr<Mesh> CreateSphereMeshD(int smooth)
 	{
@@ -438,7 +446,7 @@ namespace Rehenz
 		TrianglesAppend(triangles, BigTriangleLerp(vertices, SphereBigTriangle(smooth, 12, 9, 11, 10, -30, -24, +29), true));
 		TrianglesAppend(triangles, BigTriangleLerp(vertices, SphereBigTriangle(smooth, 12, 9, 7, 11, -26, -25, +30), true));
 
-		return std::make_shared<Mesh>(vertices, triangles);
+		return std::make_shared<Mesh>(std::move(vertices), std::move(triangles));
 	}
 	Texture::Texture(int _width, int _height) : width(_width), height(_height), buffer(new Color[static_cast<size_t>(_width) * _height])
 	{

@@ -1,8 +1,8 @@
 #pragma once
+#include "type.h"
 #include "math.h"
 #include <vector>
 #include <memory>
-#include "type.h"
 
 namespace Rehenz
 {
@@ -24,8 +24,11 @@ namespace Rehenz
 	public:
 		// position
 		Point p;
+		// normal
+		Vector n;
 		// color
 		Color c;
+		// texcoord
 		UV uv;
 		UV uv2;
 		// default value is 1, save multiplication factor
@@ -33,8 +36,9 @@ namespace Rehenz
 		float coef;
 
 		Vertex(Point _p);
-		explicit Vertex(Point _p, Color _c, UV _uv = UV(0, 0), UV _uv2 = UV(0, 0), float _rhw = 1);
-		explicit Vertex(Point _p, UV _uv, UV _uv2 = UV(0, 0));
+		explicit Vertex(Point _p, Vector _n, Color _c = Color(1, 1, 1), UV _uv = UV(0, 0), UV _uv2 = UV(0, 0), float _coef = 1);
+		explicit Vertex(Point _p, Color _c, UV _uv = UV(0, 0), UV _uv2 = UV(0, 0), float _coef = 1);
+		explicit Vertex(Point _p, UV _uv, UV _uv2 = UV(0, 0), float _coef = 1);
 
 		Vertex& operator*=(float);
 		Vertex& operator+=(const Vertex&);
@@ -56,12 +60,14 @@ namespace Rehenz
 	public:
 		Mesh();
 		explicit Mesh(const std::vector<Vertex>& _vertices, const std::vector<int>& _triangles);
+		explicit Mesh(const std::vector<Vertex>&& _vertices, const std::vector<int>&& _triangles);
 		~Mesh();
 
-		size_t VertexCount() { return vertices.size(); }
-		size_t TriangleCount() { return triangles.size() / 3; }
-		const std::vector<Vertex>& GetVertices() { return vertices; }
-		const std::vector<int>& GetTriangles() { return triangles; }
+		inline size_t VertexCount() { return vertices.size(); }
+		inline size_t TriangleCount() { return triangles.size() / 3; }
+		inline size_t IndexCount() { return triangles.size(); }
+		inline const std::vector<Vertex>& GetVertices() { return vertices; }
+		inline const std::vector<int>& GetTriangles() { return triangles; }
 
 		void AddVertex(Vertex vertex);
 		void AddVertex(const std::vector<Vertex>& _vertices);
