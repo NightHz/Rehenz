@@ -83,12 +83,21 @@ namespace Rehenz
 		void AddTriangle(const std::vector<int>& _triangles);
 	};
 
-	// create cube mesh which includes pos, color, uv, uv2 info
+	// create cube mesh which includes pos, normal, color, uv, uv2 info
 	// pos   : unit cube, and (0,0,0) is center point
+	// normal: face normal
 	// color : use colors fill, and default is white
 	// uv    : each faces map to the whole texture
 	// uv2   : expanded faces map to the texture
 	std::shared_ptr<Mesh> CreateCubeMesh(const std::vector<Color>& colors = std::vector<Color>());
+
+	// create a colorful cube mesh based function CreateCubeMesh
+	inline std::shared_ptr<Mesh> CreateCubeMeshColorful()
+	{
+		const std::vector<Color> colors{ Color(0, 0, 0), Color(1, 0, 0), Color(0, 1, 0), Color(1, 1, 0),
+										 Color(0, 0, 1), Color(1, 0, 1), Color(0, 1, 1), Color(1, 1, 1) };
+		return CreateCubeMesh(colors);
+	}
 
 	// create sphere mesh which includes pos info
 	// pos   : unit sphere, and (0,0,0) is center point
@@ -99,6 +108,10 @@ namespace Rehenz
 	std::shared_ptr<Mesh> CreateSphereMeshC(int smooth = 8);
 	// sphere mesh D layout
 	std::shared_ptr<Mesh> CreateSphereMeshD(int smooth = 4);
+
+	// create mesh from .obj file
+	// include pos, normal, uv info
+	std::shared_ptr<Mesh> CreateMeshFromObjFile(const std::string& filename);
 
 	class Texture
 	{
