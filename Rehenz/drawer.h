@@ -1,7 +1,7 @@
 #pragma once
 #include "type.h"
 #include "math.h"
-#include "render_soft.h"
+#include "mesh.h"
 
 namespace Rehenz
 {
