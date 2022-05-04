@@ -4,27 +4,6 @@
 
 namespace Rehenz
 {
-	VertexShader Camera::DefaultVertexShader = [](const VertexShaderData& data, const Vertex& v0)->Vertex
-	{
-		Vertex v(v0);
-		v.p = v.p * data.transform;
-		return v;
-	};
-
-	PixelShader Camera::DefaultPixelShader = [](const PixelShaderData& data, const Vertex& v0)->Color
-	{
-		(data); // unreferenced
-		return v0.c;
-	};
-
-	PixelShader Camera::TexturePixelShader = [](const PixelShaderData& data, const Vertex& v0)->Color
-	{
-		if (data.pobj->texture != nullptr)
-			return data.pobj->texture->GetColor(v0.uv);
-		else
-			return v0.c;
-	};
-
 	// Core Function
 	const uint* Camera::RenderImage(RenderObjects& objs, VertexShader vertex_shader, PixelShader pixel_shader)
 	{
@@ -43,7 +22,6 @@ namespace Rehenz
 		for (auto pobj = objs.GetObject(nullptr); pobj != nullptr; pobj = objs.GetObject(pobj))
 		{
 			// Copy and transform vertices (vertex shader)
-			vshader_data.pobj = pobj;
 			vshader_data.mat_world = GetMatrixS(pobj->scale) * GetMatrixE(pobj->rotation) * GetMatrixT(pobj->position);
 			vshader_data.transform = vshader_data.mat_world * vshader_data.mat_view * vshader_data.mat_project;
 			auto& vs_mesh = pobj->pmesh->GetVertices();
@@ -95,7 +73,8 @@ namespace Rehenz
 			// Traverse all triangles and sampling
 			// Compute color for all sampling points (pixel shader)
 			// Use z-buffer merge multiple colors
-			pshader_data.pobj = pobj;
+			pshader_data.texture = pobj->texture;
+			pshader_data.texture2 = pobj->texture2;
 			for (size_t i = 0; i < triangles.size(); i += 3)
 			{
 				int a = triangles[i], b = triangles[i + 1], c = triangles[i + 2];
@@ -128,11 +107,6 @@ namespace Rehenz
 		delete[] zbuffer;
 
 		return buffer;
-	}
-
-	const uint* Camera::RenderImage(VertexShader vertex_shader, PixelShader pixel_shader)
-	{
-		return RenderImage(RenderObjects::global_objs, vertex_shader, pixel_shader);
 	}
 
 

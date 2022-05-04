@@ -1,10 +1,9 @@
 #pragma once
+#include "type.h"
 #include "math.h"
 #include <vector>
 #include <memory>
-#include "type.h"
 #include "mesh.h"
-#include <functional>
 
 namespace Rehenz
 {
@@ -12,11 +11,6 @@ namespace Rehenz
 	class Camera;
 
 	class RenderObjects;
-
-	struct VertexShaderData;
-	struct PixelShaderData;
-	typedef std::function<Vertex(const VertexShaderData&, const Vertex&)> VertexShader;
-	typedef std::function<Color(const PixelShaderData&, const Vertex&)> PixelShader;
 
 
 
@@ -76,10 +70,6 @@ namespace Rehenz
 		enum class RenderMode { Wireframe, PureWhite, Color, Texture, Shader };
 		RenderMode render_mode;
 
-		static VertexShader DefaultVertexShader;
-		static PixelShader DefaultPixelShader;
-		static PixelShader TexturePixelShader;
-
 		// default height = 600, width = 800, fovy = pi/2, aspect = 4/3, z_near = 1, z_far = 500
 		//         position = (0,0,-5), at = (0,0,1), up = (0,1,0)
 		Camera();
@@ -95,25 +85,18 @@ namespace Rehenz
 
 		void SetSize(int _height, int _width, float _aspect);
 
-		const uint* RenderImage(RenderObjects& objs = RenderObjects::global_objs,
-			VertexShader vertex_shader = DefaultVertexShader, PixelShader pixel_shader = DefaultPixelShader);
-		const uint* RenderImage(VertexShader vertex_shader, PixelShader pixel_shader = DefaultPixelShader);
-	};
-
-	struct VertexShaderData
-	{
-	public:
-		std::shared_ptr<RenderObject> pobj;
-		Matrix mat_world;
-		Matrix mat_view;
-		Matrix mat_project;
-		// = mat_world * mat_view * mat_project
-		Matrix transform;
-	};
-
-	struct PixelShaderData
-	{
-	public:
-		std::shared_ptr<RenderObject> pobj;
+		const uint* RenderImage(RenderObjects& objs, VertexShader vertex_shader, PixelShader pixel_shader);
+		inline const uint* RenderImage()
+		{
+			return RenderImage(RenderObjects::global_objs, DefaultVertexShader, DefaultPixelShader);
+		}
+		inline const uint* RenderImage(RenderObjects& objs)
+		{
+			return RenderImage(objs, DefaultVertexShader, DefaultPixelShader);
+		}
+		inline const uint* RenderImage(VertexShader vertex_shader, PixelShader pixel_shader)
+		{
+			return RenderImage(RenderObjects::global_objs, vertex_shader, pixel_shader);
+		}
 	};
 }

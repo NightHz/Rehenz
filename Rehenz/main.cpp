@@ -85,8 +85,8 @@ int main_surface_dx8_and_render_soft_example()
 	{
 		//(data);
 		//return Color(v0.uv.x, v0.uv.y, 0.8f);
-		if (data.pobj->texture2 != nullptr)
-			return data.pobj->texture2->GetColor(v0.uv2);
+		if (data.texture2 != nullptr)
+			return data.texture2->GetColor(v0.uv2);
 		else
 			return Color(0.1f, 0.1f, 0.1f);
 	};
@@ -161,7 +161,7 @@ int main_surface_dx8_and_render_soft_example()
 		if (KeyIsDown('8'))      scene = &test2;
 		else if (KeyIsDown('9')) scene = &test1;
 		if (KeyIsDown(VK_RETURN))
-			srf_dx8.FillFromImage(camera.RenderImage(*scene, camera.DefaultVertexShader, my_pixel_shader));
+			srf_dx8.FillFromImage(camera.RenderImage(*scene, DefaultVertexShader, my_pixel_shader));
 		// refresh
 		srf_dx8.Present();
 		// msg

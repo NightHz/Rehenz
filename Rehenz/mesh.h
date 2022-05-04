@@ -3,6 +3,7 @@
 #include "math.h"
 #include <vector>
 #include <memory>
+#include <functional>
 
 namespace Rehenz
 {
@@ -13,9 +14,16 @@ namespace Rehenz
 
 	struct Vertex;
 	class Mesh;
+
 	class Texture;
 
-	struct VertexDistance;
+	struct VertexShaderData;
+	struct PixelShaderData;
+	typedef std::function<Vertex(const VertexShaderData&, const Vertex&)> VertexShader;
+	typedef std::function<Color(const PixelShaderData&, const Vertex&)> PixelShader;
+	extern VertexShader DefaultVertexShader;
+	extern PixelShader DefaultPixelShader;
+	extern PixelShader TexturePixelShader;
 
 
 
@@ -117,4 +125,21 @@ namespace Rehenz
 	std::shared_ptr<Texture> CreateTexturePlaid();
 	// create 1-6 dice texture
 	std::shared_ptr<Texture> CreateTextureDice();
+
+	struct VertexShaderData
+	{
+	public:
+		Matrix mat_world;
+		Matrix mat_view;
+		Matrix mat_project;
+		// = mat_world * mat_view * mat_project
+		Matrix transform;
+	};
+
+	struct PixelShaderData
+	{
+	public:
+		std::shared_ptr<Texture> texture;
+		std::shared_ptr<Texture> texture2;
+	};
 }
