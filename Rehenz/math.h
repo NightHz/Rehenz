@@ -412,7 +412,7 @@ namespace Rehenz
 	Point PointLerp(Point p1, Point p2, float t);
 
 	// point standardize
-	Point PointStandard(Point p1, float w = 1);
+	//Point PointStandard(Point p1, float w = 1);
 
 	// compute point distance
 	float PointDistance(Point p1, Point p2);

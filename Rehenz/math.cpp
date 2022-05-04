@@ -1037,7 +1037,7 @@ namespace Rehenz
 		return result;
 	}
 
-	Point PointStandard(Point p1, float w)
+	/*Point PointStandard(Point p1, float w)
 	{
 		Point result;
 
@@ -1050,7 +1050,7 @@ namespace Rehenz
 		result.w = w;
 
 		return result;
-	}
+	}*/
 
 	float PointDistance(Point p1, Point p2)
 	{
