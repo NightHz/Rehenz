@@ -21,9 +21,47 @@ namespace Rehenz
 		Drawer(uint* _buffer, int _width, int _height);
 		~Drawer();
 
-		static uint Color(uint r, uint g, uint b);
-		static uint Color(float r, float g, float b);
-		static uint Color(Rehenz::Color c);
+		inline static uint ColorRGB(byte r, byte g, byte b)
+		{
+			return (r << 16) | (g << 8) | (b << 0);
+		}
+		inline static uint ColorRGB(int r, int g, int b)
+		{
+			return ((r & 0xff) << 16) | ((g & 0xff) << 8) | ((b & 0xff) << 0);
+		}
+		inline static uint ColorRGB(uint r, uint g, uint b)
+		{
+			return ((r & 0xff) << 16) | ((g & 0xff) << 8) | ((b & 0xff) << 0);
+		}
+		inline static uint ColorRGB(float r, float g, float b)
+		{
+			return ColorRGB(static_cast<byte>(r * 0xff), static_cast<byte>(g * 0xff), static_cast<byte>(b * 0xff));
+		}
+		inline static uint ColorRGB(Color c)
+		{
+			return ColorRGB(static_cast<byte>(c.x * 0xff), static_cast<byte>(c.y * 0xff), static_cast<byte>(c.z * 0xff));
+		}
+
+		inline static uint ColorARGB(byte r, byte g, byte b, byte a)
+		{
+			return (a << 24) | (r << 16) | (g << 8) | (b << 0);
+		}
+		inline static uint ColorARGB(int r, int g, int b, int a)
+		{
+			return ((a & 0xff) << 24) | ((r & 0xff) << 16) | ((g & 0xff) << 8) | ((b & 0xff) << 0);
+		}
+		inline static uint ColorARGB(uint r, uint g, uint b, uint a)
+		{
+			return ((a & 0xff) << 24) | ((r & 0xff) << 16) | ((g & 0xff) << 8) | ((b & 0xff) << 0);
+		}
+		inline static uint ColorARGB(float r, float g, float b, float a)
+		{
+			return ColorARGB(static_cast<byte>(r * 0xff), static_cast<byte>(g * 0xff), static_cast<byte>(b * 0xff), static_cast<byte>(a * 0xff));
+		}
+		inline static uint ColorARGB(Color c)
+		{
+			return ColorARGB(static_cast<byte>(c.x * 0xff), static_cast<byte>(c.y * 0xff), static_cast<byte>(c.z * 0xff), static_cast<byte>(c.w * 0xff));
+		}
 
 		// fill with a color
 		void Fill(uint color);
@@ -44,7 +82,7 @@ namespace Rehenz
 
 	class DrawerZ : public Drawer
 	{
-	private:
+	protected:
 		float* const zbuffer;
 
 	public:

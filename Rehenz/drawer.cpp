@@ -10,18 +10,6 @@ namespace Rehenz
 	Drawer::~Drawer()
 	{
 	}
-	uint Drawer::Color(uint r, uint g, uint b)
-	{
-		return ((r & 0xff) << 16) | ((g & 0xff) << 8) | ((b & 0xff) << 0);
-	}
-	uint Drawer::Color(float r, float g, float b)
-	{
-		return Color(static_cast<uint>(r * 255), static_cast<uint>(g * 255), static_cast<uint>(b * 255));
-	}
-	uint Drawer::Color(Rehenz::Color c)
-	{
-		return Color(static_cast<uint>(c.x * 255), static_cast<uint>(c.y * 255), static_cast<uint>(c.z * 255));
-	}
 	void Drawer::Fill(uint color)
 	{
 		int s = w * h;
@@ -173,8 +161,8 @@ namespace Rehenz
 				{
 					VertexNormalize(vl);
 					VertexNormalize(vr);
-					Pixel(Point2I(xl, y), Color(pixel_shader(pshader_data, vl)), vl.p.w);
-					Pixel(Point2I(xl, y), Color(pixel_shader(pshader_data, vr)), vr.p.w);
+					Pixel(Point2I(xl, y), ColorRGB(pixel_shader(pshader_data, vl)), vl.p.w);
+					Pixel(Point2I(xl, y), ColorRGB(pixel_shader(pshader_data, vr)), vr.p.w);
 				}
 				else
 				{
@@ -184,7 +172,7 @@ namespace Rehenz
 					{
 						Vertex v = v_current;
 						VertexNormalize(v);
-						Pixel(Point2I(x, y), Color(pixel_shader(pshader_data, v)), v.p.w);
+						Pixel(Point2I(x, y), ColorRGB(pixel_shader(pshader_data, v)), v.p.w);
 						v_current += v_step;
 					}
 				}
