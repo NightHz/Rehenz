@@ -10,19 +10,19 @@ namespace Rehenz
 		// prepare drawer
 		int size = height * width;
 		float* zbuffer = new float[size];
-		std::fill(zbuffer, zbuffer + size, z_far + 1);
+		std::fill(zbuffer, zbuffer + size, projection.z_far + 1);
 		std::fill(buffer, buffer + size, 0U);
 		DrawerZ drawer(buffer, width, height, zbuffer);
 		// prepare shader data
 		VertexShaderData vshader_data;
 		PixelShaderData pshader_data;
-		vshader_data.mat_view = GetInverseMatrixT(position) * GetInverseMatrixR(at, up);
-		vshader_data.mat_project = GetMatrixP(fovy, aspect, z_near, z_far);
+		vshader_data.mat_view = transform.GetInverseTransformMatrix();
+		vshader_data.mat_project = projection.GetTransformMatrix();
 		// traverse objects
 		for (auto pobj = objs.GetObject(nullptr); pobj != nullptr; pobj = objs.GetObject(pobj))
 		{
 			// Copy and transform vertices (vertex shader)
-			vshader_data.mat_world = GetMatrixS(pobj->scale) * GetMatrixE(pobj->rotation) * GetMatrixT(pobj->position);
+			vshader_data.mat_world = pobj->transform.GetTransformMatrix();
 			vshader_data.transform = vshader_data.mat_world * vshader_data.mat_view * vshader_data.mat_project;
 			auto& vs_mesh = pobj->pmesh->GetVertices();
 			std::vector<Vertex> vertices;
@@ -34,7 +34,7 @@ namespace Rehenz
 			// Clipping and back-face culling
 			auto& tris_mesh = pobj->pmesh->GetTriangles();
 			std::vector<int> triangles;
-			Point origin = GetOriginP(z_near, z_far);
+			Point origin = projection.GetOrigin();
 			for (size_t i = 0; i < tris_mesh.size(); i += 3)
 			{
 				int a = tris_mesh[i], b = tris_mesh[i + 1], c = tris_mesh[i + 2];
@@ -111,64 +111,48 @@ namespace Rehenz
 
 
 
-	RenderObject::RenderObject() : pmesh(nullptr), texture(nullptr), texture2(nullptr), position(), rotation(), scale(1, 1, 1, 0)
-	{
-	}
-	RenderObject::RenderObject(std::shared_ptr<Mesh> _pmesh) : pmesh(_pmesh), texture(nullptr), texture2(nullptr), position(), rotation(), scale(1, 1, 1, 0)
-	{
-	}
 	RenderObject::RenderObject(std::shared_ptr<Mesh> _pmesh, std::shared_ptr<Texture> _pt, std::shared_ptr<Texture> _pt2)
-		: pmesh(_pmesh), texture(_pt), texture2(_pt2), position(), rotation(), scale(1, 1, 1, 0)
+		: pmesh(_pmesh), texture(_pt), texture2(_pt2)
 	{
 	}
+
 	RenderObject::~RenderObject()
 	{
 	}
-	Camera::Camera() : position(0, 0, -5, 0), at(0, 0, 1, 0), up(0, 1, 0, 0), render_mode(RenderMode::Wireframe)
+
+	Camera::Camera(int _height, int _width) : render_mode(RenderMode::Wireframe)
 	{
-		height = 600;
-		width = 800;
+		height = _height;
+		width = _width;
 		int size = height * width;
 		buffer = new uint[size];
-		fovy = pi / 2;
-		aspect = 4.0f / 3;
-		z_near = 1;
-		z_far = 500;
+
+		transform.pos = Vector(0, 0, -5);
+		projection.aspect = static_cast<float>(width) / height;
 	}
-	Camera::Camera(const Camera& c) : position(c.position), at(c.at), up(c.up), render_mode(c.render_mode)
+
+	Camera::Camera(const Camera& c) : transform(c.transform), projection(c.projection), render_mode(c.render_mode)
 	{
 		height = c.height;
 		width = c.width;
 		int size = height * width;
 		buffer = new uint[size];
-		fovy = c.fovy;
-		aspect = c.aspect;
-		z_near = c.z_near;
-		z_far = c.z_far;
 	}
-	Camera::Camera(int _height, int _width) : position(0, 0, -5, 0), at(0, 0, 1, 0), up(0, 1, 0, 0), render_mode(RenderMode::Wireframe)
-	{
-		height = _height;
-		width = _width;
-		int size = height * width;
-		buffer = new uint[size];
-		fovy = pi / 2;
-		aspect = static_cast<float>(width) / height;
-		z_near = 1;
-		z_far = 500;
-	}
+
 	Camera::~Camera()
 	{
 		delete[] buffer;
 	}
-	void Camera::SetSize(int _height, int _width, float _aspect)
+
+	void Camera::SetSize(int _height, int _width)
 	{
 		delete[] buffer;
 		height = _height;
 		width = _width;
 		int size = height * width;
 		buffer = new uint[size];
-		aspect = _aspect;
+		
+		projection.aspect = static_cast<float>(width) / height;
 	}
 
 
@@ -225,7 +209,7 @@ namespace Rehenz
 		return nullptr;
 	}
 
-	Transform::Transform() : pos(0, 0, 0), axes(0, 0, 0), scale(0, 0, 0)
+	Transform::Transform() : pos(0, 0, 0), axes(0, 0, 0), scale(1, 1, 1)
 	{
 	}
 

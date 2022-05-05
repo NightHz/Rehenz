@@ -97,32 +97,32 @@ int main_surface_dx8_and_render_soft_example()
 		for (float x = -10; x <= 10; x += 1)
 		{
 			auto obj_cube = std::make_shared<RenderObject>(cube, texture_plaid, texture1);
-			obj_cube->position = Vector(x, -2, z);
-			obj_cube->scale = Vector(0.4f, 0.4f, 0.4f);
+			obj_cube->transform.pos = Vector(x, -2, z);
+			obj_cube->transform.scale = Vector(0.4f, 0.4f, 0.4f);
 			test1.AddObject(obj_cube);
 		}
 	}
 	auto obj_sphere = std::make_shared<RenderObject>(sphere);
-	obj_sphere->position = Vector(0, 2, 0);
-	obj_sphere->scale = Vector(0.4f, 0.4f, 0.4f);
+	obj_sphere->transform.pos = Vector(0, 2, 0);
+	obj_sphere->transform.scale = Vector(0.4f, 0.4f, 0.4f);
 	test1.AddObject(obj_sphere);
 	auto obj_sphere2 = std::make_shared<RenderObject>(sphereB);
-	obj_sphere2->position = Vector(-2, 2, 0);
+	obj_sphere2->transform.pos = Vector(-2, 2, 0);
 	//obj_sphere2->scale = Vector(0.4f, 0.4f, 0.4f);
 	test1.AddObject(obj_sphere2);
 	auto obj_sphere3 = std::make_shared<RenderObject>(sphereC);
-	obj_sphere3->position = Vector(2, 2, 0);
+	obj_sphere3->transform.pos = Vector(2, 2, 0);
 	//obj_sphere3->scale = Vector(0.4f, 0.4f, 0.4f);
 	test1.AddObject(obj_sphere3);
 	auto obj_sphere4 = std::make_shared<RenderObject>(sphereD);
-	obj_sphere4->position = Vector(0, 0, 0);
-	obj_sphere4->scale = Vector(1, 1, 1);
+	obj_sphere4->transform.pos = Vector(0, 0, 0);
+	obj_sphere4->transform.scale = Vector(1, 1, 1);
 	test1.AddObject(obj_sphere4);
 	RenderObjects test2;
 	auto obj_cube = std::make_shared<RenderObject>(cube, texture_plaid, texture_dice);
-	obj_cube->position = Vector(0, 0, 0);
-	obj_cube->rotation = EulerAngles(0, -pi / 4, pi / 4 + pi / 24);
-	obj_cube->scale = Vector(2.2f, 2.2f, 2.2f);
+	obj_cube->transform.pos = Vector(0, 0, 0);
+	obj_cube->transform.axes = AircraftAxes(0, -pi / 4, pi / 4 + pi / 24);
+	obj_cube->transform.scale = Vector(2.2f, 2.2f, 2.2f);
 	test2.AddObject(obj_cube);
 	// camera
 	Camera camera(height, width);
@@ -143,21 +143,21 @@ int main_surface_dx8_and_render_soft_example()
 		else if (KeyIsDown('3')) camera.render_mode = Camera::RenderMode::Color;
 		else if (KeyIsDown('4')) camera.render_mode = Camera::RenderMode::Texture;
 		else if (KeyIsDown('5')) camera.render_mode = Camera::RenderMode::Shader;
-		if (KeyIsDown('W'))      camera.position.y += 0.1f;
-		else if (KeyIsDown('S')) camera.position.y -= 0.1f;
-		if (KeyIsDown('A'))      camera.position.x -= 0.1f;
-		else if (KeyIsDown('D')) camera.position.x += 0.1f;
-		camera.at = -camera.position;
-		if (KeyIsDown('I'))      obj_cube->rotation.theta += 0.05f;
-		else if (KeyIsDown('K')) obj_cube->rotation.theta -= 0.05f;
-		if (KeyIsDown('J'))      obj_cube->rotation.psi += 0.05f;
-		else if (KeyIsDown('L')) obj_cube->rotation.psi -= 0.05f;
-		if (KeyIsDown('F'))      obj_cube->position.x -= 0.1f;
-		else if (KeyIsDown('H')) obj_cube->position.x += 0.1f;
-		if (KeyIsDown('T'))      obj_cube->position.y += 0.1f;
-		else if (KeyIsDown('G')) obj_cube->position.y -= 0.1f;
-		if (KeyIsDown('R'))      obj_cube->position.z -= 0.1f;
-		else if (KeyIsDown('Y')) obj_cube->position.z += 0.1f;
+		if (KeyIsDown('W'))      camera.transform.pos.y += 0.1f;
+		else if (KeyIsDown('S')) camera.transform.pos.y -= 0.1f;
+		if (KeyIsDown('A'))      camera.transform.pos.x -= 0.1f;
+		else if (KeyIsDown('D')) camera.transform.pos.x += 0.1f;
+		camera.transform.SetFront(-camera.transform.pos);
+		if (KeyIsDown('I'))      obj_cube->transform.axes.pitch += 0.05f;
+		else if (KeyIsDown('K')) obj_cube->transform.axes.pitch -= 0.05f;
+		if (KeyIsDown('J'))      obj_cube->transform.axes.yaw += 0.05f;
+		else if (KeyIsDown('L')) obj_cube->transform.axes.yaw -= 0.05f;
+		if (KeyIsDown('F'))      obj_cube->transform.pos.x -= 0.1f;
+		else if (KeyIsDown('H')) obj_cube->transform.pos.x += 0.1f;
+		if (KeyIsDown('T'))      obj_cube->transform.pos.y += 0.1f;
+		else if (KeyIsDown('G')) obj_cube->transform.pos.y -= 0.1f;
+		if (KeyIsDown('R'))      obj_cube->transform.pos.z -= 0.1f;
+		else if (KeyIsDown('Y')) obj_cube->transform.pos.z += 0.1f;
 		if (KeyIsDown('8'))      scene = &test2;
 		else if (KeyIsDown('9')) scene = &test1;
 		if (KeyIsDown(VK_RETURN))
