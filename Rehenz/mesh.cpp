@@ -199,7 +199,7 @@ namespace Rehenz
 			float theta = pi * y / yn;
 			for (int x = 0; x < xn; x++)
 			{
-				float phi = 2 * pi * x / xn;
+				float phi = pi_mul2 * x / xn;
 				vertices.push_back(Point(sinf(theta) * cosf(phi), cosf(theta), -sinf(theta) * sinf(phi)));
 			}
 		}

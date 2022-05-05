@@ -277,12 +277,12 @@ namespace Rehenz
 		if (front.y == 0)
 			axes.pitch = 0;
 		else if (r == 0)
-			axes.pitch = (front.y > 0 ? -pi / 2 : pi / 2);
+			axes.pitch = (front.y > 0 ? -pi_div2 : pi_div2);
 		else
 			axes.pitch = -atanf(front.y / r);
 	}
 
-	Projection::Projection() :fovy(pi / 2), aspect(1), z_near(1), z_far(500)
+	Projection::Projection() :fovy(pi_div2), aspect(1), z_near(1), z_far(500)
 	{
 	}
 
