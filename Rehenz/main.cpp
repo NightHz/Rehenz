@@ -99,31 +99,31 @@ int main_surface_dx8_and_render_soft_example()
 			auto obj_cube = std::make_shared<RenderObject>(cube, texture_plaid, texture1);
 			obj_cube->transform.pos = Vector(x, -2, z);
 			obj_cube->transform.scale = Vector(0.4f, 0.4f, 0.4f);
-			test1.AddObject(obj_cube);
+			test1.AddRenderObject(obj_cube);
 		}
 	}
 	auto obj_sphere = std::make_shared<RenderObject>(sphere);
 	obj_sphere->transform.pos = Vector(0, 2, 0);
 	obj_sphere->transform.scale = Vector(0.4f, 0.4f, 0.4f);
-	test1.AddObject(obj_sphere);
+	test1.AddRenderObject(obj_sphere);
 	auto obj_sphere2 = std::make_shared<RenderObject>(sphereB);
 	obj_sphere2->transform.pos = Vector(-2, 2, 0);
 	//obj_sphere2->scale = Vector(0.4f, 0.4f, 0.4f);
-	test1.AddObject(obj_sphere2);
+	test1.AddRenderObject(obj_sphere2);
 	auto obj_sphere3 = std::make_shared<RenderObject>(sphereC);
 	obj_sphere3->transform.pos = Vector(2, 2, 0);
 	//obj_sphere3->scale = Vector(0.4f, 0.4f, 0.4f);
-	test1.AddObject(obj_sphere3);
+	test1.AddRenderObject(obj_sphere3);
 	auto obj_sphere4 = std::make_shared<RenderObject>(sphereD);
 	obj_sphere4->transform.pos = Vector(0, 0, 0);
 	obj_sphere4->transform.scale = Vector(1, 1, 1);
-	test1.AddObject(obj_sphere4);
+	test1.AddRenderObject(obj_sphere4);
 	RenderScene test2;
 	auto obj_cube = std::make_shared<RenderObject>(cube, texture_plaid, texture_dice);
 	obj_cube->transform.pos = Vector(0, 0, 0);
 	obj_cube->transform.axes = AircraftAxes(0, -pi / 4, pi / 4 + pi / 24);
 	obj_cube->transform.scale = Vector(2.2f, 2.2f, 2.2f);
-	test2.AddObject(obj_cube);
+	test2.AddRenderObject(obj_cube);
 	// camera
 	Camera camera(height, width);
 	RenderScene* scene = &test2;

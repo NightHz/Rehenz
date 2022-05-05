@@ -92,37 +92,37 @@ namespace Rehenz
 		RenderScene();
 		~RenderScene();
 
-		void AddObject(std::shared_ptr<RenderObject> pobj);
-		bool RemoveObject(std::shared_ptr<RenderObject> pobj);
+		void AddRenderObject(std::shared_ptr<RenderObject> pobj);
+		bool RemoveRenderObject(std::shared_ptr<RenderObject> pobj);
 
 		// get first object
-		obj_reader GetObject();
+		obj_reader GetRenderObject();
 		// get next object, and next of last object is false
-		obj_reader GetObject(obj_reader prev);
+		obj_reader GetRenderObject(obj_reader prev);
 
 		static RenderScene global_scene;
 	};
 
-	inline void AddObject(std::shared_ptr<RenderObject> pobj)
+	inline void AddRenderObject(std::shared_ptr<RenderObject> pobj)
 	{
-		RenderScene::global_scene.AddObject(pobj);
+		RenderScene::global_scene.AddRenderObject(pobj);
 	}
 
-	inline bool RemoveObject(std::shared_ptr<RenderObject> pobj)
+	inline bool RemoveRenderObject(std::shared_ptr<RenderObject> pobj)
 	{
-		RenderScene::global_scene.RemoveObject(pobj);
+		RenderScene::global_scene.RemoveRenderObject(pobj);
 	}
 
 	// get first object
-	inline RenderScene::obj_reader GetObject()
+	inline RenderScene::obj_reader GetRenderObject()
 	{
-		RenderScene::global_scene.GetObject();
+		RenderScene::global_scene.GetRenderObject();
 	}
 
 	// get next object, and next of last object is false
-	inline RenderScene::obj_reader GetObject(RenderScene::obj_reader prev)
+	inline RenderScene::obj_reader GetRenderObject(RenderScene::obj_reader prev)
 	{
-		RenderScene::global_scene.GetObject(prev);
+		RenderScene::global_scene.GetRenderObject(prev);
 	}
 
 	class Camera

@@ -20,7 +20,7 @@ namespace Rehenz
 		vshader_data.mat_view = transform.GetInverseTransformMatrix();
 		vshader_data.mat_project = projection.GetTransformMatrix();
 		// traverse objects
-		for (auto pobj = scene.GetObject(); pobj; pobj = scene.GetObject(pobj))
+		for (auto pobj = scene.GetRenderObject(); pobj; pobj = scene.GetRenderObject(pobj))
 		{
 			// Copy and transform vertices (vertex shader)
 			vshader_data.mat_world = pobj->transform.GetTransformMatrix();
@@ -168,12 +168,12 @@ namespace Rehenz
 	{
 	}
 
-	void RenderScene::AddObject(std::shared_ptr<RenderObject> pobj)
+	void RenderScene::AddRenderObject(std::shared_ptr<RenderObject> pobj)
 	{
 		objs.push_back(pobj);
 	}
 
-	bool RenderScene::RemoveObject(std::shared_ptr<RenderObject> pobj)
+	bool RenderScene::RemoveRenderObject(std::shared_ptr<RenderObject> pobj)
 	{
 		auto it = std::find(objs.begin(), objs.end(), pobj);
 		if (it != objs.end())
@@ -186,7 +186,7 @@ namespace Rehenz
 			return false;
 	}
 
-	RenderScene::obj_reader RenderScene::GetObject()
+	RenderScene::obj_reader RenderScene::GetRenderObject()
 	{
 		if (objs.empty())
 			return obj_reader();
@@ -196,11 +196,11 @@ namespace Rehenz
 		return p;
 	}
 
-	RenderScene::obj_reader RenderScene::GetObject(obj_reader prev)
+	RenderScene::obj_reader RenderScene::GetRenderObject(obj_reader prev)
 	{
 		if (!prev)
 			return prev;
-		if (prev.index + 1 >= objs.size())
+		if (prev.index >= objs.size() - 1)
 			return obj_reader();
 		obj_reader p;
 		p.index = prev.index + 1;
