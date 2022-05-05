@@ -11,9 +11,9 @@ namespace Rehenz
 	class Projection;
 
 	class RenderObject;
-	class Camera;
+	class RenderScene;
 
-	class RenderObjects;
+	class Camera;
 
 
 
@@ -69,28 +69,61 @@ namespace Rehenz
 		~RenderObject();
 	};
 
-	void AddObject(std::shared_ptr<RenderObject> pobj);
-	bool RemoveObject(std::shared_ptr<RenderObject> pobj);
-	// use nullptr get first object, and input last object will return nullptr
-	std::shared_ptr<RenderObject> GetObject(std::shared_ptr<RenderObject> prev);
-
-	class RenderObjects
+	class RenderScene
 	{
 	private:
 		// save all objects to render
 		std::vector<std::shared_ptr<RenderObject>> objs;
 
 	public:
-		RenderObjects();
-		~RenderObjects();
+		// reader for obj
+		class obj_reader
+		{
+			friend class RenderScene;
+		private:
+			int index;
+			RenderObject* pobj;
+		public:
+			obj_reader() { index = 0; pobj = nullptr; }
+			inline operator bool() { return pobj != nullptr; }
+			inline RenderObject* operator->() { return pobj; }
+		};
+
+		RenderScene();
+		~RenderScene();
 
 		void AddObject(std::shared_ptr<RenderObject> pobj);
 		bool RemoveObject(std::shared_ptr<RenderObject> pobj);
-		// use nullptr get first object, and input last object will return nullptr
-		std::shared_ptr<RenderObject> GetObject(std::shared_ptr<RenderObject> prev);
 
-		static RenderObjects global_objs;
+		// get first object
+		obj_reader GetObject();
+		// get next object, and next of last object is false
+		obj_reader GetObject(obj_reader prev);
+
+		static RenderScene global_scene;
 	};
+
+	inline void AddObject(std::shared_ptr<RenderObject> pobj)
+	{
+		RenderScene::global_scene.AddObject(pobj);
+	}
+
+	inline bool RemoveObject(std::shared_ptr<RenderObject> pobj)
+	{
+		RenderScene::global_scene.RemoveObject(pobj);
+	}
+
+	// get first object
+	inline RenderScene::obj_reader GetObject()
+	{
+		RenderScene::global_scene.GetObject();
+	}
+
+	// get next object, and next of last object is false
+	inline RenderScene::obj_reader GetObject(RenderScene::obj_reader prev)
+	{
+		RenderScene::global_scene.GetObject(prev);
+	}
 
 	class Camera
 	{
@@ -118,18 +151,18 @@ namespace Rehenz
 
 		void SetSize(int _height, int _width);
 
-		const uint* RenderImage(RenderObjects& objs, VertexShader vertex_shader, PixelShader pixel_shader);
+		const uint* RenderImage(RenderScene& scene, VertexShader vertex_shader, PixelShader pixel_shader);
 		inline const uint* RenderImage()
 		{
-			return RenderImage(RenderObjects::global_objs, DefaultVertexShader, DefaultPixelShader);
+			return RenderImage(RenderScene::global_scene, DefaultVertexShader, DefaultPixelShader);
 		}
-		inline const uint* RenderImage(RenderObjects& objs)
+		inline const uint* RenderImage(RenderScene& scene)
 		{
-			return RenderImage(objs, DefaultVertexShader, DefaultPixelShader);
+			return RenderImage(scene, DefaultVertexShader, DefaultPixelShader);
 		}
 		inline const uint* RenderImage(VertexShader vertex_shader, PixelShader pixel_shader)
 		{
-			return RenderImage(RenderObjects::global_objs, vertex_shader, pixel_shader);
+			return RenderImage(RenderScene::global_scene, vertex_shader, pixel_shader);
 		}
 	};
 }

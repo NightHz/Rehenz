@@ -1,11 +1,12 @@
 #include "render_soft.h"
 #include "drawer.h"
 #include "clipper.h"
+#include <algorithm>
 
 namespace Rehenz
 {
 	// Core Function
-	const uint* Camera::RenderImage(RenderObjects& objs, VertexShader vertex_shader, PixelShader pixel_shader)
+	const uint* Camera::RenderImage(RenderScene& scene, VertexShader vertex_shader, PixelShader pixel_shader)
 	{
 		// prepare drawer
 		int size = height * width;
@@ -19,7 +20,7 @@ namespace Rehenz
 		vshader_data.mat_view = transform.GetInverseTransformMatrix();
 		vshader_data.mat_project = projection.GetTransformMatrix();
 		// traverse objects
-		for (auto pobj = objs.GetObject(nullptr); pobj != nullptr; pobj = objs.GetObject(pobj))
+		for (auto pobj = scene.GetObject(); pobj; pobj = scene.GetObject(pobj))
 		{
 			// Copy and transform vertices (vertex shader)
 			vshader_data.mat_world = pobj->transform.GetTransformMatrix();
@@ -157,56 +158,54 @@ namespace Rehenz
 
 
 
-	RenderObjects RenderObjects::global_objs = RenderObjects();
-	RenderObjects::RenderObjects()
+	RenderScene RenderScene::global_scene = RenderScene();
+
+	RenderScene::RenderScene()
 	{
 	}
-	RenderObjects::~RenderObjects()
+
+	RenderScene::~RenderScene()
 	{
 	}
-	void AddObject(std::shared_ptr<RenderObject> pobj)
-	{
-		RenderObjects::global_objs.AddObject(pobj);
-	}
-	bool RemoveObject(std::shared_ptr<RenderObject> pobj)
-	{
-		return RenderObjects::global_objs.RemoveObject(pobj);
-	}
-	std::shared_ptr<RenderObject> GetObject(std::shared_ptr<RenderObject> prev)
-	{
-		return RenderObjects::global_objs.GetObject(prev);
-	}
-	void RenderObjects::AddObject(std::shared_ptr<RenderObject> pobj)
+
+	void RenderScene::AddObject(std::shared_ptr<RenderObject> pobj)
 	{
 		objs.push_back(pobj);
 	}
-	bool RenderObjects::RemoveObject(std::shared_ptr<RenderObject> pobj)
+
+	bool RenderScene::RemoveObject(std::shared_ptr<RenderObject> pobj)
 	{
-		for (auto it = objs.begin(); it != objs.end(); it++)
+		auto it = std::find(objs.begin(), objs.end(), pobj);
+		if (it != objs.end())
 		{
-			if (*it == pobj)
-			{
-				it = objs.emplace(it);
-				return true;
-			}
+			*it = objs.back();
+			objs.pop_back();
+			return true;
 		}
-		return false;
+		else
+			return false;
 	}
-	std::shared_ptr<RenderObject> RenderObjects::GetObject(std::shared_ptr<RenderObject> prev)
+
+	RenderScene::obj_reader RenderScene::GetObject()
 	{
-		if (prev == nullptr)
-			return objs.front();
-		for (auto it = objs.begin(); it != objs.end(); it++)
-		{
-			if (*it == prev)
-			{
-				if (it + 1 == objs.end())
-					return nullptr;
-				else
-					return *(it + 1);
-			}
-		}
-		return nullptr;
+		if (objs.empty())
+			return obj_reader();
+		obj_reader p;
+		p.index = 0;
+		p.pobj = objs[0].get();
+		return p;
+	}
+
+	RenderScene::obj_reader RenderScene::GetObject(obj_reader prev)
+	{
+		if (!prev)
+			return prev;
+		if (prev.index + 1 >= objs.size())
+			return obj_reader();
+		obj_reader p;
+		p.index = prev.index + 1;
+		p.pobj = objs[p.index].get();
+		return p;
 	}
 
 	Transform::Transform() : pos(0, 0, 0), axes(0, 0, 0), scale(1, 1, 1)

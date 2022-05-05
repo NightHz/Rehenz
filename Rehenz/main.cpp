@@ -91,7 +91,7 @@ int main_surface_dx8_and_render_soft_example()
 			return Color(0.1f, 0.1f, 0.1f);
 	};
 	// scene
-	RenderObjects test1;
+	RenderScene test1;
 	for (float z = -10; z <= 10; z += 1)
 	{
 		for (float x = -10; x <= 10; x += 1)
@@ -118,7 +118,7 @@ int main_surface_dx8_and_render_soft_example()
 	obj_sphere4->transform.pos = Vector(0, 0, 0);
 	obj_sphere4->transform.scale = Vector(1, 1, 1);
 	test1.AddObject(obj_sphere4);
-	RenderObjects test2;
+	RenderScene test2;
 	auto obj_cube = std::make_shared<RenderObject>(cube, texture_plaid, texture_dice);
 	obj_cube->transform.pos = Vector(0, 0, 0);
 	obj_cube->transform.axes = AircraftAxes(0, -pi / 4, pi / 4 + pi / 24);
@@ -126,7 +126,7 @@ int main_surface_dx8_and_render_soft_example()
 	test2.AddObject(obj_cube);
 	// camera
 	Camera camera(height, width);
-	RenderObjects* scene = &test2;
+	RenderScene* scene = &test2;
 	cout << "hold Enter to render" << endl;
 	cout << "press 1/2/3/4/5   to switch render mode" << endl;
 	cout << "press W/A/S/D     to move camera" << endl;
