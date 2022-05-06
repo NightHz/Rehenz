@@ -18,9 +18,21 @@ namespace Rehenz
 	}
 
 	template <typename T>
+	inline T Min(T a, T b, T c)
+	{
+		return Min(a, Min(b, c));
+	}
+
+	template <typename T>
 	inline T Max(T a, T b)
 	{
 		return (a < b) ? b : a;
+	}
+
+	template <typename T>
+	inline T Max(T a, T b, T c)
+	{
+		return Max(a, Max(b, c));
 	}
 
 	// limit x to [min, max]

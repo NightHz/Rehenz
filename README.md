@@ -40,6 +40,7 @@ some code writed by NightHz
 - `surface_dx8.h`: 使用 DirectDraw(in DirectX8) 创建一个能够绘制图像的窗口
 - `tilemap.h`: 创建一个可渲染的2D网格地图
 - `type.h`: 定义基本数据类型，例如 `uint`
+- `util.h`: 实用函数
 - `window.h`: 快速创建 windows 窗口
 - `window_fc.h`: 快速创建带有 fps 显示的 windows 窗口
 

@@ -131,6 +131,9 @@
     <ClInclude Include="input.h">
       <Filter>header\window</Filter>
     </ClInclude>
+    <ClInclude Include="util.h">
+      <Filter>header\base</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\README.md" />

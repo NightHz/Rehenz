@@ -11,5 +11,6 @@
 #include "surface_dx8.h"
 #include "tilemap.h"
 #include "type.h"
+#include "util.h"
 #include "window.h"
 #include "window_fc.h"
