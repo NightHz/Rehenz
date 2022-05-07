@@ -3,7 +3,6 @@
 #pragma once
 #define WIN32_LEAN_AND_MEAN
 #include <ddraw.h>
-#include <Windows.h>
 #include "window_fc.h"
 #include "type.h"
 

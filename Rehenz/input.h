@@ -5,6 +5,8 @@
 
 namespace Rehenz
 {
+	// require link user32.lib
+
 	// letter and number are the same as ASCII code
 	inline bool KeyIsDown(int vKey)
 	{
