@@ -6,7 +6,7 @@
 namespace Rehenz
 {
 	// Core Function
-	const uint* Camera::RenderImage(RenderScene& scene, VertexShader vertex_shader, PixelShader pixel_shader)
+	const uint* Camera::RenderImage(RenderScene& scene)
 	{
 		// prepare drawer
 		int size = height * width;
@@ -91,13 +91,11 @@ namespace Rehenz
 				{
 					drawer.Triangle(pa, pb, pc, drawer.ColorRGB(1.0f, 1.0f, 1.0f));
 				}
-				else if (render_mode == RenderMode::Color)
+				else if (render_mode == RenderMode::FlatColor)
 				{
-					drawer.Triangle(pa, pb, pc, &va, &vb, &vc, DefaultPixelShader, pshader_data);
-				}
-				else if (render_mode == RenderMode::Texture)
-				{
-					drawer.Triangle(pa, pb, pc, &va, &vb, &vc, TexturePixelShader, pshader_data);
+					Vertex v = va;
+					VertexNormalize(v);
+					drawer.Triangle(pa, pb, pc, drawer.ColorRGB(v.c));
 				}
 				else if (render_mode == RenderMode::Shader)
 				{
@@ -121,7 +119,7 @@ namespace Rehenz
 	{
 	}
 
-	Camera::Camera(int _height, int _width) : render_mode(RenderMode::Wireframe)
+	Camera::Camera(int _height, int _width)
 	{
 		height = _height;
 		width = _width;
@@ -130,14 +128,22 @@ namespace Rehenz
 
 		transform.pos = Vector(0, 0, -5);
 		projection.aspect = static_cast<float>(width) / height;
+
+		render_mode = RenderMode::Wireframe;
+		vertex_shader = DefaultVertexShader;
+		pixel_shader = DefaultPixelShader;
 	}
 
-	Camera::Camera(const Camera& c) : transform(c.transform), projection(c.projection), render_mode(c.render_mode)
+	Camera::Camera(const Camera& c) : transform(c.transform), projection(c.projection)
 	{
 		height = c.height;
 		width = c.width;
 		int size = height * width;
 		buffer = new uint[size];
+
+		render_mode = c.render_mode;
+		vertex_shader = c.vertex_shader;
+		pixel_shader = c.pixel_shader;
 	}
 
 	Camera::~Camera()

@@ -94,19 +94,19 @@ int main_surface_dx8_and_render_soft_example()
 	{
 		Vertex v(v0);
 		v.p = v.p * data.transform;
-		v.c = Color(0.2f, 0.2f, 0.2f, 1);
+		v.c = 0.3f * v0.c;
 
-		const Vector light_dir(-0.7f, -0.5f, 0.5f);
+		const Vector light_dir(-0.5f, -0.7f, 0.3f);
 		Vector N = v.n * data.mat_world * data.mat_view; // normal
 		Vector L = -light_dir * data.mat_view;           // to light
 		float s = VectorDot(L, N);
 		if (s > 0)
-			v.c += v0.c * s;
+			v.c += v0.c * s * 0.8f;
 
 		v.c.x = Clamp(v.c.x, 0.0f, 1.0f);
 		v.c.y = Clamp(v.c.y, 0.0f, 1.0f);
 		v.c.z = Clamp(v.c.z, 0.0f, 1.0f);
-		v.c.w = Clamp(v.c.w, 0.0f, 1.0f);
+		v.c.w = 1.0f;
 		return v;
 	};
 	// scene
@@ -147,11 +147,12 @@ int main_surface_dx8_and_render_soft_example()
 	Camera camera(height, width);
 	RenderScene* scene = &test2;
 	cout << "hold Enter to render" << endl;
-	cout << "press 1/2/3/4/5   to switch render mode" << endl;
-	cout << "press W/A/S/D     to move camera" << endl;
-	cout << "press I/J/K/L     to rotate cube" << endl;
-	cout << "press T/F/G/H/R/Y to move cube" << endl;
-	cout << "press 8/9         to switch scene" << endl;
+	cout << "press 1/2/3/4/5/6/7                  to switch render mode" << endl;
+	cout << "press W/A/S/D/Space/LShift           to move camera" << endl;
+	cout << "hold mouse middle key and move mouse to rotate camera" << endl;
+	cout << "press I/J/K/L                        to rotate cube" << endl;
+	cout << "press T/F/G/H/R/Y                    to move cube" << endl;
+	cout << "press 8/9                            to switch scene" << endl;
 	// input
 	Mouse mouse;
 
@@ -161,15 +162,22 @@ int main_surface_dx8_and_render_soft_example()
 		// update input
 		mouse.Present();
 		float dt = srf_dx8.GetWindow()->fps_counter.GetLastDeltatime() / 1000.0f;
-		
+
 		// render
-		static int shader = 1;
-		if (KeyIsDown('1'))      camera.render_mode = Camera::RenderMode::Wireframe, shader = 1;
-		else if (KeyIsDown('2')) camera.render_mode = Camera::RenderMode::PureWhite, shader = 1;
-		else if (KeyIsDown('3')) camera.render_mode = Camera::RenderMode::Color, shader = 1;
-		else if (KeyIsDown('4')) camera.render_mode = Camera::RenderMode::Texture, shader = 1;
-		else if (KeyIsDown('5')) camera.render_mode = Camera::RenderMode::Shader, shader = 1;
-		else if (KeyIsDown('6')) camera.render_mode = Camera::RenderMode::Shader, shader = 2;
+		if (KeyIsDown('1'))      camera.render_mode = Camera::RenderMode::Wireframe,
+			camera.vertex_shader = DefaultVertexShader, camera.pixel_shader = DefaultPixelShader;
+		else if (KeyIsDown('2')) camera.render_mode = Camera::RenderMode::PureWhite,
+			camera.vertex_shader = DefaultVertexShader, camera.pixel_shader = DefaultPixelShader;
+		else if (KeyIsDown('3')) camera.render_mode = Camera::RenderMode::Shader,
+			camera.vertex_shader = DefaultVertexShader, camera.pixel_shader = DefaultPixelShader;
+		else if (KeyIsDown('4')) camera.render_mode = Camera::RenderMode::Shader,
+			camera.vertex_shader = DefaultVertexShader, camera.pixel_shader = TexturePixelShader;
+		else if (KeyIsDown('5')) camera.render_mode = Camera::RenderMode::Shader,
+			camera.vertex_shader = DefaultVertexShader, camera.pixel_shader = my_pixel_shader;
+		else if (KeyIsDown('6')) camera.render_mode = Camera::RenderMode::Shader,
+			camera.vertex_shader = vs_light, camera.pixel_shader = DefaultPixelShader;
+		else if (KeyIsDown('7')) camera.render_mode = Camera::RenderMode::FlatColor,
+			camera.vertex_shader = DefaultVertexShader, camera.pixel_shader = DefaultPixelShader;
 
 		float cam_move_dis = 5 * dt;
 		float cam_rotate_angle = 0.3f * dt;
@@ -198,12 +206,7 @@ int main_surface_dx8_and_render_soft_example()
 		if (KeyIsDown('8'))      scene = &test2;
 		else if (KeyIsDown('9')) scene = &test1;
 		if (KeyIsDown(VK_RETURN))
-		{
-			if (shader == 1)
-				srf_dx8.FillFromImage(camera.RenderImage(*scene, DefaultVertexShader, my_pixel_shader));
-			else if (shader == 2)
-				srf_dx8.FillFromImage(camera.RenderImage(*scene, vs_light, DefaultPixelShader));
-		}
+			srf_dx8.FillFromImage(camera.RenderImage(*scene));
 		// refresh
 		srf_dx8.Present();
 		// msg

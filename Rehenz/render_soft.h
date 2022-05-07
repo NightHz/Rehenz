@@ -136,8 +136,10 @@ namespace Rehenz
 		Transform transform;
 		Projection projection;
 
-		enum class RenderMode { Wireframe, PureWhite, Color, Texture, Shader };
+		enum class RenderMode { Wireframe, PureWhite, FlatColor, Shader };
 		RenderMode render_mode;
+		VertexShader vertex_shader;
+		PixelShader pixel_shader;
 
 		// default pos = (0,0,-5)
 		explicit Camera(int _height, int _width);
@@ -151,18 +153,10 @@ namespace Rehenz
 
 		void SetSize(int _height, int _width);
 
-		const uint* RenderImage(RenderScene& scene, VertexShader vertex_shader, PixelShader pixel_shader);
+		const uint* RenderImage(RenderScene& scene);
 		inline const uint* RenderImage()
 		{
-			return RenderImage(RenderScene::global_scene, DefaultVertexShader, DefaultPixelShader);
-		}
-		inline const uint* RenderImage(RenderScene& scene)
-		{
-			return RenderImage(scene, DefaultVertexShader, DefaultPixelShader);
-		}
-		inline const uint* RenderImage(VertexShader vertex_shader, PixelShader pixel_shader)
-		{
-			return RenderImage(RenderScene::global_scene, vertex_shader, pixel_shader);
+			return RenderImage(RenderScene::global_scene);
 		}
 	};
 }
