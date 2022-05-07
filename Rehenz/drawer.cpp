@@ -247,7 +247,7 @@ namespace Rehenz
 					Pixel(Point2(x, y), color);
 					y += a;
 				}
-				if (x - 0.5f <= p2.x)
+				if (x - 0.5f < p2.x)
 					Pixel(p2, color);
 			}
 			else
@@ -264,7 +264,7 @@ namespace Rehenz
 					Pixel(Point2(x, y), color);
 					x += a;
 				}
-				if (y - 0.5f <= p2.y)
+				if (y - 0.5f < p2.y)
 					Pixel(p2, color);
 			}
 		}

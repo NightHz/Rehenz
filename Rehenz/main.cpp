@@ -473,6 +473,8 @@ int main_drawer_test()
 		lines_f.emplace_back(Point2(30.8f, 24.3f), Point2(w, 5.6f));
 		lines_f.emplace_back(Point2(33.8f, 27.3f), Point2(w, h));
 		lines_f.emplace_back(Point2(30.8f, 27.3f), Point2(31.4f, h));
+		lines_f.emplace_back(Point2(24.8f, h), Point2(27.4f, h));
+		lines_f.emplace_back(Point2(14, 28), Point2(18, 28));
 		for (const auto& p : lines_f)
 			drawer.Line(p.first, p.second, line_f_color);
 
@@ -586,6 +588,6 @@ int main()
 	//return main_tilemap_and_path_finding_and_fps_counter_example();
 	//return main_two_surface_test();
 	//return main_two_window_test();
-	//return main_drawer_test();
-	return main_drawer_test_triangle();
+	return main_drawer_test();
+	//return main_drawer_test_triangle();
 }
