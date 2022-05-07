@@ -27,6 +27,12 @@ namespace Rehenz
 
 
 
+	// clmap to [0,1]
+	inline Color ColorSaturate(Color c)
+	{
+		return Color(Clamp(c.x, 0.0f, 1.0f), Clamp(c.y, 0.0f, 1.0f), Clamp(c.z, 0.0f, 1.0f), Clamp(c.w, 0.0f, 1.0f));
+	}
+
 	struct Vertex
 	{
 	public:

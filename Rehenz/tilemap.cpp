@@ -10,27 +10,27 @@ namespace Rehenz
 		switch (tile)
 		{
 		case 1u:
-			return Drawer::ColorRGB(255u, 255u, 255u); // white
+			return Drawer::ColorRGB(255, 255, 255); // white
 		case 2u:
-			return Drawer::ColorRGB(252u, 200u, 0u); // yellow
+			return Drawer::ColorRGB(252, 200, 0); // yellow
 		case 3u:
-			return Drawer::ColorRGB(123u, 141u, 66u); // green
+			return Drawer::ColorRGB(123, 141, 66); // green
 		case 4u:
-			return Drawer::ColorRGB(137u, 195u, 235u); // blue
+			return Drawer::ColorRGB(137, 195, 235); // blue
 		case 5u:
-			return Drawer::ColorRGB(166u, 154u, 189u); // purple
+			return Drawer::ColorRGB(166, 154, 189); // purple
 		case 6u:
-			return Drawer::ColorRGB(240u, 131u, 0u); // orange
+			return Drawer::ColorRGB(240, 131, 0u); // orange
 		case 7u:
-			return Drawer::ColorRGB(0u, 85u, 46u); // dark green
+			return Drawer::ColorRGB(0, 85, 46); // dark green
 		case 8u:
-			return Drawer::ColorRGB(25u, 47u, 96u); // dark blue
+			return Drawer::ColorRGB(25, 47, 96); // dark blue
 		case 9u:
-			return Drawer::ColorRGB(125u, 125u, 125u); // gray
+			return Drawer::ColorRGB(125, 125, 125); // gray
 		case 10u:
-			return Drawer::ColorRGB(238u, 187u, 203u); // pink
+			return Drawer::ColorRGB(238, 187, 203); // pink
 		default:
-			return Drawer::ColorRGB(108u, 44u, 47u); // dark red
+			return Drawer::ColorRGB(108, 44, 47); // dark red
 		}
 	};
 
@@ -38,8 +38,8 @@ namespace Rehenz
 		tile_size(10, 10), render_center(_width * 0.5f, _height * 0.5f)
 	{
 		tiles = new uint[static_cast<size_t>(width) * height]{ 0 };
-		bg_color = Drawer::ColorRGB(168u, 201u, 127u); // green
-		edge_color = Drawer::ColorRGB(43u, 43u, 43u); // black
+		bg_color = Drawer::ColorRGB(168, 201, 127); // green
+		edge_color = Drawer::ColorRGB(43, 43, 43); // black
 		tile_shader = DefaultTileShader;
 	}
 	

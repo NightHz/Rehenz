@@ -83,13 +83,13 @@ namespace Rehenz
 				Point2I pa = screen_pos[a], pb = screen_pos[b], pc = screen_pos[c];
 				if (render_mode == RenderMode::Wireframe)
 				{
-					drawer.Line(pa, pb, drawer.ColorRGB(1.0f, 1.0f, 1.0f));
-					drawer.Line(pa, pc, drawer.ColorRGB(1.0f, 1.0f, 1.0f));
-					drawer.Line(pb, pc, drawer.ColorRGB(1.0f, 1.0f, 1.0f));
+					drawer.Line(pa, pb, drawer.ColorRGB(255, 255, 255));
+					drawer.Line(pa, pc, drawer.ColorRGB(255, 255, 255));
+					drawer.Line(pb, pc, drawer.ColorRGB(255, 255, 255));
 				}
 				else if (render_mode == RenderMode::PureWhite)
 				{
-					drawer.Triangle(pa, pb, pc, drawer.ColorRGB(1.0f, 1.0f, 1.0f));
+					drawer.Triangle(pa, pb, pc, drawer.ColorRGB(255, 255, 255));
 				}
 				else if (render_mode == RenderMode::FlatColor)
 				{
