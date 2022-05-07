@@ -7,6 +7,7 @@ namespace Rehenz
 {
 	class Drawer;
 	class DrawerZ;
+	class DrawerF;
 
 
 
@@ -102,5 +103,23 @@ namespace Rehenz
 		// draw triangle including all edges
 		void Triangle(Point2I p1, Point2I p2, Point2I p3, const Vertex* v1, const Vertex* v2, const Vertex* v3,
 			PixelShader pixel_shader, PixelShaderData pshader_data);
+	};
+
+	// draw point based float, draw range: [0,w]x[0,h]
+	// draw all end point and all edge
+	class DrawerF : public Drawer
+	{
+	public:
+		DrawerF(uint* _buffer, int _width, int _height);
+		~DrawerF();
+
+		using Drawer::Pixel;
+		using Drawer::Line;
+
+		// draw a pixel
+		void Pixel(Point2 p, uint color);
+
+		// draw line
+		void Line(Point2 p1, Point2 p2, uint color);
 	};
 }

@@ -428,9 +428,9 @@ int main_drawer_test()
 	srf.Create(GetModuleHandle(nullptr), w2, h2, "Rehenz drawer test");
 
 	std::unique_ptr<uint[]> image = std::make_unique<uint[]>(w * h);
-	Drawer drawer(image.get(), w, h);
+	DrawerF drawer(image.get(), w, h);
 	std::unique_ptr<uint[]> image2 = std::make_unique<uint[]>(w2 * h2);
-	Drawer drawer2(image2.get(), w2, h2);
+	DrawerF drawer2(image2.get(), w2, h2);
 	while (srf.GetWindowState())
 	{
 		// clear
@@ -438,12 +438,43 @@ int main_drawer_test()
 		drawer.Fill(color_clear);
 
 		// test drawer
-		const auto line_color = Drawer::ColorRGB(0, 0, 0);
+		const auto line_color = Drawer::ColorRGB(255, 0, 0);
 		std::vector<std::pair<Point2I, Point2I>> lines;
 		lines.emplace_back(Point2I(3, 4), Point2I(13, 6));
 		lines.emplace_back(Point2I(10, 23), Point2I(5, 9));
 		for (const auto& p : lines)
 			drawer.Line(p.first, p.second, line_color);
+
+		const auto line_f_color = Drawer::ColorRGB(0, 255, 0);
+		std::vector<std::pair<Point2, Point2>> lines_f;
+		lines_f.emplace_back(Point2(12.5f, 9.2f), Point2(17.5f, 11.2f));
+		lines_f.emplace_back(Point2(12.5f, 13.5f), Point2(17.5f, 15.5f));
+		lines_f.emplace_back(Point2(12.5f, 17.8f), Point2(17.5f, 19.8f));
+
+		lines_f.emplace_back(Point2(20.2f, 3.8f), Point2(22.8f, 6.2f));
+		lines_f.emplace_back(Point2(20.2f, 7.8f), Point2(22.8f, 10.38f));
+		lines_f.emplace_back(Point2(20.2f, 11.8f), Point2(22.8f, 14.42f));
+		lines_f.emplace_back(Point2(20.2f, 15.8f), Point2(22.8f, 17.6f));
+		lines_f.emplace_back(Point2(20.2f, 19.58f), Point2(22.8f, 22.2f));
+		lines_f.emplace_back(Point2(20.2f, 24.62f), Point2(22.8f, 27.2f));
+
+		lines_f.emplace_back(Point2(27.8f, 6.2f), Point2(25.2f, 3.8f));
+		lines_f.emplace_back(Point2(27.8f, 10.38f), Point2(25.2f, 7.8f));
+		lines_f.emplace_back(Point2(27.8f, 14.42f), Point2(25.2f, 11.8f));
+		lines_f.emplace_back(Point2(27.8f, 17.6f), Point2(25.2f, 15.8f));
+		lines_f.emplace_back(Point2(27.8f, 22.2f), Point2(25.2f, 19.58f));
+		lines_f.emplace_back(Point2(27.8f, 27.2f), Point2(25.2f, 24.62f));
+
+		lines_f.emplace_back(Point2(12.8f, 21.8f), Point2(13.2f, 23.8f));
+		lines_f.emplace_back(Point2(15.8f, 21.8f), Point2(16.2f, 22.1f));
+		lines_f.emplace_back(Point2(15.8f, 24.3f), Point2(16.2f, 24.6f));
+
+		lines_f.emplace_back(Point2(30.8f, 3.3f), Point2(w, 0));
+		lines_f.emplace_back(Point2(30.8f, 24.3f), Point2(w, 5.6f));
+		lines_f.emplace_back(Point2(33.8f, 27.3f), Point2(w, h));
+		lines_f.emplace_back(Point2(30.8f, 27.3f), Point2(31.4f, h));
+		for (const auto& p : lines_f)
+			drawer.Line(p.first, p.second, line_f_color);
 
 		// expand image
 		const auto edge_color = Drawer::ColorRGB(123, 141, 66);
@@ -457,10 +488,12 @@ int main_drawer_test()
 			}
 		}
 		// highlight
-		const auto highlight_color = Drawer::ColorRGB(240, 131, 0);
+		const auto highlight_color = Drawer::ColorRGB(0, 0, 0);
 		const Point2I o(s / 2, s / 2);
 		for (const auto& p : lines)
 			drawer2.Line(p.first * s + o, p.second * s + o, highlight_color);
+		for (const auto& p : lines_f)
+			drawer2.Line((p.first * s), (p.second * s), highlight_color);
 
 		// refresh
 		srf.FillFromImage(image2.get());

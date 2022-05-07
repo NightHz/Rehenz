@@ -207,4 +207,67 @@ namespace Rehenz
 			}
 		}
 	}
+
+	DrawerF::DrawerF(uint* _buffer, int _width, int _height)
+		: Drawer(_buffer, _width, _height)
+	{
+	}
+
+	DrawerF::~DrawerF()
+	{
+	}
+
+	void DrawerF::Pixel(Point2 p, uint color)
+	{
+		if (p.x == w)
+			p.x -= 0.1f;
+		if (p.y == h)
+			p.y -= 0.1f;
+		Pixel(Point2I(p), color);
+	}
+
+	void DrawerF::Line(Point2 p1, Point2 p2, uint color)
+	{
+		if (p1.x == p2.x && p1.y == p2.y)
+			Pixel(p1, color);
+		else
+		{
+			float dx = abs(p1.x - p2.x), dy = abs(p1.y - p2.y);
+			if (dx >= dy)
+			{
+				if (p2.x < p1.x)
+					std::swap(p1, p2);
+				float a = (p2.y - p1.y) / dx;
+				float x = static_cast<int>(p1.x + 0.5f) + 0.5f;
+				float y = p1.y + a * (x - p1.x);
+				if (x - 0.5f > p1.x)
+					Pixel(p1, color);
+				for (; x < p2.x; x += 1.0f)
+				{
+					Pixel(Point2(x, y), color);
+					y += a;
+				}
+				if (x - 0.5f <= p2.x)
+					Pixel(p2, color);
+			}
+			else
+			{
+				if (p2.y < p1.y)
+					std::swap(p1, p2);
+				float a = (p2.x - p1.x) / dy;
+				float y = static_cast<int>(p1.y + 0.5f) + 0.5f;
+				float x = p1.x + a * (y - p1.y);
+				if (y - 0.5f > p1.y)
+					Pixel(p1, color);
+				for (; y < p2.y; y += 1.0f)
+				{
+					Pixel(Point2(x, y), color);
+					x += a;
+				}
+				if (y - 0.5f <= p2.y)
+					Pixel(p2, color);
+			}
+		}
+	}
+
 }
