@@ -90,6 +90,25 @@ int main_surface_dx8_and_render_soft_example()
 		else
 			return Color(0.1f, 0.1f, 0.1f);
 	};
+	VertexShader vs_light = [](const VertexShaderData& data, const Vertex& v0) -> Vertex
+	{
+		Vertex v(v0);
+		v.p = v.p * data.transform;
+		v.c = Color(0.2f, 0.2f, 0.2f, 1);
+
+		const Vector light_dir(-0.7f, -0.5f, 0.5f);
+		Vector N = v.n * data.mat_world * data.mat_view; // normal
+		Vector L = -light_dir * data.mat_view;           // to light
+		float s = VectorDot(L, N);
+		if (s > 0)
+			v.c += v0.c * s;
+
+		v.c.x = Clamp(v.c.x, 0.0f, 1.0f);
+		v.c.y = Clamp(v.c.y, 0.0f, 1.0f);
+		v.c.z = Clamp(v.c.z, 0.0f, 1.0f);
+		v.c.w = Clamp(v.c.w, 0.0f, 1.0f);
+		return v;
+	};
 	// scene
 	RenderScene test1;
 	for (float z = -10; z <= 10; z += 1)
@@ -138,11 +157,13 @@ int main_surface_dx8_and_render_soft_example()
 	while (srf_dx8.GetWindowState())
 	{
 		// render
-		if (KeyIsDown('1'))      camera.render_mode = Camera::RenderMode::Wireframe;
-		else if (KeyIsDown('2')) camera.render_mode = Camera::RenderMode::PureWhite;
-		else if (KeyIsDown('3')) camera.render_mode = Camera::RenderMode::Color;
-		else if (KeyIsDown('4')) camera.render_mode = Camera::RenderMode::Texture;
-		else if (KeyIsDown('5')) camera.render_mode = Camera::RenderMode::Shader;
+		static int shader = 1;
+		if (KeyIsDown('1'))      camera.render_mode = Camera::RenderMode::Wireframe, shader = 1;
+		else if (KeyIsDown('2')) camera.render_mode = Camera::RenderMode::PureWhite, shader = 1;
+		else if (KeyIsDown('3')) camera.render_mode = Camera::RenderMode::Color, shader = 1;
+		else if (KeyIsDown('4')) camera.render_mode = Camera::RenderMode::Texture, shader = 1;
+		else if (KeyIsDown('5')) camera.render_mode = Camera::RenderMode::Shader, shader = 1;
+		else if (KeyIsDown('6')) camera.render_mode = Camera::RenderMode::Shader, shader = 2;
 		if (KeyIsDown('W'))      camera.transform.pos.y += 0.1f;
 		else if (KeyIsDown('S')) camera.transform.pos.y -= 0.1f;
 		if (KeyIsDown('A'))      camera.transform.pos.x -= 0.1f;
@@ -161,7 +182,12 @@ int main_surface_dx8_and_render_soft_example()
 		if (KeyIsDown('8'))      scene = &test2;
 		else if (KeyIsDown('9')) scene = &test1;
 		if (KeyIsDown(VK_RETURN))
-			srf_dx8.FillFromImage(camera.RenderImage(*scene, DefaultVertexShader, my_pixel_shader));
+		{
+			if (shader == 1)
+				srf_dx8.FillFromImage(camera.RenderImage(*scene, DefaultVertexShader, my_pixel_shader));
+			else if (shader == 2)
+				srf_dx8.FillFromImage(camera.RenderImage(*scene, vs_light, DefaultPixelShader));
+		}
 		// refresh
 		srf_dx8.Present();
 		// msg
@@ -583,11 +609,11 @@ int main()
 	cout << "Hello~ Rehenz~" << endl;
 
 	//return main_noise_example();
-	//return main_surface_dx8_and_render_soft_example();
+	return main_surface_dx8_and_render_soft_example();
 	//return main_clip_test();
 	//return main_tilemap_and_path_finding_and_fps_counter_example();
 	//return main_two_surface_test();
 	//return main_two_window_test();
-	return main_drawer_test();
+	//return main_drawer_test();
 	//return main_drawer_test_triangle();
 }
