@@ -416,14 +416,74 @@ int main_two_window_test()
 	return 0;
 }
 
+int main_drawer_test()
+{
+	cout << endl;
+	SurfaceDx8 srf;
+	const int w = 40;
+	const int h = 30;
+	const int s = 20;
+	const int w2 = w * s;
+	const int h2 = h * s;
+	srf.Create(GetModuleHandle(nullptr), w2, h2, "Rehenz drawer test");
+
+	std::unique_ptr<uint[]> image = std::make_unique<uint[]>(w * h);
+	Drawer drawer(image.get(), w, h);
+	std::unique_ptr<uint[]> image2 = std::make_unique<uint[]>(w2 * h2);
+	Drawer drawer2(image2.get(), w2, h2);
+	while (srf.GetWindowState())
+	{
+		// clear
+		const auto color_clear = Drawer::ColorRGB(1.0f, 1.0f, 1.0f);
+		drawer.Fill(color_clear);
+
+		// test drawer
+		const auto line_color = Drawer::ColorRGB(0, 0, 0);
+		std::vector<std::pair<Point2I, Point2I>> lines;
+		lines.emplace_back(Point2I(3, 4), Point2I(13, 6));
+		lines.emplace_back(Point2I(10, 23), Point2I(5, 9));
+		for (const auto& p : lines)
+			drawer.Line(p.first, p.second, line_color);
+
+		// expand image
+		const auto edge_color = Drawer::ColorRGB(123, 141, 66);
+		for (int x = 0; x < w; x++)
+		{
+			for (int y = 0; y < h; y++)
+			{
+				drawer2.Rectangle(Point2I(x * s, y * s), Point2I(x * s + s - 2, y * s + s - 2), image[x + static_cast<size_t>(y) * w]);
+				drawer2.Rectangle(Point2I(x * s + s - 1, y * s), Point2I(x * s + s - 1, y * s + s - 1), edge_color);
+				drawer2.Rectangle(Point2I(x * s, y * s + s - 1), Point2I(x * s + s - 1, y * s + s - 1), edge_color);
+			}
+		}
+		// highlight
+		const auto highlight_color = Drawer::ColorRGB(240, 131, 0);
+		const Point2I o(s / 2, s / 2);
+		for (const auto& p : lines)
+			drawer2.Line(p.first * s + o, p.second * s + o, highlight_color);
+
+		// refresh
+		srf.FillFromImage(image2.get());
+		srf.Present();
+		// msg
+		SimpleMessageProcess();
+		// exit
+		if (KeyIsDown('Q'))
+			break;
+	}
+
+	return 0;
+}
+
 int main()
 {
 	cout << "Hello~ Rehenz~" << endl;
 
 	//return main_noise_example();
-	return main_surface_dx8_and_render_soft_example();
+	//return main_surface_dx8_and_render_soft_example();
 	//return main_clip_test();
 	//return main_tilemap_and_path_finding_and_fps_counter_example();
 	//return main_two_surface_test();
 	//return main_two_window_test();
+	return main_drawer_test();
 }

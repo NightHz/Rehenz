@@ -467,6 +467,9 @@ namespace Rehenz
 		explicit Vector2I(const Vector2& v);
 		explicit Vector2I(const Vector& v);
 		explicit Vector2I(int _x, int _y);
+
+		Vector2I operator+(Vector2I) const;
+		Vector2I operator*(int) const;
 	};
 
 	// 2-component point with int type

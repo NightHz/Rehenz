@@ -1144,4 +1144,14 @@ namespace Rehenz
 		y = _y;
 	}
 
+	Vector2I Vector2I::operator+(Vector2I v) const
+	{
+		return Vector2I(x + v.x, y + v.y);
+	}
+
+	Vector2I Vector2I::operator*(int i) const
+	{
+		return Vector2I(x * i, y * i);
+	}
+
 }
