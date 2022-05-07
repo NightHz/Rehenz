@@ -137,6 +137,7 @@
     <ClCompile Include="clipper.cpp" />
     <ClCompile Include="drawer.cpp" />
     <ClCompile Include="fps_counter.cpp" />
+    <ClCompile Include="input.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="math.cpp" />
     <ClCompile Include="mesh.cpp" />

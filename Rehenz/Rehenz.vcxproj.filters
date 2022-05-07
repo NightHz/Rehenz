@@ -84,6 +84,9 @@
     <ClCompile Include="window_fc.cpp">
       <Filter>source\window</Filter>
     </ClCompile>
+    <ClCompile Include="input.cpp">
+      <Filter>source\base</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="rehenz.h">

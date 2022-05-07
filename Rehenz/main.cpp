@@ -152,10 +152,16 @@ int main_surface_dx8_and_render_soft_example()
 	cout << "press I/J/K/L     to rotate cube" << endl;
 	cout << "press T/F/G/H/R/Y to move cube" << endl;
 	cout << "press 8/9         to switch scene" << endl;
+	// input
+	Mouse mouse;
 
 	cout << "press Q to exit" << endl;
 	while (srf_dx8.GetWindowState())
 	{
+		// update input
+		mouse.Present();
+		float dt = srf_dx8.GetWindow()->fps_counter.GetLastDeltatime() / 1000.0f;
+		
 		// render
 		static int shader = 1;
 		if (KeyIsDown('1'))      camera.render_mode = Camera::RenderMode::Wireframe, shader = 1;
@@ -164,11 +170,21 @@ int main_surface_dx8_and_render_soft_example()
 		else if (KeyIsDown('4')) camera.render_mode = Camera::RenderMode::Texture, shader = 1;
 		else if (KeyIsDown('5')) camera.render_mode = Camera::RenderMode::Shader, shader = 1;
 		else if (KeyIsDown('6')) camera.render_mode = Camera::RenderMode::Shader, shader = 2;
-		if (KeyIsDown('W'))      camera.transform.pos.y += 0.1f;
-		else if (KeyIsDown('S')) camera.transform.pos.y -= 0.1f;
-		if (KeyIsDown('A'))      camera.transform.pos.x -= 0.1f;
-		else if (KeyIsDown('D')) camera.transform.pos.x += 0.1f;
-		camera.transform.SetFront(-camera.transform.pos);
+
+		float cam_move_dis = 5 * dt;
+		float cam_rotate_angle = 0.3f * dt;
+		if (KeyIsDown('W'))      camera.transform.pos += cam_move_dis * camera.transform.GetFrontInGround();
+		else if (KeyIsDown('S')) camera.transform.pos -= cam_move_dis * camera.transform.GetFrontInGround();
+		if (KeyIsDown('A'))      camera.transform.pos -= cam_move_dis * camera.transform.GetRightInGround();
+		else if (KeyIsDown('D')) camera.transform.pos += cam_move_dis * camera.transform.GetRightInGround();
+		if (KeyIsDown(VK_SPACE)) camera.transform.pos.y += cam_move_dis;
+		else if (KeyIsDown(VK_LSHIFT)) camera.transform.pos.y -= cam_move_dis;
+		if (KeyIsDown(VK_MBUTTON))
+		{
+			camera.transform.axes.pitch += cam_rotate_angle * mouse.GetMoveY();
+			camera.transform.axes.yaw += cam_rotate_angle * mouse.GetMoveX();
+		}
+
 		if (KeyIsDown('I'))      obj_cube->transform.axes.pitch += 0.05f;
 		else if (KeyIsDown('K')) obj_cube->transform.axes.pitch -= 0.05f;
 		if (KeyIsDown('J'))      obj_cube->transform.axes.yaw += 0.05f;
