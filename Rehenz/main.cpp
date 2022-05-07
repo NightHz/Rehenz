@@ -508,6 +508,74 @@ int main_drawer_test()
 	return 0;
 }
 
+int main_drawer_test_triangle()
+{
+	cout << endl;
+	SurfaceDx8 srf;
+	const int w = 40;
+	const int h = 30;
+	const int s = 20;
+	const int w2 = w * s;
+	const int h2 = h * s;
+	srf.Create(GetModuleHandle(nullptr), w2, h2, "Rehenz drawer test triangle");
+
+	std::unique_ptr<uint[]> image = std::make_unique<uint[]>(w * h);
+	Drawer drawer(image.get(), w, h);
+	std::unique_ptr<uint[]> image2 = std::make_unique<uint[]>(w2 * h2);
+	Drawer drawer2(image2.get(), w2, h2);
+	while (srf.GetWindowState())
+	{
+		// clear
+		const auto color_clear = Drawer::ColorRGB(1.0f, 1.0f, 1.0f);
+		drawer.Fill(color_clear);
+
+		// test drawer
+		const auto color = Drawer::ColorRGB(255, 0, 0);
+		std::vector<Point2I> tri;
+		auto tri_add = [&tri](int x1, int y1, int x2, int y2, int x3, int y3)
+		{
+			tri.emplace_back(x1, y1); tri.emplace_back(x2, y2); tri.emplace_back(x3, y3);
+		};
+		tri_add(3, 4, 5, 6, 2, 8);
+		tri_add(2, 15, 5, 10, 6, 18);
+		tri_add(12, 5, 15, 4, 16, 18);
+		for (size_t i = 0; i < tri.size(); i += 3)
+			drawer.Triangle(tri[i], tri[i + 1], tri[i + 2], color);
+
+		// expand image
+		const auto edge_color = Drawer::ColorRGB(123, 141, 66);
+		for (int x = 0; x < w; x++)
+		{
+			for (int y = 0; y < h; y++)
+			{
+				drawer2.Rectangle(Point2I(x * s, y * s), Point2I(x * s + s - 2, y * s + s - 2), image[x + static_cast<size_t>(y) * w]);
+				drawer2.Rectangle(Point2I(x * s + s - 1, y * s), Point2I(x * s + s - 1, y * s + s - 1), edge_color);
+				drawer2.Rectangle(Point2I(x * s, y * s + s - 1), Point2I(x * s + s - 1, y * s + s - 1), edge_color);
+			}
+		}
+		// highlight
+		const auto highlight_color = Drawer::ColorRGB(0, 0, 0);
+		const Point2I o(s / 2, s / 2);
+		for (size_t i = 0; i < tri.size(); i += 3)
+		{
+			drawer2.Line(tri[i] * s + o, tri[i + 1] * s + o, highlight_color);
+			drawer2.Line(tri[i + 1] * s + o, tri[i + 2] * s + o, highlight_color);
+			drawer2.Line(tri[i] * s + o, tri[i + 2] * s + o, highlight_color);
+		}
+
+		// refresh
+		srf.FillFromImage(image2.get());
+		srf.Present();
+		// msg
+		SimpleMessageProcess();
+		// exit
+		if (KeyIsDown('Q'))
+			break;
+	}
+
+	return 0;
+}
+
 int main()
 {
 	cout << "Hello~ Rehenz~" << endl;
@@ -518,5 +586,6 @@ int main()
 	//return main_tilemap_and_path_finding_and_fps_counter_example();
 	//return main_two_surface_test();
 	//return main_two_window_test();
-	return main_drawer_test();
+	//return main_drawer_test();
+	return main_drawer_test_triangle();
 }
