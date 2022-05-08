@@ -11,6 +11,7 @@ namespace Rehenz
 
 
 
+	// draw point which aligned pixel center, draw region: [0,w-1]x[0,h-1]
 	class Drawer
 	{
 	protected:
@@ -72,8 +73,7 @@ namespace Rehenz
 			PixelShader pixel_shader, PixelShaderData pshader_data);
 	};
 
-	// draw point based float, draw range: [0,w]x[0,h]
-	// draw all end point and all edge
+	// draw point which based float, draw region: [0,w]x[0,h]
 	class DrawerF : public Drawer
 	{
 	public:
@@ -86,7 +86,7 @@ namespace Rehenz
 		// draw a pixel
 		void Pixel(Point2 p, uint color);
 
-		// draw line
+		// draw line including all end points
 		void Line(Point2 p1, Point2 p2, uint color);
 	};
 }

@@ -1,5 +1,6 @@
 #include "drawer.h"
 #include <utility>
+#include <cassert>
 
 namespace Rehenz
 {
@@ -18,7 +19,7 @@ namespace Rehenz
 	}
 	void Drawer::Pixel(Point2I p, uint color)
 	{
-		//if (p.x >= 0 && p.x < w && p.y >= 0 && p.y < h)
+		assert(p.x >= 0 && p.x < w&& p.y >= 0 && p.y < h);
 		int i = p.y * w + p.x;
 		buffer[i] = color;
 	}
@@ -244,7 +245,13 @@ namespace Rehenz
 					Pixel(p1, color);
 				for (; x < p2.x; x += 1.0f)
 				{
-					Pixel(Point2(x, y), color);
+					// avoid y out of bounds caused by float precision
+					Point2I sp(static_cast<int>(x), static_cast<int>(y));
+					if (sp.y == -1)
+						sp.y++;
+					else if (sp.y == h)
+						sp.y--;
+					Pixel(sp, color);
 					y += a;
 				}
 				if (x - 0.5f < p2.x)
@@ -261,7 +268,13 @@ namespace Rehenz
 					Pixel(p1, color);
 				for (; y < p2.y; y += 1.0f)
 				{
-					Pixel(Point2(x, y), color);
+					// avoid x out of bounds caused by float precision
+					Point2I sp(static_cast<int>(x), static_cast<int>(y));
+					if (sp.x == -1)
+						sp.x++;
+					else if (sp.x == w)
+						sp.x--;
+					Pixel(sp, color);
 					x += a;
 				}
 				if (y - 0.5f < p2.y)

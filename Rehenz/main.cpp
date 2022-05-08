@@ -478,6 +478,24 @@ int main_drawer_test()
 	DrawerF drawer2(image2.get(), w2, h2);
 	while (srf.GetWindowState())
 	{
+		// time
+		static ullong t = 0;
+		uint dt = srf.GetWindow()->fps_counter.GetLastDeltatime();
+		t += dt;
+		// moving line
+		auto GetMovingY = [](ullong t, ullong cycle, float y) -> float
+		{
+			t %= 8 * cycle;
+			if (t < cycle)
+				return 0;
+			else if (t < 4 * cycle)
+				return Lerp(0.0f, y, (t - cycle) / static_cast<float>(3 * cycle));
+			else if (t < 5 * cycle)
+				return y;
+			else
+				return Lerp(y, 0.0f, (t - 5 * cycle) / static_cast<float>(3 * cycle));
+		};
+
 		// clear
 		const auto color_clear = Drawer::ColorRGB(255, 255, 255);
 		drawer.Fill(color_clear);
@@ -487,6 +505,9 @@ int main_drawer_test()
 		std::vector<std::pair<Point2I, Point2I>> lines;
 		lines.emplace_back(Point2I(3, 4), Point2I(13, 6));
 		lines.emplace_back(Point2I(10, 23), Point2I(5, 9));
+
+		lines.emplace_back(Point2I(30, static_cast<int>(6.5f + GetMovingY(t, 300, 3))),
+			Point2I(33, static_cast<int>(6.5f + GetMovingY(t + 300, 300, 3))));
 		for (const auto& p : lines)
 			drawer.Line(p.first, p.second, line_color);
 
@@ -515,11 +536,14 @@ int main_drawer_test()
 		lines_f.emplace_back(Point2(15.8f, 24.3f), Point2(16.2f, 24.6f));
 
 		lines_f.emplace_back(Point2(30.8f, 3.3f), Point2(w, 0));
-		lines_f.emplace_back(Point2(30.8f, 24.3f), Point2(w, 5.6f));
+		lines_f.emplace_back(Point2(30.8f, 24.3f), Point2(w, 15.6f));
 		lines_f.emplace_back(Point2(33.8f, 27.3f), Point2(w, h));
 		lines_f.emplace_back(Point2(30.8f, 27.3f), Point2(31.4f, h));
 		lines_f.emplace_back(Point2(24.8f, h), Point2(27.4f, h));
 		lines_f.emplace_back(Point2(14, 28), Point2(18, 28));
+
+		lines_f.emplace_back(Point2(35.5f, 6.5f + GetMovingY(t, 300, 3)),
+			Point2(38.5f, 6.5f + GetMovingY(t + 300, 300, 3)));
 		for (const auto& p : lines_f)
 			drawer.Line(p.first, p.second, line_f_color);
 
@@ -628,11 +652,11 @@ int main()
 	cout << "Hello~ Rehenz~" << endl;
 
 	//return main_noise_example();
-	return main_surface_dx8_and_render_soft_example();
+	//return main_surface_dx8_and_render_soft_example();
 	//return main_clip_test();
 	//return main_tilemap_and_path_finding_and_fps_counter_example();
 	//return main_two_surface_test();
 	//return main_two_window_test();
-	//return main_drawer_test();
+	return main_drawer_test();
 	//return main_drawer_test_triangle();
 }
