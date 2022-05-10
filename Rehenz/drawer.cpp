@@ -48,16 +48,31 @@ namespace Rehenz
 			{
 				if (p2.x < p1.x)
 					std::swap(p1, p2);
-				int y_move = (p2.y >= p1.y) ? 1 : -1;
 				int y_offset = dx / 2; // dx times of 1/2
-				for (auto p = p1; p.x <= p2.x; p.x++)
+				if (p2.y >= p1.y)
 				{
-					Pixel(p, color);
-					y_offset += dy;     // dx times of dy/dx
-					if (y_offset >= dx) // dx times of >= 1
+					for (auto p = p1; p.x <= p2.x; p.x++)
 					{
-						y_offset -= dx; // dx times of -= 1
-						p.y += y_move;
+						Pixel(p, color);
+						y_offset += dy;     // dx times of dy/dx
+						if (y_offset >= dx) // dx times of >= 1
+						{
+							y_offset -= dx; // dx times of -= 1
+							p.y++;
+						}
+					}
+				}
+				else
+				{
+					for (auto p = p1; p.x <= p2.x; p.x++)
+					{
+						Pixel(p, color);
+						y_offset -= dy;     // dx times of dy/dx
+						if (y_offset < 0)   // dx times of < 0
+						{
+							y_offset += dx; // dx times of += 1
+							p.y--;
+						}
 					}
 				}
 			}
@@ -65,16 +80,31 @@ namespace Rehenz
 			{
 				if (p2.y < p1.y)
 					std::swap(p1, p2);
-				int x_move = (p2.x >= p1.x) ? 1 : -1;
 				int x_offset = dy / 2;
-				for (auto p = p1; p.y <= p2.y; p.y++)
+				if (p2.x >= p1.x)
 				{
-					Pixel(p, color);
-					x_offset += dx;
-					if (x_offset >= dy)
+					for (auto p = p1; p.y <= p2.y; p.y++)
 					{
-						x_offset -= dy;
-						p.x += x_move;
+						Pixel(p, color);
+						x_offset += dx;
+						if (x_offset >= dy)
+						{
+							x_offset -= dy;
+							p.x++;
+						}
+					}
+				}
+				else
+				{
+					for (auto p = p1; p.y <= p2.y; p.y++)
+					{
+						Pixel(p, color);
+						x_offset -= dx;
+						if (x_offset < 0)
+						{
+							x_offset += dy;
+							p.x--;
+						}
 					}
 				}
 			}
