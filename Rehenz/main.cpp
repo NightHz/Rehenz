@@ -602,6 +602,7 @@ int main_drawer_test_triangle()
 
 		// test drawer
 		const auto color = Drawer::ColorRGB(255, 0, 0);
+		const auto line_color = Drawer::ColorRGB(0, 255, 0);
 		std::vector<Point2I> tri;
 		auto tri_add = [&tri](int x1, int y1, int x2, int y2, int x3, int y3)
 		{
@@ -611,7 +612,12 @@ int main_drawer_test_triangle()
 		tri_add(2, 15, 5, 10, 6, 18);
 		tri_add(12, 5, 15, 4, 16, 18);
 		for (size_t i = 0; i < tri.size(); i += 3)
+		{
+			drawer.Line(tri[i], tri[i + 1], line_color);
+			drawer.Line(tri[i + 1], tri[i + 2], line_color);
+			drawer.Line(tri[i], tri[i + 2], line_color);
 			drawer.Triangle(tri[i], tri[i + 1], tri[i + 2], color);
+		}
 
 		// expand image
 		const auto edge_color = Drawer::ColorRGB(123, 141, 66);
@@ -657,6 +663,6 @@ int main()
 	//return main_tilemap_and_path_finding_and_fps_counter_example();
 	//return main_two_surface_test();
 	//return main_two_window_test();
-	return main_drawer_test();
-	//return main_drawer_test_triangle();
+	//return main_drawer_test();
+	return main_drawer_test_triangle();
 }

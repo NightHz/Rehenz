@@ -41,6 +41,9 @@ namespace Rehenz
 		// draw line including all end points
 		void Line(Point2I p1, Point2I p2, uint color);
 
+		// draw triangle including all edges
+		void Triangle_new(Point2I p1, Point2I p2, Point2I p3, uint color);
+
 		// require top_l and top_r have same y, and bottom_l and bottom_r have same y
 		void Trapezoid(Point2I top_l, Point2I top_r, Point2I bottom_l, Point2I bottom_r, uint color);
 		// draw triangle including all edges
@@ -82,11 +85,20 @@ namespace Rehenz
 
 		using Drawer::Pixel;
 		using Drawer::Line;
+		using Drawer::Triangle;
 
 		// draw a pixel
 		void Pixel(Point2 p, uint color);
 
-		// draw line including all end points
+		// draw line
+		// sample points are aligned horizontally or vertically with grid center
+		// sample endpoint when endpoint length > half pixel
 		void Line(Point2 p1, Point2 p2, uint color);
+
+		// draw triangle
+		// sample point when point is inside
+		// sample point when point is on edge and the right of point is inside
+		// sample point when point is on edge and the right of point is on edge and the bottom of right of point is inside
+		void Triangle(Point2 p1, Point2 p2, Point2 p3, uint color);
 	};
 }
