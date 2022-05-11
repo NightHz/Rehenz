@@ -610,13 +610,20 @@ int main_drawer_test_triangle()
 		};
 		tri_add(3, 4, 5, 6, 2, 8);
 		tri_add(2, 15, 5, 10, 6, 18);
-		tri_add(12, 5, 15, 4, 16, 18);
+		tri_add(12, 5, 15, 4, 13, 18);
+
+		tri_add(18, 3, 22, 3, 21, 3);
+		tri_add(18, 6, 22, 8, 21, 6);
+		tri_add(18, 14, 22, 11, 21, 14);
+
+		tri_add(31, 10, 32, 4, 25, 18);
+		tri_add(4, 20, 32, 24, 10, 26);
 		for (size_t i = 0; i < tri.size(); i += 3)
 		{
 			drawer.Line(tri[i], tri[i + 1], line_color);
 			drawer.Line(tri[i + 1], tri[i + 2], line_color);
 			drawer.Line(tri[i], tri[i + 2], line_color);
-			drawer.Triangle(tri[i], tri[i + 1], tri[i + 2], color);
+			drawer.Triangle_new(tri[i], tri[i + 1], tri[i + 2], color);
 		}
 
 		// expand image

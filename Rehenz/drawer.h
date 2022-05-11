@@ -19,6 +19,19 @@ namespace Rehenz
 		const int w;
 		const int h;
 
+		// dy must >= 0
+		// (xi, dxi, dyi) define line
+		// dyi must >= 0
+		// line1 must be to the left of line2
+		void Trapezoid_new(int y, int dy, int x1, int dx1, int dy1, int x2, int dx2, int dy2, uint color);
+
+		// dy must >= 0
+		// (xi, xi_offset, dxi, dyi) define line
+		// dyi must >= 0
+		// line1 must be to the left of line2
+		void Trapezoid_new(int y, int dy, int& x1, int& x1_offset, int dx1, int dy1,
+			int& x2, int& x2_offset, int dx2, int dy2, uint color);
+
 	public:
 		Drawer(uint* _buffer, int _width, int _height);
 		~Drawer();
