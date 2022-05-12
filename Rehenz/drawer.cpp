@@ -428,4 +428,11 @@ namespace Rehenz
 		}
 	}
 
+	void DrawerF::Triangle(Point2 p1, Point2 p2, Point2 p3, uint color)
+	{
+		Line(p1, p2, color);
+		Line(p1, p3, color);
+		Line(p2, p3, color);
+	}
+
 }

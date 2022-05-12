@@ -660,6 +660,149 @@ int main_drawer_test_triangle()
 	return 0;
 }
 
+int main_drawerf_test_triangle()
+{
+	cout << endl;
+	const int w = 20;
+	const int h = 15;
+	const int s = 40;
+	const int w2 = w * s;
+	const int h2 = h * s;
+	SurfaceDx8 srf1;
+	srf1.Create(GetModuleHandle(nullptr), w2, h2, "Rehenz drawerf test triangle : normal draw order");
+	srf1.GetWindow()->fps_counter.LockFps(0);
+
+	std::unique_ptr<uint[]> image1 = std::make_unique<uint[]>(w * h);
+	DrawerF drawer1(image1.get(), w, h);
+	std::unique_ptr<uint[]> image1_srf = std::make_unique<uint[]>(w2 * h2);
+	DrawerF drawer1_srf(image1_srf.get(), w2, h2);
+
+	SurfaceDx8 srf2;
+	srf2.Create(GetModuleHandle(nullptr), w2, h2, "Rehenz drawerf test triangle : reverse draw order");
+	srf2.GetWindow()->fps_counter.LockFps(0);
+
+	std::unique_ptr<uint[]> image2 = std::make_unique<uint[]>(w * h);
+	DrawerF drawer2(image2.get(), w, h);
+	std::unique_ptr<uint[]> image2_srf = std::make_unique<uint[]>(w2 * h2);
+	DrawerF drawer2_srf(image2_srf.get(), w2, h2);
+
+	SurfaceDx8 srf3;
+	srf3.Create(GetModuleHandle(nullptr), w2, h2, "Rehenz drawerf test triangle");
+	srf3.GetWindow()->fps_counter.LockFps(0);
+
+	std::unique_ptr<uint[]> image3_srf = std::make_unique<uint[]>(w2 * h2);
+	Drawer drawer3_srf(image3_srf.get(), w2, h2);
+
+	uint red = Drawer::ColorRGB(242, 129, 128);
+	uint yellow = Drawer::ColorRGB(223, 218, 129);
+	uint blue = Drawer::ColorRGB(141, 219, 254);
+	uint green = Drawer::ColorRGB(149, 224, 129);
+	uint purple = Drawer::ColorRGB(141, 133, 253);
+	uint pink = Drawer::ColorRGB(231, 162, 244);
+	uint orange = Drawer::ColorRGB(255, 178, 125);
+	std::vector<Point2> tri;
+	std::vector<uint> color;
+	auto tri_add = [&tri, &color](float x1, float y1, float x2, float y2, float x3, float y3, uint c)
+	{
+		tri.emplace_back(x1 + 0.5f, y1 + 0.5f);
+		tri.emplace_back(x2 + 0.5f, y2 + 0.5f);
+		tri.emplace_back(x3 + 0.5f, y3 + 0.5f);
+		color.push_back(c);
+	};
+	tri_add(0, 0, 4, 0, 2, 2, purple);
+	tri_add(10, 0, 4, 0, 6, 3, green);
+	tri_add(10, 0, 16, 0, 10.2f, 4.2f, red);
+	tri_add(0, 0, 0, 5, 2, 2, red);
+	tri_add(6, 3, 4, 0, 2, 2, yellow);
+
+	tri_add(6, 3, 10, 0, 9, 6, purple);
+	tri_add(10.2f, 4.2f, 10, 0, 9, 6, yellow);
+	tri_add(10.2f, 4.2f, 16, 0, 11.3f, 5.4f, blue);
+	tri_add(16, 9, 16, 0, 11.3f, 5.4f, green);
+	tri_add(2, 2, 0, 5, 3, 6, green);
+
+	tri_add(2, 2, 6, 3, 3, 6, pink);
+	tri_add(6, 3, 3, 6, 6, 6, blue);
+	tri_add(6, 3, 9, 6, 6, 6, red);
+	tri_add(10.2f, 4.2f, 9, 6, 9.9f, 5.7f, green);
+	tri_add(10.2f, 4.2f, 11.3f, 5.4f, 9.9f, 5.7f, purple);
+
+	tri_add(0, 5, 0, 10, 3, 6, yellow);
+	tri_add(6, 9, 0, 10, 3, 6, red);
+	tri_add(6, 9, 6, 6, 3, 6, purple);
+	tri_add(6, 9, 6, 6, 9, 6, pink);
+	tri_add(6, 9, 9.6f, 6.3f, 9, 6, blue);
+
+	tri_add(9, 6, 9.6f, 6.3f, 9.9f, 5.7f, orange);
+	tri_add(16, 9, 9.6f, 6.3f, 9.9f, 5.7f, pink);
+	tri_add(16, 9, 11.3f, 5.4f, 9.9f, 5.7f, yellow);
+	tri_add(6, 9, 9.6f, 6.3f, 15, 10, yellow);
+	tri_add(16, 9, 9.6f, 6.3f, 15, 10, red);
+
+	tri_add(0, 10, 15, 10, 6, 9, green);
+	tri_add(15, 10, 16, 10, 16, 9, purple);
+
+	while (srf1.GetWindowState() || srf2.GetWindowState() || srf3.GetWindowState())
+	{
+		// clear
+		const auto color_clear = Drawer::ColorRGB(255, 255, 255);
+		drawer1.Fill(color_clear);
+		drawer2.Fill(color_clear);
+		drawer3_srf.Fill(color_clear);
+
+		// draw triangle
+		for (size_t i = 0; i < tri.size(); i += 3)
+			drawer1.Triangle(tri[i], tri[i + 1], tri[i + 2], color[i / 3]);
+		for (llong i = tri.size() - 3; i >= 0; i -= 3)
+			drawer2.Triangle(tri[i], tri[i + 1], tri[i + 2], color[i / 3]);
+
+		// expand image
+		const auto edge_color = Drawer::ColorRGB(123, 141, 66);
+		for (int x = 0; x < w; x++)
+		{
+			for (int y = 0; y < h; y++)
+			{
+				drawer1_srf.Rectangle(Point2I(x * s, y * s), Point2I(x * s + s - 2, y * s + s - 2), image1[x + static_cast<size_t>(y) * w]);
+				drawer1_srf.Rectangle(Point2I(x * s + s - 1, y * s), Point2I(x * s + s - 1, y * s + s - 1), edge_color);
+				drawer1_srf.Rectangle(Point2I(x * s, y * s + s - 1), Point2I(x * s + s - 1, y * s + s - 1), edge_color);
+				drawer2_srf.Rectangle(Point2I(x * s, y * s), Point2I(x * s + s - 2, y * s + s - 2), image2[x + static_cast<size_t>(y) * w]);
+				drawer2_srf.Rectangle(Point2I(x * s + s - 1, y * s), Point2I(x * s + s - 1, y * s + s - 1), edge_color);
+				drawer2_srf.Rectangle(Point2I(x * s, y * s + s - 1), Point2I(x * s + s - 1, y * s + s - 1), edge_color);
+			}
+		}
+		// highlight
+		const auto highlight_color = Drawer::ColorRGB(0, 0, 0);
+		for (size_t i = 0; i < tri.size(); i += 3)
+		{
+			drawer1_srf.Line(tri[i] * s, tri[i + 1] * s, highlight_color);
+			drawer1_srf.Line(tri[i + 1] * s, tri[i + 2] * s, highlight_color);
+			drawer1_srf.Line(tri[i] * s, tri[i + 2] * s, highlight_color);
+			drawer2_srf.Line(tri[i] * s, tri[i + 1] * s, highlight_color);
+			drawer2_srf.Line(tri[i + 1] * s, tri[i + 2] * s, highlight_color);
+			drawer2_srf.Line(tri[i] * s, tri[i + 2] * s, highlight_color);
+			drawer3_srf.Triangle_new(Point2I(tri[i] * s), Point2I(tri[i + 1] * s), Point2I(tri[i + 2] * s), color[i / 3]);
+			drawer3_srf.Line(Point2I(tri[i] * s), Point2I(tri[i + 1] * s), highlight_color);
+			drawer3_srf.Line(Point2I(tri[i + 1] * s), Point2I(tri[i + 2] * s), highlight_color);
+			drawer3_srf.Line(Point2I(tri[i] * s), Point2I(tri[i + 2] * s), highlight_color);
+		}
+
+		// refresh
+		srf1.FillFromImage(image1_srf.get());
+		srf1.Present();
+		srf2.FillFromImage(image2_srf.get());
+		srf2.Present();
+		srf3.FillFromImage(image3_srf.get());
+		srf3.Present();
+		// msg
+		SimpleMessageProcess();
+		// exit
+		if (KeyIsDown('Q'))
+			break;
+	}
+
+	return 0;
+}
+
 int main()
 {
 	cout << "Hello~ Rehenz~" << endl;
@@ -671,5 +814,6 @@ int main()
 	//return main_two_surface_test();
 	//return main_two_window_test();
 	//return main_drawer_test();
-	return main_drawer_test_triangle();
+	//return main_drawer_test_triangle();
+	return main_drawerf_test_triangle();
 }
