@@ -5,14 +5,51 @@
 
 namespace Rehenz
 {
+	class DrawerBase;
 	class Drawer;
 	class DrawerZ;
 	class DrawerF;
 
 
 
+	// drawer base class, provide Fill, Pixel, ColorRGB, and some colors
+	class DrawerBase
+	{
+	protected:
+		uint* const buffer;
+		const int w;
+		const int h;
+
+	public:
+		DrawerBase(uint* _buffer, int _width, int _height);
+		~DrawerBase();
+
+		inline static uint ColorRGB(int r, int g, int b)
+		{
+			return ((r & 0xff) << 16) | ((g & 0xff) << 8) | ((b & 0xff) << 0);
+		}
+		inline static uint ColorRGB(Color c)
+		{
+			return ColorRGB(static_cast<int>(c.x * 0xff), static_cast<int>(c.y * 0xff), static_cast<int>(c.z * 0xff));
+		}
+
+		static uint red_l;
+		static uint yellow_l;
+		static uint blue_l;
+		static uint green_l;
+		static uint purple_l;
+		static uint pink_l;
+		static uint orange;
+
+		// fill with a color
+		void Fill(uint color);
+
+		// draw a pixel
+		void Pixel(Point2I p, uint color);
+	};
+
 	// draw point which aligned pixel center, draw region: [0,w-1]x[0,h-1]
-	class Drawer
+	class Drawer : public DrawerBase
 	{
 	private:
 		// dy must >= 0
@@ -29,29 +66,9 @@ namespace Rehenz
 		void Trapezoid_new(int y, int dy, int& x1, int& x1_offset, int dx1, int dy1,
 			int& x2, int& x2_offset, int dx2, int dy2, uint color);
 
-	protected:
-		uint* const buffer;
-		const int w;
-		const int h;
-
 	public:
 		Drawer(uint* _buffer, int _width, int _height);
 		~Drawer();
-
-		inline static uint ColorRGB(int r, int g, int b)
-		{
-			return ((r & 0xff) << 16) | ((g & 0xff) << 8) | ((b & 0xff) << 0);
-		}
-		inline static uint ColorRGB(Color c)
-		{
-			return ColorRGB(static_cast<int>(c.x * 0xff), static_cast<int>(c.y * 0xff), static_cast<int>(c.z * 0xff));
-		}
-
-		// fill with a color
-		void Fill(uint color);
-
-		// draw a pixel
-		void Pixel(Point2I p, uint color);
 
 		// draw line including all end points
 		void Line(Point2I p1, Point2I p2, uint color);
@@ -92,7 +109,7 @@ namespace Rehenz
 	};
 
 	// draw point which based float, draw region: [0,w]x[0,h]
-	class DrawerF : public Drawer
+	class DrawerF : public DrawerBase
 	{
 	private:
 		// 3.3f -> 3.5f
@@ -116,9 +133,7 @@ namespace Rehenz
 		DrawerF(uint* _buffer, int _width, int _height);
 		~DrawerF();
 
-		using Drawer::Pixel;
-		using Drawer::Line;
-		using Drawer::Triangle;
+		using DrawerBase::Pixel;
 
 		// draw a pixel
 		void Pixel(Point2 p, uint color);

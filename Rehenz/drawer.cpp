@@ -4,6 +4,37 @@
 
 namespace Rehenz
 {
+	DrawerBase::DrawerBase(uint* _buffer, int _width, int _height)
+		: buffer(_buffer), w(_width), h(_height)
+	{
+	}
+
+	DrawerBase::~DrawerBase()
+	{
+	}
+
+	uint DrawerBase::red_l = ColorRGB(242, 129, 128);
+	uint DrawerBase::yellow_l = ColorRGB(223, 218, 129);
+	uint DrawerBase::blue_l = ColorRGB(141, 219, 254);
+	uint DrawerBase::green_l = ColorRGB(149, 224, 129);
+	uint DrawerBase::purple_l = ColorRGB(141, 133, 253);
+	uint DrawerBase::pink_l = ColorRGB(231, 162, 244);
+	uint DrawerBase::orange = ColorRGB(255, 178, 125);
+
+	void DrawerBase::Fill(uint color)
+	{
+		int s = w * h;
+		for (int i = 0; i < s; i++)
+			buffer[i] = color;
+	}
+
+	void DrawerBase::Pixel(Point2I p, uint color)
+	{
+		assert(p.x >= 0 && p.x < w&& p.y >= 0 && p.y < h);
+		int i = p.y * w + p.x;
+		buffer[i] = color;
+	}
+
 	void Drawer::Trapezoid_new(int y, int dy, int x1, int dx1, int dy1, int x2, int dx2, int dy2, uint color)
 	{
 		int x1_offset = dy1 / 2;
@@ -45,24 +76,14 @@ namespace Rehenz
 	}
 
 	Drawer::Drawer(uint* _buffer, int _width, int _height)
-		: buffer(_buffer), w(_width), h(_height)
+		: DrawerBase(_buffer, _width, _height)
 	{
 	}
+
 	Drawer::~Drawer()
 	{
 	}
-	void Drawer::Fill(uint color)
-	{
-		int s = w * h;
-		for (int i = 0; i < s; i++)
-			buffer[i] = color;
-	}
-	void Drawer::Pixel(Point2I p, uint color)
-	{
-		assert(p.x >= 0 && p.x < w&& p.y >= 0 && p.y < h);
-		int i = p.y * w + p.x;
-		buffer[i] = color;
-	}
+
 	void Drawer::Line(Point2I p1, Point2I p2, uint color)
 	{
 		if (p1.x == p2.x && p1.y == p2.y)
@@ -366,7 +387,7 @@ namespace Rehenz
 	}
 
 	DrawerF::DrawerF(uint* _buffer, int _width, int _height)
-		: Drawer(_buffer, _width, _height)
+		: DrawerBase(_buffer, _width, _height)
 	{
 	}
 

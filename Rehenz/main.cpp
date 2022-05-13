@@ -473,9 +473,11 @@ int main_drawer_test()
 	srf.Create(GetModuleHandle(nullptr), w2, h2, "Rehenz drawer test");
 
 	std::unique_ptr<uint[]> image = std::make_unique<uint[]>(w * h);
-	DrawerF drawer(image.get(), w, h);
+	Drawer drawer(image.get(), w, h);
+	DrawerF drawerf(image.get(), w, h);
 	std::unique_ptr<uint[]> image2 = std::make_unique<uint[]>(w2 * h2);
-	DrawerF drawer2(image2.get(), w2, h2);
+	Drawer drawer2(image2.get(), w2, h2);
+	DrawerF drawerf2(image2.get(), w2, h2);
 	while (srf.GetWindowState())
 	{
 		// time
@@ -545,7 +547,7 @@ int main_drawer_test()
 		lines_f.emplace_back(Point2(35.5f, 6.5f + GetMovingY(t, 300, 3)),
 			Point2(38.5f, 6.5f + GetMovingY(t + 300, 300, 3)));
 		for (const auto& p : lines_f)
-			drawer.Line(p.first, p.second, line_f_color);
+			drawerf.Line(p.first, p.second, line_f_color);
 
 		// expand image
 		const auto edge_color = Drawer::ColorRGB(123, 141, 66);
@@ -564,7 +566,7 @@ int main_drawer_test()
 		for (const auto& p : lines)
 			drawer2.Line(p.first * s + o, p.second * s + o, highlight_color);
 		for (const auto& p : lines_f)
-			drawer2.Line((p.first * s), (p.second * s), highlight_color);
+			drawerf2.Line((p.first * s), (p.second * s), highlight_color);
 
 		// refresh
 		srf.FillFromImage(image2.get());
@@ -675,7 +677,8 @@ int main_drawerf_test_triangle()
 	std::unique_ptr<uint[]> image1 = std::make_unique<uint[]>(w * h);
 	DrawerF drawer1(image1.get(), w, h);
 	std::unique_ptr<uint[]> image1_srf = std::make_unique<uint[]>(w2 * h2);
-	DrawerF drawer1_srf(image1_srf.get(), w2, h2);
+	Drawer drawer1_srf(image1_srf.get(), w2, h2);
+	DrawerF drawerf1_srf(image1_srf.get(), w2, h2);
 
 	SurfaceDx8 srf2;
 	srf2.Create(GetModuleHandle(nullptr), w2, h2, "Rehenz drawerf test triangle : reverse draw order");
@@ -684,7 +687,8 @@ int main_drawerf_test_triangle()
 	std::unique_ptr<uint[]> image2 = std::make_unique<uint[]>(w * h);
 	DrawerF drawer2(image2.get(), w, h);
 	std::unique_ptr<uint[]> image2_srf = std::make_unique<uint[]>(w2 * h2);
-	DrawerF drawer2_srf(image2_srf.get(), w2, h2);
+	Drawer drawer2_srf(image2_srf.get(), w2, h2);
+	DrawerF drawerf2_srf(image2_srf.get(), w2, h2);
 
 	SurfaceDx8 srf3;
 	srf3.Create(GetModuleHandle(nullptr), w2, h2, "Rehenz drawerf test triangle");
@@ -774,12 +778,12 @@ int main_drawerf_test_triangle()
 		const auto highlight_color = Drawer::ColorRGB(0, 0, 0);
 		for (size_t i = 0; i < tri.size(); i += 3)
 		{
-			drawer1_srf.Line(tri[i] * s, tri[i + 1] * s, highlight_color);
-			drawer1_srf.Line(tri[i + 1] * s, tri[i + 2] * s, highlight_color);
-			drawer1_srf.Line(tri[i] * s, tri[i + 2] * s, highlight_color);
-			drawer2_srf.Line(tri[i] * s, tri[i + 1] * s, highlight_color);
-			drawer2_srf.Line(tri[i + 1] * s, tri[i + 2] * s, highlight_color);
-			drawer2_srf.Line(tri[i] * s, tri[i + 2] * s, highlight_color);
+			drawerf1_srf.Line(tri[i] * s, tri[i + 1] * s, highlight_color);
+			drawerf1_srf.Line(tri[i + 1] * s, tri[i + 2] * s, highlight_color);
+			drawerf1_srf.Line(tri[i] * s, tri[i + 2] * s, highlight_color);
+			drawerf2_srf.Line(tri[i] * s, tri[i + 1] * s, highlight_color);
+			drawerf2_srf.Line(tri[i + 1] * s, tri[i + 2] * s, highlight_color);
+			drawerf2_srf.Line(tri[i] * s, tri[i + 2] * s, highlight_color);
 			drawer3_srf.Triangle_new(Point2I(tri[i] * s), Point2I(tri[i + 1] * s), Point2I(tri[i + 2] * s), color[i / 3]);
 			drawer3_srf.Line(Point2I(tri[i] * s), Point2I(tri[i + 1] * s), highlight_color);
 			drawer3_srf.Line(Point2I(tri[i + 1] * s), Point2I(tri[i + 2] * s), highlight_color);
