@@ -625,7 +625,7 @@ int main_drawer_test_triangle()
 			drawer.Line(tri[i], tri[i + 1], line_color);
 			drawer.Line(tri[i + 1], tri[i + 2], line_color);
 			drawer.Line(tri[i], tri[i + 2], line_color);
-			drawer.Triangle_new(tri[i], tri[i + 1], tri[i + 2], color);
+			drawer.Triangle(tri[i], tri[i + 1], tri[i + 2], color);
 		}
 
 		// expand image
@@ -784,7 +784,7 @@ int main_drawerf_test_triangle()
 			drawerf2_srf.Line(tri[i] * s, tri[i + 1] * s, highlight_color);
 			drawerf2_srf.Line(tri[i + 1] * s, tri[i + 2] * s, highlight_color);
 			drawerf2_srf.Line(tri[i] * s, tri[i + 2] * s, highlight_color);
-			drawer3_srf.Triangle_new(Point2I(tri[i] * s), Point2I(tri[i + 1] * s), Point2I(tri[i + 2] * s), color[i / 3]);
+			drawer3_srf.Triangle(Point2I(tri[i] * s), Point2I(tri[i + 1] * s), Point2I(tri[i + 2] * s), color[i / 3]);
 			drawer3_srf.Line(Point2I(tri[i] * s), Point2I(tri[i + 1] * s), highlight_color);
 			drawer3_srf.Line(Point2I(tri[i + 1] * s), Point2I(tri[i + 2] * s), highlight_color);
 			drawer3_srf.Line(Point2I(tri[i] * s), Point2I(tri[i + 2] * s), highlight_color);

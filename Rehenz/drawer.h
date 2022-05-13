@@ -56,14 +56,14 @@ namespace Rehenz
 		// (xi, dxi, dyi) define line
 		// dyi must >= 0
 		// line1 must be to the left of line2
-		void Trapezoid_new(int y, int dy, int x1, int dx1, int dy1, int x2, int dx2, int dy2, uint color);
+		void Trapezoid(int y, int dy, int x1, int dx1, int dy1, int x2, int dx2, int dy2, uint color);
 
 		// dy must >= 0
 		// (xi, xi_offset, dxi, dyi) define line
 		// dyi must >= 0
 		// line1 must be to the left of line2
 		// output x1, x2 pos when stop
-		void Trapezoid_new(int y, int dy, int& x1, int& x1_offset, int dx1, int dy1,
+		void Trapezoid(int y, int dy, int& x1, int& x1_offset, int dx1, int dy1,
 			int& x2, int& x2_offset, int dx2, int dy2, uint color);
 
 	public:
@@ -74,14 +74,10 @@ namespace Rehenz
 		void Line(Point2I p1, Point2I p2, uint color);
 
 		// draw triangle including all edges
-		void Triangle_new(Point2I p1, Point2I p2, Point2I p3, uint color);
-
-		// require top_l and top_r have same y, and bottom_l and bottom_r have same y
-		void Trapezoid(Point2I top_l, Point2I top_r, Point2I bottom_l, Point2I bottom_r, uint color);
-		// draw triangle including all edges
 		void Triangle(Point2I p1, Point2I p2, Point2I p3, uint color);
+
 		// draw rectangle including all edges
-		void Rectangle(Point2I top_left, Point2I bottom_right, uint color);
+		void Rectangle(Point2I p1, Point2I p2, uint color);
 	};
 
 	class DrawerZ : public Drawer
@@ -97,7 +93,6 @@ namespace Rehenz
 
 		using Drawer::Line;
 
-		using Drawer::Trapezoid;
 		using Drawer::Triangle;
 		// require top_l and top_r have same y, and bottom_l and bottom_r have same y
 		void Trapezoid(Point2I top_l, Point2I top_r, Point2I bottom_l, Point2I bottom_r,

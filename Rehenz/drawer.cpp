@@ -35,14 +35,14 @@ namespace Rehenz
 		buffer[i] = color;
 	}
 
-	void Drawer::Trapezoid_new(int y, int dy, int x1, int dx1, int dy1, int x2, int dx2, int dy2, uint color)
+	void Drawer::Trapezoid(int y, int dy, int x1, int dx1, int dy1, int x2, int dx2, int dy2, uint color)
 	{
 		int x1_offset = dy1 / 2;
 		int x2_offset = dy2 / 2;
-		Trapezoid_new(y, dy, x1, x1_offset, dx1, dy1, x2, x2_offset, dx2, dy2, color);
+		Trapezoid(y, dy, x1, x1_offset, dx1, dy1, x2, x2_offset, dx2, dy2, color);
 	}
 
-	void Drawer::Trapezoid_new(int y, int dy, int& x1, int& x1_offset, int dx1, int dy1,
+	void Drawer::Trapezoid(int y, int dy, int& x1, int& x1_offset, int dx1, int dy1,
 		int& x2, int& x2_offset, int dx2, int dy2, uint color)
 	{
 		int y2 = y + dy;
@@ -172,7 +172,7 @@ namespace Rehenz
 		}
 	}
 
-	void Drawer::Triangle_new(Point2I p1, Point2I p2, Point2I p3, uint color)
+	void Drawer::Triangle(Point2I p1, Point2I p2, Point2I p3, uint color)
 	{
 		if (p3.y < p2.y)
 			std::swap(p2, p3);
@@ -194,7 +194,7 @@ namespace Rehenz
 			int dy = p3.y - p1.y;
 			int dx13 = p3.x - p1.x;
 			int dx23 = p3.x - p2.x;
-			Trapezoid_new(p1.y, dy, p1.x, dx13, dy, p2.x, dx23, dy, color);
+			Trapezoid(p1.y, dy, p1.x, dx13, dy, p2.x, dx23, dy, color);
 			Line(p1, p3, color);
 			Line(p2, p3, color);
 		}
@@ -204,7 +204,7 @@ namespace Rehenz
 			int dy = p3.y - p1.y;
 			int dx12 = p2.x - p1.x;
 			int dx13 = p3.x - p1.x;
-			Trapezoid_new(p1.y, dy, p1.x, dx12, dy, p1.x, dx13, dy, color);
+			Trapezoid(p1.y, dy, p1.x, dx12, dy, p1.x, dx13, dy, color);
 			Line(p1, p2, color);
 			Line(p1, p3, color);
 		}
@@ -223,10 +223,10 @@ namespace Rehenz
 				int x13_offset = dy13 / 2;
 				int x12 = p1.x;
 				int x13 = p1.x;
-				Trapezoid_new(p1.y, dy12 - 1, x12, x12_offset, dx12, dy12, x13, x13_offset, dx13, dy13, color);
+				Trapezoid(p1.y, dy12 - 1, x12, x12_offset, dx12, dy12, x13, x13_offset, dx13, dy13, color);
 				int x23_offset = dy23 / 2;
 				int x23 = p2.x;
-				Trapezoid_new(p2.y, dy23, x23, x23_offset, dx23, dy23, x13, x13_offset, dx13, dy13, color);
+				Trapezoid(p2.y, dy23, x23, x23_offset, dx23, dy23, x13, x13_offset, dx13, dy13, color);
 			}
 			else
 			{
@@ -235,10 +235,10 @@ namespace Rehenz
 				int x13_offset = dy13 / 2;
 				int x12 = p1.x;
 				int x13 = p1.x;
-				Trapezoid_new(p1.y, dy12 - 1, x13, x13_offset, dx13, dy13, x12, x12_offset, dx12, dy12, color);
+				Trapezoid(p1.y, dy12 - 1, x13, x13_offset, dx13, dy13, x12, x12_offset, dx12, dy12, color);
 				int x23_offset = dy23 / 2;
 				int x23 = p2.x;
-				Trapezoid_new(p2.y, dy23, x13, x13_offset, dx13, dy13, x23, x23_offset, dx23, dy23, color);
+				Trapezoid(p2.y, dy23, x13, x13_offset, dx13, dy13, x23, x23_offset, dx23, dy23, color);
 			}
 			Line(p1, p2, color);
 			Line(p1, p3, color);
@@ -246,50 +246,13 @@ namespace Rehenz
 		}
 	}
 
-	void Drawer::Trapezoid(Point2I top_l, Point2I top_r, Point2I bottom_l, Point2I bottom_r, uint color)
+	void Drawer::Rectangle(Point2I p1, Point2I p2, uint color)
 	{
-		if (top_l.y != bottom_l.y)
+		Sort(p1.x, p2.x);
+		Sort(p1.y, p2.y);
+		for (int y = p1.y; y <= p2.y; y++)
 		{
-			for (int y = top_l.y; y <= bottom_l.y; y++)
-			{
-				float t = static_cast<float>(y - top_l.y) / (bottom_l.y - top_l.y);
-				int xl = Lerp(top_l.x, bottom_l.x, t);
-				int xr = Lerp(top_r.x, bottom_r.x, t);
-				for (int x = xl; x <= xr; x++)
-					Pixel(Point2I(x, y), color);
-			}
-		}
-	}
-	void Drawer::Triangle(Point2I p1, Point2I p2, Point2I p3, uint color)
-	{
-		if (p1.y > p2.y)
-			std::swap(p1, p2);
-		if (p1.y > p3.y)
-			std::swap(p1, p3);
-		if (p2.y > p3.y)
-			std::swap(p2, p3);
-
-		if (p3.y != p1.y)
-		{
-			float t = static_cast<float>(p2.y - p1.y) / (p3.y - p1.y);
-			int x = Lerp(p1.x, p3.x, t);
-			if (p2.x <= x)
-			{
-				Trapezoid(p1, p1, p2, Point2I(x, p2.y), color);
-				Trapezoid(p2, Point2I(x, p2.y), p3, p3, color);
-			}
-			else
-			{
-				Trapezoid(p1, p1, Point2I(x, p2.y), p2, color);
-				Trapezoid(Point2I(x, p2.y), p2, p3, p3, color);
-			}
-		}
-	}
-	void Drawer::Rectangle(Point2I top_left, Point2I bottom_right, uint color)
-	{
-		for (int y = top_left.y; y <= bottom_right.y; y++)
-		{
-			for (int x = top_left.x; x <= bottom_right.x; x++)
+			for (int x = p1.x; x <= p2.x; x++)
 				Pixel(Point2I(x, y), color);
 		}
 	}
