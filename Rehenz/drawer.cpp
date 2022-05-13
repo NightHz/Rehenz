@@ -354,6 +354,17 @@ namespace Rehenz
 		}
 	}
 
+	void DrawerF::Trapezoid(float& y, float y_bottom, float& x1, float a1, float& x2, float a2, uint color)
+	{
+		for (; y < y_bottom; y++)
+		{
+			for (float x = NextHalf(x1); x < x2; x += 1.0f)
+				Pixel(Point2I(static_cast<int>(x), static_cast<int>(y)), color);
+			x1 += a1;
+			x2 += a2;
+		}
+	}
+
 	DrawerF::DrawerF(uint* _buffer, int _width, int _height)
 		: Drawer(_buffer, _width, _height)
 	{
@@ -430,9 +441,68 @@ namespace Rehenz
 
 	void DrawerF::Triangle(Point2 p1, Point2 p2, Point2 p3, uint color)
 	{
-		Line(p1, p2, color);
-		Line(p1, p3, color);
-		Line(p2, p3, color);
+		if (p3.y < p2.y)
+			std::swap(p2, p3);
+		if (p2.y < p1.y)
+			std::swap(p1, p2);
+		if (p3.y < p2.y)
+			std::swap(p2, p3);
+		// now p1.y <= p2.y <= p3.y
+		if (p1.y == p3.y)
+			return;
+		else if (p1.y == p2.y)
+		{
+			Sort(p1.x, p2.x);
+			float y = NextHalf(p1.y);
+			float a13 = (p3.x - p1.x) / (p3.y - p1.y);
+			float a23 = (p3.x - p2.x) / (p3.y - p2.y);
+			float x13 = p1.x + a13 * (y - p1.y);
+			float x23 = p2.x + a23 * (y - p2.y);
+			Trapezoid(y, p3.y, x13, a13, x23, a23, color);
+		}
+		else if (p2.y == p3.y)
+		{
+			Sort(p2.x, p3.x);
+			float y = NextHalf(p1.y);
+			float a12 = (p2.x - p1.x) / (p2.y - p1.y);
+			float a13 = (p3.x - p1.x) / (p3.y - p1.y);
+			float x12 = p1.x + a12 * (y - p1.y);
+			float x13 = p1.x + a13 * (y - p1.y);
+			Trapezoid(y, p3.y, x12, a12, x13, a13, color);
+		}
+		else
+		{
+			float dy12 = p2.y - p1.y;
+			float dy13 = p3.y - p1.y;
+			float dx12 = p2.x - p1.x;
+			float dx13 = p3.x - p1.x;
+			if (dx12 * dy13 <= dy12 * dx13)
+			{
+				// line12 is to the left of line13
+				float y = NextHalf(p1.y);
+				float a12 = (p2.x - p1.x) / (p2.y - p1.y);
+				float a13 = (p3.x - p1.x) / (p3.y - p1.y);
+				float x12 = p1.x + a12 * (y - p1.y);
+				float x13 = p1.x + a13 * (y - p1.y);
+				Trapezoid(y, p2.y, x12, a12, x13, a13, color);
+				float a23 = (p3.x - p2.x) / (p3.y - p2.y);
+				float x23 = p2.x + a23 * (y - p2.y);
+				Trapezoid(y, p3.y, x23, a23, x13, a13, color);
+			}
+			else
+			{
+				// line12 is to the right of line13
+				float y = NextHalf(p1.y);
+				float a12 = (p2.x - p1.x) / (p2.y - p1.y);
+				float a13 = (p3.x - p1.x) / (p3.y - p1.y);
+				float x12 = p1.x + a12 * (y - p1.y);
+				float x13 = p1.x + a13 * (y - p1.y);
+				Trapezoid(y, p2.y, x13, a13, x12, a12, color);
+				float a23 = (p3.x - p2.x) / (p3.y - p2.y);
+				float x23 = p2.x + a23 * (y - p2.y);
+				Trapezoid(y, p3.y, x13, a13, x23, a23, color);
+			}
+		}
 	}
 
 }
