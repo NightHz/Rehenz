@@ -1,9 +1,6 @@
 #pragma once
 #include "type.h"
 #include "math.h"
-#include <vector>
-#include <memory>
-#include <functional>
 
 namespace Rehenz
 {
@@ -61,6 +58,9 @@ namespace Rehenz
 		Vertex operator+(const Vertex&) const;
 		Vertex operator-(const Vertex&) const;
 	};
+
+	// divide by coef to recover vertex attributes except position
+	Vertex VertexRecover(const Vertex& v);
 
 	void VertexNormalize(Vertex& v);
 	Vertex VertexLerp(const Vertex& v1, const Vertex& v2, float t);

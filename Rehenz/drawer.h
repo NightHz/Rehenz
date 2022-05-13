@@ -154,4 +154,49 @@ namespace Rehenz
 		//   modify to lerp rather then step to avoid the problem
 		void Triangle(Point2 p1, Point2 p2, Point2 p3, uint color);
 	};
+
+	// draw Vertex which based float, draw region: [0,w]x[0,h]
+	// use z-buffer
+	class DrawerV : public DrawerBase
+	{
+	private:
+		float* const zbuffer;
+
+		PixelShader ps;
+		const PixelShaderData* ps_data;
+
+		// 3.3f -> 3.5f
+		// 4.5f -> 4.5f
+		// 5.7f -> 6.5f
+		inline float NextHalf(float x)
+		{
+			float x2 = static_cast<int>(x + 0.5f) + 0.5f;
+			if (x2 == x + 1.0f)
+				x2 = x;
+			return x2;
+		}
+
+		using DrawerBase::Pixel;
+
+		// draw a pixel
+		void Pixel(const Vertex& v);
+
+		// y must be aligned to .5
+		// (vi, ai = dv/dy) define line
+		// line1 must be to the left of line2
+		// output v1, v2, y pos when stop
+		void Trapezoid(float& y, float y_bottom, Vertex& v1, const Vertex& a1, Vertex& v2, const Vertex& a2);
+
+	public:
+		DrawerV(uint* _buffer, int _width, int _height, float* _zbuffer);
+		~DrawerV();
+
+		// fill z-buffer
+		void FillZ(float z);
+
+		// draw triangle
+		// rasterization rule is same with DrawerF::Triangle, see it to get more info
+		void Triangle(const Vertex& v1, const Vertex& v2, const Vertex& v3,
+			PixelShader pixel_shader, const PixelShaderData& _ps_data);
+	};
 }

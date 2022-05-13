@@ -1,5 +1,5 @@
 #include "mesh.h"
-#include <utility>
+#include "util.h"
 #include <fstream>
 #include <sstream>
 
@@ -80,6 +80,12 @@ namespace Rehenz
 	Vertex Vertex::operator-(const Vertex& v) const
 	{
 		return Vertex(p - v.p, n - v.n, c - v.c, uv - v.uv, uv2 - v.uv2, coef - v.coef);
+	}
+
+	Vertex VertexRecover(const Vertex& v)
+	{
+		float f = 1 / v.coef;
+		return Vertex(v.p, v.n * f, v.c * f, v.uv * f, v.uv2 * f, 1);
 	}
 
 	void VertexNormalize(Vertex& v)

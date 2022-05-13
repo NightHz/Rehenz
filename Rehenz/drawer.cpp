@@ -489,4 +489,127 @@ namespace Rehenz
 		}
 	}
 
+	void DrawerV::Pixel(const Vertex& v)
+	{
+		assert(v.p.x >= 0 && v.p.x < w&& v.p.y >= 0 && v.p.y < h);
+		int i = static_cast<int>(v.p.y) * w + static_cast<int>(v.p.x);
+		if (v.p.z < zbuffer[i])
+		{
+			buffer[i] = ColorRGB(ps(*ps_data, VertexRecover(v)));
+			zbuffer[i] = v.p.z;
+		}
+	}
+
+	void DrawerV::Trapezoid(float& y, float y_bottom, Vertex& v1, const Vertex& a1, Vertex& v2, const Vertex& a2)
+	{
+		for (; y < y_bottom; y++)
+		{
+			if (v2.p.x > v1.p.x)
+			{
+				float x = NextHalf(v1.p.x);
+				Vertex ddv = (v2 - v1) * (1.0f / (v2.p.x - v1.p.x));
+				Vertex v = v1 + ddv * (x - v1.p.x);
+				for (; x < v2.p.x; x += 1.0f)
+				{
+					Pixel(v);
+					v += ddv;
+				}
+			}
+			v1 += a1;
+			v2 += a2;
+		}
+	}
+
+	DrawerV::DrawerV(uint* _buffer, int _width, int _height, float* _zbuffer)
+		: DrawerBase(_buffer, _width, _height), zbuffer(_zbuffer)
+	{
+		ps = nullptr;
+		ps_data = nullptr;
+	}
+
+	DrawerV::~DrawerV()
+	{
+	}
+
+	void DrawerV::FillZ(float z)
+	{
+		int s = w * h;
+		for (int i = 0; i < s; i++)
+			zbuffer[i] = z;
+	}
+
+	void DrawerV::Triangle(const Vertex& v1, const Vertex& v2, const Vertex& v3, PixelShader pixel_shader, const PixelShaderData& _ps_data)
+	{
+		this->ps = pixel_shader;
+		this->ps_data = &_ps_data;
+
+		const Vertex* v_miny = &v1, * v_midy = &v2, * v_maxy = &v3;
+		if (v_maxy->p.y < v_midy->p.y)
+			std::swap(v_midy, v_maxy);
+		if (v_midy->p.y < v_miny->p.y)
+			std::swap(v_miny, v_midy);
+		if (v_maxy->p.y < v_midy->p.y)
+			std::swap(v_midy, v_maxy);
+
+		if (v_miny->p.y == v_maxy->p.y)
+			return;
+		else if (v_miny->p.y == v_midy->p.y)
+		{
+			float y = NextHalf(v_miny->p.y);
+			Vertex a13 = (*v_maxy - *v_miny) * (1.0f / (v_maxy->p.y - v_miny->p.y));
+			Vertex a23 = (*v_maxy - *v_midy) * (1.0f / (v_maxy->p.y - v_midy->p.y));
+			Vertex v13 = *v_miny + a13 * (y - v_miny->p.y);
+			Vertex v23 = *v_midy + a23 * (y - v_midy->p.y);
+			if (v_miny->p.x <= v_midy->p.x)
+				Trapezoid(y, v_maxy->p.y, v13, a13, v23, a23);
+			else
+				Trapezoid(y, v_maxy->p.y, v23, a23, v13, a13);
+		}
+		else if (v_midy->p.y == v_maxy->p.y)
+		{
+			float y = NextHalf(v_miny->p.y);
+			Vertex a12 = (*v_midy - *v_miny) * (1.0f / (v_midy->p.y - v_miny->p.y));
+			Vertex a13 = (*v_maxy - *v_miny) * (1.0f / (v_maxy->p.y - v_miny->p.y));
+			Vertex v12 = *v_miny + a12 * (y - v_miny->p.y);
+			Vertex v13 = *v_miny + a13 * (y - v_miny->p.y);
+			if (v_midy->p.x <= v_maxy->p.x)
+				Trapezoid(y, v_maxy->p.y, v12, a12, v13, a13);
+			else
+				Trapezoid(y, v_maxy->p.y, v13, a13, v12, a12);
+		}
+		else
+		{
+			float dy12 = v_midy->p.y - v_miny->p.y;
+			float dy13 = v_maxy->p.y - v_miny->p.y;
+			float dx12 = v_midy->p.x - v_miny->p.x;
+			float dx13 = v_maxy->p.x - v_miny->p.x;
+			if (dx12 * dy13 <= dy12 * dx13)
+			{
+				// line12 is to the left of line13
+				float y = NextHalf(v_miny->p.y);
+				Vertex a12 = (*v_midy - *v_miny) * (1.0f / (v_midy->p.y - v_miny->p.y));
+				Vertex a13 = (*v_maxy - *v_miny) * (1.0f / (v_maxy->p.y - v_miny->p.y));
+				Vertex v12 = *v_miny + a12 * (y - v_miny->p.y);
+				Vertex v13 = *v_miny + a13 * (y - v_miny->p.y);
+				Trapezoid(y, v_midy->p.y, v12, a12, v13, a13);
+				Vertex a23 = (*v_maxy - *v_midy) * (1.0f / (v_maxy->p.y - v_midy->p.y));
+				Vertex v23 = *v_midy + a23 * (y - v_midy->p.y);
+				Trapezoid(y, v_maxy->p.y, v23, a23, v13, a13);
+			}
+			else
+			{
+				// line12 is to the right of line13
+				float y = NextHalf(v_miny->p.y);
+				Vertex a12 = (*v_midy - *v_miny) * (1.0f / (v_midy->p.y - v_miny->p.y));
+				Vertex a13 = (*v_maxy - *v_miny) * (1.0f / (v_maxy->p.y - v_miny->p.y));
+				Vertex v12 = *v_miny + a12 * (y - v_miny->p.y);
+				Vertex v13 = *v_miny + a13 * (y - v_miny->p.y);
+				Trapezoid(y, v_midy->p.y, v13, a13, v12, a12);
+				Vertex a23 = (*v_maxy - *v_midy) * (1.0f / (v_maxy->p.y - v_midy->p.y));
+				Vertex v23 = *v_midy + a23 * (y - v_midy->p.y);
+				Trapezoid(y, v_maxy->p.y, v13, a13, v23, a23);
+			}
+		}
+	}
+
 }

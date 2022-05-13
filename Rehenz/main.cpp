@@ -191,6 +191,7 @@ int main_surface_dx8_and_render_soft_example()
 		{
 			camera.transform.axes.pitch += cam_rotate_angle * mouse.GetMoveY();
 			camera.transform.axes.yaw += cam_rotate_angle * mouse.GetMoveX();
+			mouse.SetToPrev();
 		}
 
 		if (KeyIsDown('I'))      obj_cube->transform.axes.pitch += 0.05f;
@@ -812,12 +813,12 @@ int main()
 	cout << "Hello~ Rehenz~" << endl;
 
 	//return main_noise_example();
-	//return main_surface_dx8_and_render_soft_example();
+	return main_surface_dx8_and_render_soft_example();
 	//return main_clip_test();
 	//return main_tilemap_and_path_finding_and_fps_counter_example();
 	//return main_two_surface_test();
 	//return main_two_window_test();
 	//return main_drawer_test();
 	//return main_drawer_test_triangle();
-	return main_drawerf_test_triangle();
+	//return main_drawerf_test_triangle();
 }
