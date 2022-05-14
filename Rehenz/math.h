@@ -218,7 +218,7 @@ namespace Rehenz
 		Vector& operator=(Vector);
 
 		// some operator
-		Vector& operator*=(Matrix);
+		Vector& operator*=(const Matrix&);
 		Vector& operator+=(Vector);
 		Vector& operator-=(Vector);
 		Vector& operator*=(float);
@@ -226,7 +226,7 @@ namespace Rehenz
 
 		Vector operator-() const;
 
-		Vector operator*(Matrix) const;
+		Vector operator*(const Matrix&) const;
 		Vector operator+(Vector) const;
 		Vector operator-(Vector) const;
 		Vector operator*(float) const;

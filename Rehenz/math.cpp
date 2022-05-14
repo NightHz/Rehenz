@@ -474,7 +474,7 @@ namespace Rehenz
 		return (*this);
 	}
 
-	Vector& Vector::operator*=(Matrix matrix0)
+	Vector& Vector::operator*=(const Matrix& matrix0)
 	{
 		Vector result;
 		for (int i = 0; i < 4; i++)
@@ -520,7 +520,7 @@ namespace Rehenz
 		return result;
 	}
 
-	Vector Vector::operator*(Matrix matrix0) const
+	Vector Vector::operator*(const Matrix& matrix0) const
 	{
 		Vector result;
 		for (int i = 0; i < 4; i++)
