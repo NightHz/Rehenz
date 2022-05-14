@@ -88,12 +88,22 @@ some code writed by NightHz
 |:-:|:-:|
 |![](img/triangle_rasterization2.png)|![](img/triangle_rasterization3.png)|
 
+渲染器基于浮点数对顶点光栅化。
+
 **备注**
 
 透视矫正的两种方法
 
 1. 屏幕点按 `t` 线性插值时，顶点会按 `t'` 线性插值，其中 `t' = (w1 * t) / (w1 * t + w2 * (1 - t))`
 2. `1/w` 倍的顶点与屏幕点按照相同的 `t` 线性插值
+
+**渲染结果示意图**
+
+|颜色&材质|简单光照|
+|:-:|:-:|
+|![](img/render_color.png)|![](img/render_light.png)|
+|![](img/render_tex.png)|![](img/render_light_tex.png)|
+
 
 ### path_finding
 
