@@ -63,9 +63,7 @@ int main_surface_dx8_and_render_soft_example()
 
 	cout << "Ready render" << endl;
 	// mesh
-	auto cube = CreateCubeMesh(std::vector<Color>{
-		Color(1, 1, 1), Color(1, 0, 0), Color(0, 1, 0), Color(0, 0, 1),
-			Color(1, 1, 0), Color(1, 0, 1), Color(0, 1, 1), Color(1, 1, 1)});
+	auto cube = CreateCubeMeshColorful();
 	cout << "cube    vertex count: " << cube->VertexCount() << "  \ttriangle count: " << cube->TriangleCount() << endl;
 	auto sphere = CreateSphereMesh();
 	cout << "sphere  vertex count: " << sphere->VertexCount() << "  \ttriangle count: " << sphere->TriangleCount() << endl;
@@ -92,22 +90,32 @@ int main_surface_dx8_and_render_soft_example()
 	};
 	VertexShader vs_light = [](const VertexShaderData& data, const Vertex& v0) -> Vertex
 	{
+		static Color white(1, 1, 1);
+
 		Vertex v(v0);
 		v.p = v.p * data.transform;
-		v.c = 0.3f * v0.c;
+		v.c = white * 0.3f;
 
 		const Vector light_dir(-0.5f, -0.7f, 0.3f);
-		Vector N = v.n * data.mat_world * data.mat_view; // normal
-		Vector L = -light_dir * data.mat_view;           // to light
+		Vector N = VectorNormalize(v.n * data.mat_world * data.mat_view); // normal
+		Vector L = VectorNormalize(-light_dir * data.mat_view);           // to light
 		float s = VectorDot(L, N);
 		if (s > 0)
-			v.c += v0.c * s * 0.8f;
+			v.c += white * s * 0.8f;
 
-		v.c.x = Clamp(v.c.x, 0.0f, 1.0f);
-		v.c.y = Clamp(v.c.y, 0.0f, 1.0f);
-		v.c.z = Clamp(v.c.z, 0.0f, 1.0f);
-		v.c.w = 1.0f;
 		return v;
+	};
+	PixelShader ps_color = [](const PixelShaderData& data, const Vertex& v0)->Color
+	{
+		(data);
+		return ColorSaturate(v0.c);
+	};
+	PixelShader ps_tex = [](const PixelShaderData& data, const Vertex& v0)->Color
+	{
+		if (data.texture != nullptr)
+			return ColorSaturate(v0.c * data.texture->GetColor(v0.uv));
+		else
+			return ColorSaturate(v0.c);
 	};
 	// scene
 	RenderScene test1;
@@ -140,11 +148,14 @@ int main_surface_dx8_and_render_soft_example()
 	RenderScene test2;
 	auto obj_cube = std::make_shared<RenderObject>(cube, texture_plaid, texture_dice);
 	obj_cube->transform.pos = Vector(0, 0, 0);
-	obj_cube->transform.axes = AircraftAxes(0, -pi / 4, pi / 4 + pi / 24);
+	//obj_cube->transform.axes = AircraftAxes(0, -pi / 4, pi / 4 + pi / 24);
+	obj_cube->transform.axes = AircraftAxes(-1.55f, 1.15f, 0);
 	obj_cube->transform.scale = Vector(2.2f, 2.2f, 2.2f);
 	test2.AddRenderObject(obj_cube);
 	// camera
 	Camera camera(height, width);
+	camera.transform.pos = Vector(-0.56f, 2.30f, -2.81f);
+	camera.transform.axes = AircraftAxes(0.70f, 0.21f, 0);
 	RenderScene* scene = &test2;
 	cout << "hold Enter to render" << endl;
 	cout << "press 1/2/3/4/5/6/7                  to switch render mode" << endl;
@@ -175,9 +186,9 @@ int main_surface_dx8_and_render_soft_example()
 		else if (KeyIsDown('5')) camera.render_mode = Camera::RenderMode::Shader,
 			camera.vertex_shader = DefaultVertexShader, camera.pixel_shader = my_pixel_shader;
 		else if (KeyIsDown('6')) camera.render_mode = Camera::RenderMode::Shader,
-			camera.vertex_shader = vs_light, camera.pixel_shader = DefaultPixelShader;
-		else if (KeyIsDown('7')) camera.render_mode = Camera::RenderMode::FlatColor,
-			camera.vertex_shader = DefaultVertexShader, camera.pixel_shader = DefaultPixelShader;
+			camera.vertex_shader = vs_light, camera.pixel_shader = ps_color;
+		else if (KeyIsDown('7')) camera.render_mode = Camera::RenderMode::Shader,
+			camera.vertex_shader = vs_light, camera.pixel_shader = ps_tex;
 
 		float cam_move_dis = 5 * dt;
 		float cam_rotate_angle = 0.3f * dt;

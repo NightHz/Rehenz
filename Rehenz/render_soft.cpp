@@ -88,10 +88,10 @@ namespace Rehenz
 				{
 					drawerf.Triangle(pa, pb, pc, drawerf.white);
 				}
-				else if (render_mode == RenderMode::FlatColor)
+				/*else if (render_mode == RenderMode::FlatColor)
 				{
 					drawerf.Triangle(pa, pb, pc, drawerf.ColorRGB(VertexRecover(va).c));
-				}
+				}*/
 				else if (render_mode == RenderMode::Shader)
 				{
 					drawer.Triangle(va, vb, vc, pixel_shader, pshader_data);

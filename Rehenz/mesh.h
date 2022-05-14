@@ -30,6 +30,8 @@ namespace Rehenz
 		return Color(Clamp(c.x, 0.0f, 1.0f), Clamp(c.y, 0.0f, 1.0f), Clamp(c.z, 0.0f, 1.0f), Clamp(c.w, 0.0f, 1.0f));
 	}
 
+	Color operator*(Color c1, Color c2);
+
 	struct Vertex
 	{
 	public:

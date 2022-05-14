@@ -136,7 +136,7 @@ namespace Rehenz
 		Transform transform;
 		Projection projection;
 
-		enum class RenderMode { Wireframe, PureWhite, FlatColor, Shader };
+		enum class RenderMode { Wireframe, PureWhite, /*FlatColor,*/ Shader };
 		RenderMode render_mode;
 		VertexShader vertex_shader;
 		PixelShader pixel_shader;
