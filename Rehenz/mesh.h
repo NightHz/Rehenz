@@ -62,7 +62,6 @@ namespace Rehenz
 	// divide by coef to recover vertex attributes except position
 	Vertex VertexRecover(const Vertex& v);
 
-	void VertexNormalize(Vertex& v);
 	Vertex VertexLerp(const Vertex& v1, const Vertex& v2, float t);
 
 	class Mesh

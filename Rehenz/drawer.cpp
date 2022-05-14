@@ -13,13 +13,22 @@ namespace Rehenz
 	{
 	}
 
+	uint DrawerBase::white = ColorRGB(255, 255, 255);
+	uint DrawerBase::black = ColorRGB(0, 0, 0);
+	uint DrawerBase::red = ColorRGB(255, 0, 0);
+	uint DrawerBase::green = ColorRGB(0, 255, 0);
+	uint DrawerBase::blue = ColorRGB(0, 0, 255);
+	uint DrawerBase::yellow = ColorRGB(255, 255, 0);
+	uint DrawerBase::magenta = ColorRGB(255, 0, 255);
+	uint DrawerBase::cyan = ColorRGB(0, 255, 255);
+
 	uint DrawerBase::red_l = ColorRGB(242, 129, 128);
 	uint DrawerBase::yellow_l = ColorRGB(223, 218, 129);
 	uint DrawerBase::blue_l = ColorRGB(141, 219, 254);
 	uint DrawerBase::green_l = ColorRGB(149, 224, 129);
 	uint DrawerBase::purple_l = ColorRGB(141, 133, 253);
 	uint DrawerBase::pink_l = ColorRGB(231, 162, 244);
-	uint DrawerBase::orange = ColorRGB(255, 178, 125);
+	uint DrawerBase::orange_l = ColorRGB(255, 178, 125);
 
 	void DrawerBase::Fill(uint color)
 	{
@@ -254,87 +263,6 @@ namespace Rehenz
 		{
 			for (int x = p1.x; x <= p2.x; x++)
 				Pixel(Point2I(x, y), color);
-		}
-	}
-	DrawerZ::DrawerZ(uint* _buffer, int _width, int _height, float* _zbuffer)
-		: Drawer(_buffer, _width, _height), zbuffer(_zbuffer)
-	{
-	}
-	DrawerZ::~DrawerZ()
-	{
-	}
-	void DrawerZ::Pixel(Point2I p, uint color, float z)
-	{
-		//if (p.x >= 0 && p.x < w && p.y >= 0 && p.y < h && z >= 0 && z <= 1)
-		int i = p.y * w + p.x;
-		if (z < zbuffer[i])
-		{
-			buffer[i] = color;
-			zbuffer[i] = z;
-		}
-	}
-
-	void DrawerZ::Trapezoid(Point2I top_l, Point2I top_r, Point2I bottom_l, Point2I bottom_r,
-		const Vertex& v_tl, const Vertex& v_tr, const Vertex& v_bl, const Vertex& v_br,
-		PixelShader pixel_shader, PixelShaderData pshader_data)
-	{
-		if (top_l.y != bottom_l.y)
-		{
-			for (int y = top_l.y; y <= bottom_l.y; y++)
-			{
-				float t = static_cast<float>(y - top_l.y) / (bottom_l.y - top_l.y);
-				int xl = Lerp(top_l.x, bottom_l.x, t);
-				int xr = Lerp(top_r.x, bottom_r.x, t);
-				Vertex vl = VertexLerp(v_tl, v_bl, t);
-				Vertex vr = VertexLerp(v_tr, v_br, t);
-				if (xl == xr)
-				{
-					VertexNormalize(vl);
-					VertexNormalize(vr);
-					Pixel(Point2I(xl, y), ColorRGB(pixel_shader(pshader_data, vl)), vl.p.w);
-					Pixel(Point2I(xl, y), ColorRGB(pixel_shader(pshader_data, vr)), vr.p.w);
-				}
-				else
-				{
-					Vertex v_step = (vr - vl) * (1 / static_cast<float>(xr - xl));
-					Vertex v_current = vl;
-					for (int x = xl; x <= xr; x++)
-					{
-						Vertex v = v_current;
-						VertexNormalize(v);
-						Pixel(Point2I(x, y), ColorRGB(pixel_shader(pshader_data, v)), v.p.w);
-						v_current += v_step;
-					}
-				}
-			}
-		}
-	}
-
-	void DrawerZ::Triangle(Point2I p1, Point2I p2, Point2I p3, const Vertex* v1, const Vertex* v2, const Vertex* v3,
-		PixelShader pixel_shader, PixelShaderData pshader_data)
-	{
-		if (p1.y > p2.y)
-			std::swap(p1, p2), std::swap(v1, v2);
-		if (p1.y > p3.y)
-			std::swap(p1, p3), std::swap(v1, v3);
-		if (p2.y > p3.y)
-			std::swap(p2, p3), std::swap(v2, v3);
-
-		if (p3.y != p1.y)
-		{
-			float t = static_cast<float>(p2.y - p1.y) / (p3.y - p1.y);
-			int x = Lerp(p1.x, p3.x, t);
-			auto v = VertexLerp(*v1, *v3, t);
-			if (p2.x <= x)
-			{
-				Trapezoid(p1, p1, p2, Point2I(x, p2.y), *v1, *v1, *v2, v, pixel_shader, pshader_data);
-				Trapezoid(p2, Point2I(x, p2.y), p3, p3, *v2, v, *v3, *v3, pixel_shader, pshader_data);
-			}
-			else
-			{
-				Trapezoid(p1, p1, Point2I(x, p2.y), p2, *v1, *v1, v, *v2, pixel_shader, pshader_data);
-				Trapezoid(Point2I(x, p2.y), p2, p3, p3, v, *v2, *v3, *v3, pixel_shader, pshader_data);
-			}
 		}
 	}
 

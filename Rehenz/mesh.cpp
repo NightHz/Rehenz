@@ -88,11 +88,6 @@ namespace Rehenz
 		return Vertex(v.p, v.n * f, v.c * f, v.uv * f, v.uv2 * f, 1);
 	}
 
-	void VertexNormalize(Vertex& v)
-	{
-		v *= 1 / v.coef;
-	}
-
 	Vertex VertexLerp(const Vertex& v1, const Vertex& v2, float t)
 	{
 		return v1 + (v2 - v1) * t;

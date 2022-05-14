@@ -10,10 +10,11 @@ namespace Rehenz
 	{
 		// prepare drawer
 		int size = height * width;
-		float* zbuffer = new float[size];
-		std::fill(zbuffer, zbuffer + size, projection.z_far + 1);
+		auto zbuffer = std::make_unique<float[]>(size);
+		std::fill(zbuffer.get(), zbuffer.get() + size, 1.0f);
 		std::fill(buffer, buffer + size, 0U);
-		DrawerZ drawer(buffer, width, height, zbuffer);
+		DrawerV drawer(buffer, width, height, zbuffer.get());
+		DrawerF drawerf(buffer, width, height);
 		// prepare shader data
 		VertexShaderData vshader_data;
 		PixelShaderData pshader_data;
@@ -59,16 +60,12 @@ namespace Rehenz
 			}
 
 			// Mapping to screen
-			std::vector<Point2I> screen_pos;
 			for (auto& v : vertices)
 			{
 				// (-1,-1) -> (0,h), (1,1) -> (w,0)
 				v *= 1 / v.p.w;
-				int x = static_cast<int>((v.p.x + 1) * width / 2);
-				int y = static_cast<int>((-v.p.y + 1) * height / 2);
-				x = Clamp(x, 0, width - 1);
-				y = Clamp(y, 0, height - 1);
-				screen_pos.push_back(Point2I(x, y));
+				v.p.x = (v.p.x + 1) * width / 2;
+				v.p.y = (-v.p.y + 1) * height / 2;
 			}
 
 			// Traverse all triangles and sampling
@@ -80,30 +77,27 @@ namespace Rehenz
 			{
 				int a = triangles[i], b = triangles[i + 1], c = triangles[i + 2];
 				Vertex& va = vertices[a], & vb = vertices[b], & vc = vertices[c];
-				Point2I pa = screen_pos[a], pb = screen_pos[b], pc = screen_pos[c];
+				Point& pa = va.p, & pb = vb.p, & pc = vc.p;
 				if (render_mode == RenderMode::Wireframe)
 				{
-					drawer.Line(pa, pb, drawer.ColorRGB(255, 255, 255));
-					drawer.Line(pa, pc, drawer.ColorRGB(255, 255, 255));
-					drawer.Line(pb, pc, drawer.ColorRGB(255, 255, 255));
+					drawerf.Line(pa, pb, drawerf.white);
+					drawerf.Line(pa, pc, drawerf.white);
+					drawerf.Line(pb, pc, drawerf.white);
 				}
 				else if (render_mode == RenderMode::PureWhite)
 				{
-					drawer.Triangle(pa, pb, pc, drawer.ColorRGB(255, 255, 255));
+					drawerf.Triangle(pa, pb, pc, drawerf.white);
 				}
 				else if (render_mode == RenderMode::FlatColor)
 				{
-					Vertex v = va;
-					VertexNormalize(v);
-					drawer.Triangle(pa, pb, pc, drawer.ColorRGB(v.c));
+					drawerf.Triangle(pa, pb, pc, drawerf.ColorRGB(VertexRecover(va).c));
 				}
 				else if (render_mode == RenderMode::Shader)
 				{
-					drawer.Triangle(pa, pb, pc, &va, &vb, &vc, pixel_shader, pshader_data);
+					drawer.Triangle(va, vb, vc, pixel_shader, pshader_data);
 				}
 			}
 		}
-		delete[] zbuffer;
 
 		return buffer;
 	}
