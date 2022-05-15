@@ -199,7 +199,7 @@ namespace Rehenz
 		std::vector<int> triangles;
 
 		// add vertices by latitude from top(0,1,0) to bottom(0,-1,0)
-		vertices.push_back(Point(0, 1, 0));
+		vertices.emplace_back(Point(0, 1, 0), Vector(0, 1, 0));
 		for (int y = 1; y < yn; y++)
 		{
 			float theta = pi * y / yn;
@@ -207,6 +207,8 @@ namespace Rehenz
 			{
 				float phi = pi_mul2 * x / xn;
 				vertices.push_back(Point(sinf(theta) * cosf(phi), cosf(theta), -sinf(theta) * sinf(phi)));
+				vertices.back().n = vertices.back().p;
+				vertices.back().n.w = 0;
 			}
 		}
 		vertices.push_back(Point(0, -1, 0));
@@ -372,6 +374,12 @@ namespace Rehenz
 		SphereSkeleton(vertices, smooth, 3, 4); SphereSkeleton(vertices, smooth, 4, 1);
 		SphereSkeleton(vertices, smooth, 1, 5); SphereSkeleton(vertices, smooth, 2, 5);
 		SphereSkeleton(vertices, smooth, 3, 5); SphereSkeleton(vertices, smooth, 4, 5);
+		// update normal
+		for (auto& v : vertices)
+		{
+			v.n = v.p;
+			v.n.w = 0;
+		}
 		// add triangles
 		TrianglesAppend(triangles, BigTriangleLerp(vertices, SphereBigTriangle(smooth, 6, 0, 1, 2, +1, +5, -2), true));
 		TrianglesAppend(triangles, BigTriangleLerp(vertices, SphereBigTriangle(smooth, 6, 0, 2, 3, +2, +6, -3), true));
@@ -399,6 +407,12 @@ namespace Rehenz
 		SphereSkeleton(vertices, smooth, 0, 1); SphereSkeleton(vertices, smooth, 0, 2);
 		SphereSkeleton(vertices, smooth, 0, 3); SphereSkeleton(vertices, smooth, 1, 2);
 		SphereSkeleton(vertices, smooth, 2, 3); SphereSkeleton(vertices, smooth, 3, 1);
+		// update normal
+		for (auto& v : vertices)
+		{
+			v.n = v.p;
+			v.n.w = 0;
+		}
 		// add triangles
 		TrianglesAppend(triangles, BigTriangleLerp(vertices, SphereBigTriangle(smooth, 4, 0, 1, 2, +1, +4, -2), true));
 		TrianglesAppend(triangles, BigTriangleLerp(vertices, SphereBigTriangle(smooth, 4, 0, 2, 3, +2, +5, -3), true));
@@ -451,6 +465,12 @@ namespace Rehenz
 		SphereSkeleton(vertices, smooth, 11, 7); SphereSkeleton(vertices, smooth, 7, 9);
 		SphereSkeleton(vertices, smooth, 3, 9); SphereSkeleton(vertices, smooth, 8, 9);
 		SphereSkeleton(vertices, smooth, 10, 9); SphereSkeleton(vertices, smooth, 11, 9);
+		// update normal
+		for (auto& v : vertices)
+		{
+			v.n = v.p;
+			v.n.w = 0;
+		}
 		// add triangles
 		TrianglesAppend(triangles, BigTriangleLerp(vertices, SphereBigTriangle(smooth, 12, 0, 1, 2, +1, +6, -2), true));
 		TrianglesAppend(triangles, BigTriangleLerp(vertices, SphereBigTriangle(smooth, 12, 0, 2, 4, +2, +7, -3), true));

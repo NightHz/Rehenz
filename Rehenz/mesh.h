@@ -106,8 +106,9 @@ namespace Rehenz
 		return CreateCubeMesh(colors);
 	}
 
-	// create sphere mesh which includes pos info
+	// create sphere mesh which includes pos, normal info
 	// pos   : unit sphere, and (0,0,0) is center point
+	// normal: point out of the ball through ball center
 	std::shared_ptr<Mesh> CreateSphereMesh(int smooth = 10);
 	// another sphere mesh layout. I call it B layout. default is A layout
 	std::shared_ptr<Mesh> CreateSphereMeshB(int smooth = 5);
