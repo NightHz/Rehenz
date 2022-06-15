@@ -73,6 +73,8 @@ int main_surface_dx8_and_render_soft_example()
 	cout << "sphereC vertex count: " << sphereC->VertexCount() << "  \ttriangle count: " << sphereC->TriangleCount() << endl;
 	auto sphereD = CreateSphereMeshD();
 	cout << "sphereD vertex count: " << sphereD->VertexCount() << "  \ttriangle count: " << sphereD->TriangleCount() << endl;
+	auto frustum = CreateFrustumMesh(0);
+	cout << "frustum vertex count: " << frustum->VertexCount() << "  \ttriangle count: " << frustum->TriangleCount() << endl;
 	// texture
 	auto texture1 = CreateTexture1();
 	auto textureC = CreateTextureC();
@@ -145,6 +147,9 @@ int main_surface_dx8_and_render_soft_example()
 	obj_sphere4->transform.pos = Vector(0, 0, 0);
 	obj_sphere4->transform.scale = Vector(1, 1, 1);
 	test1.AddRenderObject(obj_sphere4);
+	auto obj_frustum = std::make_shared<RenderObject>(frustum);
+	obj_frustum->transform.pos = Vector(3, 0, 0);
+	test1.AddRenderObject(obj_frustum);
 	RenderScene test2;
 	auto obj_cube = std::make_shared<RenderObject>(cube, texture_plaid, texture_dice);
 	obj_cube->transform.pos = Vector(0, 0, 0);
