@@ -127,7 +127,7 @@ int main_surface_dx8_and_render_soft_example()
 		{
 			auto obj_cube = std::make_shared<RenderObject>(cube, texture_plaid, texture1);
 			obj_cube->transform.pos = Vector(x, -2, z);
-			obj_cube->transform.scale = Vector(0.4f, 0.4f, 0.4f);
+			obj_cube->transform.scale = Vector(0.2f, 0.2f, 0.2f);
 			test1.AddRenderObject(obj_cube);
 		}
 	}
@@ -155,7 +155,7 @@ int main_surface_dx8_and_render_soft_example()
 	obj_cube->transform.pos = Vector(0, 0, 0);
 	//obj_cube->transform.axes = AircraftAxes(0, -pi / 4, pi / 4 + pi / 24);
 	obj_cube->transform.axes = AircraftAxes(-1.55f, 1.15f, 0);
-	obj_cube->transform.scale = Vector(2.2f, 2.2f, 2.2f);
+	obj_cube->transform.scale = Vector(1.1f, 1.1f, 1.1f);
 	test2.AddRenderObject(obj_cube);
 	// camera
 	Camera camera(height, width);
