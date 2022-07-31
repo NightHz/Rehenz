@@ -142,6 +142,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="spline.cpp" />
     <ClCompile Include="clipper.cpp" />
     <ClCompile Include="drawer.cpp" />
     <ClCompile Include="fps_counter.cpp" />
@@ -168,6 +169,7 @@
     <ClInclude Include="path_finding.h" />
     <ClInclude Include="rehenz.h" />
     <ClInclude Include="render_soft.h" />
+    <ClInclude Include="spline.h" />
     <ClInclude Include="surface_dx8.h" />
     <ClInclude Include="tilemap.h" />
     <ClInclude Include="type.h" />

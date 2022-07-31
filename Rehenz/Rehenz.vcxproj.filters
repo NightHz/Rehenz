@@ -87,6 +87,9 @@
     <ClCompile Include="input.cpp">
       <Filter>source\base</Filter>
     </ClCompile>
+    <ClCompile Include="spline.cpp">
+      <Filter>source\render</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="rehenz.h">
@@ -136,6 +139,9 @@
     </ClInclude>
     <ClInclude Include="util.h">
       <Filter>header\base</Filter>
+    </ClInclude>
+    <ClInclude Include="spline.h">
+      <Filter>header\render</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

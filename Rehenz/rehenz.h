@@ -8,6 +8,7 @@
 #include "noise_gen.h"
 #include "path_finding.h"
 #include "render_soft.h"
+#include "spline.h"
 #include "surface_dx8.h"
 #include "tilemap.h"
 #include "type.h"
