@@ -5,6 +5,21 @@
 
 namespace Rehenz
 {
+	static std::unordered_map<HWND, bool> windows;
+
+	LRESULT CALLBACK SimpleWindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
+	{
+		switch (msg)
+		{
+		case WM_DESTROY:
+			windows[hwnd] = false;
+			break;
+		default:
+			break;
+		}
+		return DefWindowProc(hwnd, msg, wparam, lparam);
+	}
+
 	bool SimpleWindow::InitDefaultWindowClass(HINSTANCE hinstance)
 	{
 		WNDCLASSEX winclass;
@@ -13,7 +28,7 @@ namespace Rehenz
 		winclass.cbSize = sizeof(WNDCLASSEX);
 		winclass.style = CS_DBLCLKS | CS_HREDRAW | CS_VREDRAW;
 		winclass.lpszClassName = WINDOW_CLASS_NAME;
-		winclass.lpfnWndProc = DefWindowProc;
+		winclass.lpfnWndProc = SimpleWindowProc;
 		winclass.cbClsExtra = 0;
 		winclass.cbWndExtra = 0;
 		winclass.hInstance = hinstance;
@@ -44,6 +59,7 @@ namespace Rehenz
 		AdjustWindowRectEx(&rc, style, false, 0);
 		hwnd = CreateWindowEx(0, WINDOW_CLASS_NAME, title.c_str(), style,
 			0, 0, rc.right - rc.left, rc.bottom - rc.top, nullptr, nullptr, hinstance, nullptr);
+		windows[hwnd] = true;
 	}
 
 	SimpleWindow::~SimpleWindow()
@@ -56,6 +72,16 @@ namespace Rehenz
 	}
 
 	bool SimpleWindow::CheckWindowState()
+	{
+		if (!hwnd)
+			return false;
+		bool state = windows[hwnd];
+		if (!state)
+			hwnd = nullptr;
+		return state;
+	}
+
+	bool SimpleWindow::CheckWindowStateByFindTitle()
 	{
 		if (!hwnd)
 			return false;

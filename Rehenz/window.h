@@ -29,6 +29,7 @@ namespace Rehenz
 		inline const String& GetTitle() { return title; }
 
 		bool CheckWindowState();
+		bool CheckWindowStateByFindTitle();
 		void SetTitle(String _title);
 	};
 
