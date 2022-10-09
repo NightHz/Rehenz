@@ -90,6 +90,9 @@
     <ClCompile Include="input.cpp">
       <Filter>source\window</Filter>
     </ClCompile>
+    <ClCompile Include="transform.cpp">
+      <Filter>source\render</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="rehenz.h">
@@ -145,6 +148,9 @@
     </ClInclude>
     <ClInclude Include="hash.h">
       <Filter>header\base</Filter>
+    </ClInclude>
+    <ClInclude Include="transform.h">
+      <Filter>header\render</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

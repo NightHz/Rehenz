@@ -148,6 +148,7 @@
     <ClCompile Include="render_soft.cpp" />
     <ClCompile Include="surface_dx8.cpp" />
     <ClCompile Include="tilemap.cpp" />
+    <ClCompile Include="transform.cpp" />
     <ClCompile Include="window.cpp" />
     <ClCompile Include="window_fc.cpp" />
   </ItemGroup>
@@ -166,6 +167,7 @@
     <ClInclude Include="spline.h" />
     <ClInclude Include="surface_dx8.h" />
     <ClInclude Include="tilemap.h" />
+    <ClInclude Include="transform.h" />
     <ClInclude Include="type.h" />
     <ClInclude Include="util.h" />
     <ClInclude Include="window.h" />

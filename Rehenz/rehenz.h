@@ -12,6 +12,7 @@
 #include "spline.h"
 #include "surface_dx8.h"
 #include "tilemap.h"
+#include "transform.h"
 #include "type.h"
 #include "util.h"
 #include "window.h"
