@@ -2,12 +2,13 @@
 
 namespace Rehenz
 {
-	FpsCounter::FpsCounter(std::function<TimeType(void)> GetTimeFunc) : fps{ 0,0,0 }, GetTime(GetTimeFunc)
+	FpsCounter::FpsCounter(std::function<TimeType(void)> GetTimeFunc, TimeType _frequency)
+		: fps{ 0,0,0 }, GetTime(GetTimeFunc), frequency(_frequency)
 	{
 		fps_t0 = 0;
 		t0 = GetTime();
 		t1 = t0;
-		lock_time = 16; // lock 60 fps
+		lock_time = frequency / 60; // lock 60 fps
 		UpdateFpsCallback = nullptr;
 	}
 
@@ -20,7 +21,7 @@ namespace Rehenz
 		// update fps
 		fps[2]++;
 		TimeType fps_t1 = GetTime();
-		if (fps_t1 - fps_t0 >= 500)
+		if (fps_t1 - fps_t0 >= frequency / 2)
 		{
 			fps[0] = fps[1];
 			fps[1] = fps[2];
@@ -44,7 +45,12 @@ namespace Rehenz
 
 	uint FpsCounter::GetLastDeltatime()
 	{
-		return static_cast<uint>(t1 - t0);
+		return static_cast<uint>((t1 - t0) * 1000 / frequency);
+	}
+
+	float FpsCounter::GetLastDeltatime2()
+	{
+		return static_cast<float>(static_cast<double>(t1 - t0) / static_cast<double>(frequency));
 	}
 
 	void FpsCounter::LockFps(uint _fps)
@@ -52,6 +58,6 @@ namespace Rehenz
 		if (_fps == 0)
 			lock_time = 0;
 		else
-			lock_time = 1000 / _fps;
+			lock_time = frequency / _fps;
 	}
 }

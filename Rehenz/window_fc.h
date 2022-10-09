@@ -4,7 +4,6 @@
 
 namespace Rehenz
 {
-	// require link winmm.lib
 	class SimpleWindowWithFC : public SimpleWindow
 	{
 	private:

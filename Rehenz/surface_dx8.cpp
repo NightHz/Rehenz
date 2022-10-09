@@ -1,8 +1,6 @@
 #include "surface_dx8.h"
 #include <utility>
 
-#define WINDOW_CLASS_NAME TEXT("REHENZ")
-
 namespace Rehenz
 {
 	SurfaceDx8::SurfaceDx8()
@@ -209,11 +207,11 @@ namespace Rehenz
 		if (window == nullptr)
 			return false;
 
-		window->Present();
-
 		window_state = window->CheckWindowState();
 		if (!window_state)
 			return true;
+
+		window->Present();
 
 		UpdateBounds();
 
