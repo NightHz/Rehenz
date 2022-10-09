@@ -4,35 +4,10 @@
 
 namespace Rehenz
 {
-
-	TileShader Tilemap::DefaultTileShader = [](uint tile)->uint
-	{
-		switch (tile)
-		{
-		case 1u:
-			return Drawer::ColorRGB(255, 255, 255); // white
-		case 2u:
-			return Drawer::ColorRGB(252, 200, 0); // yellow
-		case 3u:
-			return Drawer::ColorRGB(123, 141, 66); // green
-		case 4u:
-			return Drawer::ColorRGB(137, 195, 235); // blue
-		case 5u:
-			return Drawer::ColorRGB(166, 154, 189); // purple
-		case 6u:
-			return Drawer::ColorRGB(240, 131, 0u); // orange
-		case 7u:
-			return Drawer::ColorRGB(0, 85, 46); // dark green
-		case 8u:
-			return Drawer::ColorRGB(25, 47, 96); // dark blue
-		case 9u:
-			return Drawer::ColorRGB(125, 125, 125); // gray
-		case 10u:
-			return Drawer::ColorRGB(238, 187, 203); // pink
-		default:
-			return Drawer::ColorRGB(108, 44, 47); // dark red
-		}
-	};
+	std::unordered_map<uint, uint> Tilemap::default_tile_colors{
+		{0,Drawer::red_dark_tm}, {1,Drawer::white}, {2,Drawer::yellow_tm}, {3,Drawer::green_tm}, {4,Drawer::blue_tm},
+		{5,Drawer::purple_tm}, {6,Drawer::orange_tm}, {7,Drawer::green_dark_tm}, {8,Drawer::blue_dark_tm}, {9,Drawer::gray_tm},
+		{10,Drawer::pink_tm} };
 
 	Tilemap::Tilemap(uint _width, uint _height) : width(_width), height(_height),
 		tile_size(10, 10), render_center(_width * 0.5f, _height * 0.5f)
@@ -41,7 +16,7 @@ namespace Rehenz
 		bg_color = Drawer::ColorRGB(168, 201, 127); // green
 		edge_color = Drawer::ColorRGB(43, 43, 43); // black
 		edge_width = 1;
-		tile_shader = DefaultTileShader;
+		tile_colors = default_tile_colors;
 	}
 	
 	Tilemap::Tilemap(const Tilemap& tilemap) : width(tilemap.width), height(tilemap.height),
@@ -50,7 +25,7 @@ namespace Rehenz
 		tiles = new uint[static_cast<size_t>(width) * height]{ 0 };
 		bg_color = tilemap.bg_color;
 		edge_color = tilemap.edge_color;
-		tile_shader = tilemap.tile_shader;
+		tile_colors = tilemap.tile_colors;
 	}
 
 	Tilemap::~Tilemap()
@@ -92,7 +67,7 @@ namespace Rehenz
 				float sy2 = sy1 + tile_size.y;
 				// draw tile
 				uint tile = tiles[x + y * width];
-				uint color = tile_shader(tile);
+				uint color = tile_colors[tile];
 				drawer.Rectangle(Point2(Clamp(sx1, 0.0f, sw), Clamp(sy1, 0.0f, sh)), Point2(Clamp(sx2, 0.0f, sw), Clamp(sy2, 0.0f, sh)), color);
 			}
 		}

@@ -7,9 +7,6 @@
 
 namespace Rehenz
 {
-	// a function which define tile's color
-	typedef std::function<uint(uint tile)> TileShader;
-
 	class Tilemap
 	{
 		friend class TilesPF;
@@ -17,7 +14,7 @@ namespace Rehenz
 		uint* tiles;
 
 	public:
-		static TileShader DefaultTileShader;
+		static std::unordered_map<uint, uint> default_tile_colors;
 
 		// size info
 		const uint width;
@@ -29,7 +26,7 @@ namespace Rehenz
 		Vector2 tile_size;
 		float edge_width;
 		Vector2 render_center;
-		TileShader tile_shader;
+		std::unordered_map<uint, uint> tile_colors;
 
 		Tilemap(uint _width, uint _height);
 		Tilemap(const Tilemap& tilemap);
