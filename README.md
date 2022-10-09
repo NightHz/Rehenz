@@ -31,6 +31,7 @@ some code writed by NightHz
 - `clipper.h`: 裁切一个几何元
 - `drawer.h`: 绘制/光栅化一个几何元
 - `fps_counter.h`: 帧率计数器
+- `hash.h`: 对一些自定义基础类型注入 `std::hash`
 - `input.h` : 按键状态检测
 - `math.h`: 数学
 - `mesh.h`: 存储3D网格

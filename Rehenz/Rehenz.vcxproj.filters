@@ -143,6 +143,9 @@
     <ClInclude Include="spline.h">
       <Filter>header\render</Filter>
     </ClInclude>
+    <ClInclude Include="hash.h">
+      <Filter>header\base</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\README.md" />

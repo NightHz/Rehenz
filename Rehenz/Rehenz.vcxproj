@@ -155,6 +155,7 @@
     <ClInclude Include="clipper.h" />
     <ClInclude Include="drawer.h" />
     <ClInclude Include="fps_counter.h" />
+    <ClInclude Include="hash.h" />
     <ClInclude Include="input.h" />
     <ClInclude Include="math.h" />
     <ClInclude Include="mesh.h" />
