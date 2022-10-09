@@ -84,11 +84,11 @@
     <ClCompile Include="window_fc.cpp">
       <Filter>source\window</Filter>
     </ClCompile>
-    <ClCompile Include="input.cpp">
-      <Filter>source\base</Filter>
-    </ClCompile>
     <ClCompile Include="spline.cpp">
       <Filter>source\render</Filter>
+    </ClCompile>
+    <ClCompile Include="input.cpp">
+      <Filter>source\window</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
