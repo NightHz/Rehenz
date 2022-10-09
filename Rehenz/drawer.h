@@ -131,6 +131,10 @@ namespace Rehenz
 		//   if happened, maybe leave holes or rasterized more than once
 		//   modify to lerp rather then step to avoid the problem
 		void Triangle(Point2 p1, Point2 p2, Point2 p3, uint color);
+
+		// draw rectangle
+		//   draw left edge and top edge and left top corner
+		void Rectangle(Point2 p1, Point2 p2, uint color);
 	};
 
 	// draw Vertex which based float, draw region: [0,w]x[0,h]

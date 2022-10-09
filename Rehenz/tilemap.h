@@ -22,11 +22,12 @@ namespace Rehenz
 		// size info
 		const uint width;
 		const uint height;
-		Vector2 tile_size;
 
 		// render info
 		uint bg_color;
 		uint edge_color;
+		Vector2 tile_size;
+		float edge_width;
 		Vector2 render_center;
 		TileShader tile_shader;
 
@@ -36,10 +37,7 @@ namespace Rehenz
 		~Tilemap();
 
 		// access tile with x and y
-		uint& operator()(uint x, uint y);
-
-		// access tiles
-		uint* GetTiles() { return tiles; }
+		inline uint& operator()(uint x, uint y) { return tiles[x + y * width]; }
 
 		// render to image
 		uint* Render(uint* image, uint screen_width, uint screen_height);

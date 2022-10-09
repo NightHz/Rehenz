@@ -268,7 +268,7 @@ namespace Rehenz
 
 	void DrawerF::Trapezoid(float& y, float y_bottom, float& x1, float a1, float& x2, float a2, uint color)
 	{
-		for (; y < y_bottom; y++)
+		for (; y < y_bottom; y += 1.0f)
 		{
 			for (float x = NextHalf(x1); x < x2; x += 1.0f)
 				Pixel(Point2I(static_cast<int>(x), static_cast<int>(y)), color);
@@ -417,6 +417,19 @@ namespace Rehenz
 		}
 	}
 
+	void DrawerF::Rectangle(Point2 p1, Point2 p2, uint color)
+	{
+		Sort(p1.y, p2.y);
+		Sort(p1.x, p2.x);
+		float x0 = NextHalf(p1.x);
+		float y = NextHalf(p1.y);
+		for (; y < p2.y; y += 1.0f)
+		{
+			for (float x = x0; x < p2.x; x += 1.0f)
+				Pixel(Point2I(static_cast<int>(x), static_cast<int>(y)), color);
+		}
+	}
+
 	void DrawerV::Pixel(const Vertex& v)
 	{
 		assert(v.p.x >= 0 && v.p.x < w&& v.p.y >= 0 && v.p.y < h);
@@ -430,7 +443,7 @@ namespace Rehenz
 
 	void DrawerV::Trapezoid(float& y, float y_bottom, Vertex& v1, const Vertex& a1, Vertex& v2, const Vertex& a2)
 	{
-		for (; y < y_bottom; y++)
+		for (; y < y_bottom; y += 1.0f)
 		{
 			if (v2.p.x > v1.p.x)
 			{

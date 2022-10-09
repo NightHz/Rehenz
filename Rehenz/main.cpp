@@ -347,6 +347,7 @@ int main_tilemap_and_path_finding_and_fps_counter_example()
 	cout << "press Q to exit" << endl;
 	while (srf_dx8.GetWindowState())
 	{
+		float dt = srf_dx8.GetWindow()->fps_counter.GetLastDeltatime2();
 		// next
 		bool next = false;
 		if (!press_n && KeyIsDown('N'))
@@ -405,6 +406,24 @@ int main_tilemap_and_path_finding_and_fps_counter_example()
 			}
 		}
 		// render
+		if (KeyIsDown(VK_LEFT)) tilemap.render_center.x -= dt * 20;
+		else if (KeyIsDown(VK_RIGHT)) tilemap.render_center.x += dt * 20;
+		if (KeyIsDown(VK_UP)) tilemap.render_center.y -= dt * 20;
+		else if (KeyIsDown(VK_DOWN)) tilemap.render_center.y += dt * 20;
+		if (KeyIsDown(VK_ADD))
+		{
+			tilemap.tile_size *= std::powf(1.6f, dt);
+			//tilemap.tile_size += dt * Vector2(5, 5);
+			tilemap.tile_size.x = Min(tilemap.tile_size.x, 40.0f);
+			tilemap.tile_size.y = Min(tilemap.tile_size.y, 40.0f);
+		}
+		else if (KeyIsDown(VK_SUBTRACT))
+		{
+			tilemap.tile_size *= std::powf(1.6f, -dt);
+			//tilemap.tile_size -= dt * Vector2(5, 5);
+			tilemap.tile_size.x = Max(tilemap.tile_size.x, 2.0f);
+			tilemap.tile_size.y = Max(tilemap.tile_size.y, 2.0f);
+		}
 		srf_dx8.FillFromImage(tilemap.Render(image.get(), width, height));
 		// refresh
 		srf_dx8.Present();
@@ -829,9 +848,9 @@ int main()
 	cout << "Hello~ Rehenz~" << endl;
 
 	//return main_noise_example();
-	return main_surface_dx8_and_render_soft_example();
+	//return main_surface_dx8_and_render_soft_example();
 	//return main_clip_test();
-	//return main_tilemap_and_path_finding_and_fps_counter_example();
+	return main_tilemap_and_path_finding_and_fps_counter_example();
 	//return main_two_surface_test();
 	//return main_two_window_test();
 	//return main_drawer_test();

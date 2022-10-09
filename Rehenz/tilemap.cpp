@@ -40,6 +40,7 @@ namespace Rehenz
 		tiles = new uint[static_cast<size_t>(width) * height]{ 0 };
 		bg_color = Drawer::ColorRGB(168, 201, 127); // green
 		edge_color = Drawer::ColorRGB(43, 43, 43); // black
+		edge_width = 1;
 		tile_shader = DefaultTileShader;
 	}
 	
@@ -57,60 +58,60 @@ namespace Rehenz
 		delete[] tiles;
 	}
 
-	uint& Tilemap::operator()(uint x, uint y)
-	{
-		return tiles[x + y * width];
-	}
-
 	uint* Tilemap::Render(uint* image, uint screen_width, uint screen_height)
 	{
-		int sw = static_cast<int>(screen_width);
-		int sh = static_cast<int>(screen_height);
+		if (tile_size.x <= 0 || tile_size.y <= 0)
+			return image;
+
+		float sw = static_cast<float>(screen_width);
+		float sh = static_cast<float>(screen_height);
 		float sw_half = sw * 0.5f;
 		float sh_half = sh * 0.5f;
-		Drawer drawer(image, sw, sh);
+		DrawerF drawer(image, static_cast<int>(screen_width), static_cast<int>(screen_height));
 		drawer.Fill(bg_color);
 
-		Vector2 tiles_for_unit_pixel(1 / tile_size.x, 1 / tile_size.y);
-		// compute render region in screen
-		int rrx1 = Max(0, static_cast<int>(sw_half - render_center.x * tile_size.x));
-		int rry1 = Max(0, static_cast<int>(sh_half - render_center.y * tile_size.y));
-		int rrx2 = Min(sw, static_cast<int>(sw_half + (width - render_center.x) * tile_size.x));
-		int rry2 = Min(sh, static_cast<int>(sh_half + (height - render_center.y) * tile_size.y));
+		int w = static_cast<int>(width);
+		int h = static_cast<int>(height);
+		Vector2 tiles_for_half_screen(sw_half / tile_size.x, sh_half / tile_size.y);
+		float edge_width_half = edge_width / 2;
+
 		// compute covered tiles in tilemap
-		int x1 = Max(0, static_cast<int>(render_center.x + (rrx1 - sw_half) * tiles_for_unit_pixel.x));
-		int y1 = Max(0, static_cast<int>(render_center.y + (rry1 - sh_half) * tiles_for_unit_pixel.y));
-		int x2 = Min(static_cast<int>(width - 1), static_cast<int>(render_center.x + (rrx2 - sw_half) * tiles_for_unit_pixel.x));
-		int y2 = Min(static_cast<int>(height - 1), static_cast<int>(render_center.y + (rry2 - sh_half) * tiles_for_unit_pixel.y));
+		int x1 = Max(0, static_cast<int>(render_center.x - tiles_for_half_screen.x));
+		int y1 = Max(0, static_cast<int>(render_center.y - tiles_for_half_screen.y));
+		int x2 = Min(w - 1, static_cast<int>(render_center.x + tiles_for_half_screen.x));
+		int y2 = Min(h - 1, static_cast<int>(render_center.y + tiles_for_half_screen.y));
 		// loop tiles
-		float sx1_tile = sw_half + (x1 - render_center.x) * tile_size.x;
-		float sy1_tile = sh_half + (y1 - render_center.y) * tile_size.y;
-		float sy_tile = sy1_tile;
-		for (int y = y1; y <= y2; y++, sy_tile += tile_size.y)
+		for (int y = y1; y <= y2; y++)
 		{
-			float sx_tile = sx1_tile;
-			for (int x = x1; x <= x2; x++, sx_tile += tile_size.x)
+			for (int x = x1; x <= x2; x++)
 			{
 				// compute screen region of the tile
-				int sx1 = static_cast<int>(sx_tile);
-				int sy1 = static_cast<int>(sy_tile);
-				int sx2 = static_cast<int>(sx_tile + tile_size.x);
-				int sy2 = static_cast<int>(sy_tile + tile_size.y);
+				float sx1 = sw_half + (x - render_center.x) * tile_size.x;
+				float sy1 = sh_half + (y - render_center.y) * tile_size.y;
+				float sx2 = sx1 + tile_size.x;
+				float sy2 = sy1 + tile_size.y;
 				// draw tile
 				uint tile = tiles[x + y * width];
-				//if (tile != 1) continue;
 				uint color = tile_shader(tile);
-				drawer.Rectangle(Point2I(Max(0, sx1), Max(0, sy1)), Point2I(Min(sw, sx2) - 1, Min(sh, sy2) - 1), color);
-				// draw edges
-				if (sy1 >= 0 && sy1 < sh)
-					drawer.Line(Point2I(Max(0, sx1), sy1), Point2I(Min(sw - 1, sx2), sy1), edge_color);
-				if (sy2 >= 0 && sy2 < sh)
-					drawer.Line(Point2I(Max(0, sx1), sy2), Point2I(Min(sw - 1, sx2), sy2), edge_color);
-				if (sx1 >= 0 && sx1 < sw)
-					drawer.Line(Point2I(sx1, Max(0, sy1)), Point2I(sx1, Min(sh - 1, sy2)), edge_color);
-				if (sx2 >= 0 && sx2 < sw)
-					drawer.Line(Point2I(sx2, Max(0, sy1)), Point2I(sx2, Min(sh - 1, sy2)), edge_color);
+				drawer.Rectangle(Point2(Clamp(sx1, 0.0f, sw), Clamp(sy1, 0.0f, sh)), Point2(Clamp(sx2, 0.0f, sw), Clamp(sy2, 0.0f, sh)), color);
 			}
+		}
+
+		// compute render region in screen
+		float rrx1 = Max(0.0f, sw_half + (x1 - render_center.x) * tile_size.x - edge_width_half);
+		float rry1 = Max(0.0f, sh_half + (y1 - render_center.y) * tile_size.y - edge_width_half);
+		float rrx2 = Min(sw, sw_half + (x2 + 1 - render_center.x) * tile_size.x + edge_width_half);
+		float rry2 = Min(sh, sh_half + (y2 + 1 - render_center.y) * tile_size.y + edge_width_half);
+		// draw edges
+		for (int x = x1; x <= x2 + 1; x++)
+		{
+			float sx = sw_half + (x - render_center.x) * tile_size.x;
+			drawer.Rectangle(Point2(Clamp(sx - edge_width_half, 0.0f, sw), rry1), Point2(Clamp(sx + edge_width_half, 0.0f, sw), rry2), edge_color);
+		}
+		for (int y = y1; y <= y2 + 1; y++)
+		{
+			float sy = sh_half + (y - render_center.y) * tile_size.y;
+			drawer.Rectangle(Point2(rrx1, Clamp(sy - edge_width_half, 0.0f, sh)), Point2(rrx2, Clamp(sy + edge_width_half, 0.0f, sh)), edge_color);
 		}
 
 		return image;
