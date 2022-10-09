@@ -21,11 +21,11 @@ namespace Rehenz
 		const uint height;
 
 		// render info
-		uint bg_color;
-		uint edge_color;
 		Vector2 tile_size;
 		float edge_width;
 		Vector2 render_center;
+		uint bg_color;
+		uint edge_color;
 		std::unordered_map<uint, uint> tile_colors;
 
 		Tilemap(uint _width, uint _height);

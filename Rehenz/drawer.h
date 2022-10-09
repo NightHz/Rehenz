@@ -41,8 +41,9 @@ namespace Rehenz
 		static uint purple_l;
 		static uint pink_l;
 		static uint orange_l;
-		static uint yellow_tm, green_tm, blue_tm, purple_tm, orange_tm;
+		static uint yellow_tm, green_yellow_tm, blue_tm, purple_tm, orange_tm;
 		static uint green_dark_tm, blue_dark_tm, gray_tm, pink_tm, red_dark_tm;
+		static uint green_tm, black_tm;
 
 		// fill with a color
 		void Fill(uint color);
