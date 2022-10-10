@@ -14,34 +14,6 @@ namespace Rehenz
 	}
 
 	uint DrawerBase::white = ColorRGB(255, 255, 255);
-	uint DrawerBase::black = ColorRGB(0, 0, 0);
-	uint DrawerBase::red = ColorRGB(255, 0, 0);
-	uint DrawerBase::green = ColorRGB(0, 255, 0);
-	uint DrawerBase::blue = ColorRGB(0, 0, 255);
-	uint DrawerBase::yellow = ColorRGB(255, 255, 0);
-	uint DrawerBase::magenta = ColorRGB(255, 0, 255);
-	uint DrawerBase::cyan = ColorRGB(0, 255, 255);
-
-	uint DrawerBase::red_l = ColorRGB(242, 129, 128);
-	uint DrawerBase::yellow_l = ColorRGB(223, 218, 129);
-	uint DrawerBase::blue_l = ColorRGB(141, 219, 254);
-	uint DrawerBase::green_l = ColorRGB(149, 224, 129);
-	uint DrawerBase::purple_l = ColorRGB(141, 133, 253);
-	uint DrawerBase::pink_l = ColorRGB(231, 162, 244);
-	uint DrawerBase::orange_l = ColorRGB(255, 178, 125);
-
-	uint DrawerBase::yellow_tm = ColorRGB(252, 200, 0);
-	uint DrawerBase::green_yellow_tm = ColorRGB(123, 141, 66);
-	uint DrawerBase::blue_tm = ColorRGB(137, 195, 235);
-	uint DrawerBase::purple_tm = ColorRGB(166, 154, 189);
-	uint DrawerBase::orange_tm = ColorRGB(240, 131, 0);
-	uint DrawerBase::green_dark_tm = ColorRGB(0, 85, 46);
-	uint DrawerBase::blue_dark_tm = ColorRGB(25, 47, 96);
-	uint DrawerBase::gray_tm = ColorRGB(125, 125, 125);
-	uint DrawerBase::pink_tm = ColorRGB(238, 187, 203);
-	uint DrawerBase::red_dark_tm = ColorRGB(108, 44, 47);
-	uint DrawerBase::green_tm = ColorRGB(168, 201, 127);
-	uint DrawerBase::black_tm = ColorRGB(43, 43, 43);
 
 	void DrawerBase::Fill(uint color)
 	{

@@ -1,11 +1,10 @@
 #pragma once
 #include "type.h"
 #include "math.h"
+#include "color.h"
 
 namespace Rehenz
 {
-	// 4-component color, r=x, b=y, g=z, a=w, defualt a=1
-	typedef Point Color;
 	// 2-component uv coordinates, u=x, v=y
 	typedef Vector2 UV;
 
@@ -23,14 +22,6 @@ namespace Rehenz
 	extern PixelShader TexturePixelShader;
 
 
-
-	// clmap to [0,1]
-	inline Color ColorSaturate(Color c)
-	{
-		return Color(Clamp(c.x, 0.0f, 1.0f), Clamp(c.y, 0.0f, 1.0f), Clamp(c.z, 0.0f, 1.0f), Clamp(c.w, 0.0f, 1.0f));
-	}
-
-	Color operator*(Color c1, Color c2);
 
 	struct Vertex
 	{

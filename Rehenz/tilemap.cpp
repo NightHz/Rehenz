@@ -5,16 +5,16 @@
 namespace Rehenz
 {
 	std::unordered_map<uint, uint> Tilemap::default_tile_colors{
-		{0,Drawer::red_dark_tm}, {1,Drawer::white}, {2,Drawer::yellow_tm}, {3,Drawer::green_yellow_tm}, {4,Drawer::blue_tm},
-		{5,Drawer::purple_tm}, {6,Drawer::orange_tm}, {7,Drawer::green_dark_tm}, {8,Drawer::blue_dark_tm}, {9,Drawer::gray_tm},
-		{10,Drawer::pink_tm} };
+		{0,ColorRGB::red_dark_tm}, {1,ColorRGB::white}, {2,ColorRGB::yellow_tm}, {3,ColorRGB::yellow_green_tm}, {4,ColorRGB::blue_tm},
+		{5,ColorRGB::purple_tm}, {6,ColorRGB::orange_tm}, {7,ColorRGB::green_dark_tm}, {8,ColorRGB::blue_dark_tm}, {9,ColorRGB::gray_tm},
+		{10,ColorRGB::pink_tm} };
 
 	Tilemap::Tilemap(uint _width, uint _height) : width(_width), height(_height),
 		tile_size(10, 10), render_center(_width * 0.5f, _height * 0.5f)
 	{
 		tiles = new uint[static_cast<size_t>(width) * height]{ 0 };
-		bg_color = Drawer::green_tm;
-		edge_color = Drawer::black_tm;
+		bg_color = ColorRGB::green_tm;
+		edge_color = ColorRGB::black_tm;
 		edge_width = 1;
 		tile_colors = default_tile_colors;
 	}

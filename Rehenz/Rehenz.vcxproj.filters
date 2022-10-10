@@ -93,6 +93,9 @@
     <ClCompile Include="transform.cpp">
       <Filter>source\render</Filter>
     </ClCompile>
+    <ClCompile Include="color.cpp">
+      <Filter>source\render</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="rehenz.h">
@@ -150,6 +153,9 @@
       <Filter>header\base</Filter>
     </ClInclude>
     <ClInclude Include="transform.h">
+      <Filter>header\render</Filter>
+    </ClInclude>
+    <ClInclude Include="color.h">
       <Filter>header\render</Filter>
     </ClInclude>
   </ItemGroup>

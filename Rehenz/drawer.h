@@ -2,6 +2,7 @@
 #include "type.h"
 #include "math.h"
 #include "mesh.h"
+#include "color.h"
 
 namespace Rehenz
 {
@@ -12,7 +13,7 @@ namespace Rehenz
 
 
 
-	// drawer base class, provide Fill, Pixel, ColorRGB, and some colors
+	// drawer base class, provide Fill, Pixel
 	class DrawerBase
 	{
 	protected:
@@ -24,26 +25,18 @@ namespace Rehenz
 		DrawerBase(uint* _buffer, int _width, int _height);
 		~DrawerBase();
 
+		// only for old code
 		inline static uint ColorRGB(int r, int g, int b)
 		{
-			return ((r & 0xff) << 16) | ((g & 0xff) << 8) | ((b & 0xff) << 0);
+			return Rehenz::ColorRGB(r, g, b);
 		}
+		// only for old code
 		inline static uint ColorRGB(Color c)
 		{
-			return ColorRGB(static_cast<int>(c.x * 0xff), static_cast<int>(c.y * 0xff), static_cast<int>(c.z * 0xff));
+			return Rehenz::ColorRGB(c);
 		}
-
-		static uint white, black, red, green, blue, yellow, magenta, cyan;
-		static uint red_l;
-		static uint yellow_l;
-		static uint blue_l;
-		static uint green_l;
-		static uint purple_l;
-		static uint pink_l;
-		static uint orange_l;
-		static uint yellow_tm, green_yellow_tm, blue_tm, purple_tm, orange_tm;
-		static uint green_dark_tm, blue_dark_tm, gray_tm, pink_tm, red_dark_tm;
-		static uint green_tm, black_tm;
+		// only for old code
+		static uint white;
 
 		// fill with a color
 		void Fill(uint color);

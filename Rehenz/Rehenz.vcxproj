@@ -135,6 +135,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="color.cpp" />
     <ClCompile Include="spline.cpp" />
     <ClCompile Include="clipper.cpp" />
     <ClCompile Include="drawer.cpp" />
@@ -154,6 +155,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="clipper.h" />
+    <ClInclude Include="color.h" />
     <ClInclude Include="drawer.h" />
     <ClInclude Include="fps_counter.h" />
     <ClInclude Include="hash.h" />

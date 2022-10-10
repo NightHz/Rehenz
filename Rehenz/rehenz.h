@@ -1,5 +1,6 @@
 #pragma once
 #include "clipper.h"
+#include "color.h"
 #include "drawer.h"
 #include "fps_counter.h"
 #include "hash.h"

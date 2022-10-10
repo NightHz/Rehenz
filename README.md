@@ -48,6 +48,7 @@ some code writed by NightHz
 **render**
 
 - `clipper.h`: 裁切一个几何元
+- `color.h`: 定义颜色
 - `drawer.h`: 绘制/光栅化一个几何元
 - `mesh.h`: 存储3D网格
 - `render_soft.h`: 渲染3维世界的软件**渲染器**

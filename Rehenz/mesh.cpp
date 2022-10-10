@@ -86,11 +86,6 @@ namespace Rehenz
 		return Vertex(p - v.p, n - v.n, c - v.c, uv - v.uv, uv2 - v.uv2, coef - v.coef);
 	}
 
-	Color operator*(Color c1, Color c2)
-	{
-		return Color(c1.x * c2.x, c1.y * c2.y, c1.z * c2.z, c1.w * c2.w);
-	}
-
 	Vertex VertexRecover(const Vertex& v)
 	{
 		float f = 1 / v.coef;
