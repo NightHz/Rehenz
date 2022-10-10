@@ -28,25 +28,40 @@ some code writed by NightHz
 
 ## 文件描述
 
-- `clipper.h`: 裁切一个几何元
-- `drawer.h`: 绘制/光栅化一个几何元
-- `fps_counter.h`: 帧率计数器
-- `hash.h`: 对一些自定义基础类型注入 `std::hash`
-- `input.h` : 按键状态检测
-- `math.h`: 数学
-- `mesh.h`: 存储3D网格
-- `noise_gen.h`: 生成一张噪点图，例如 Perlin 噪点
-- `path_finding.h`: 寻路算法
 - `rehenz.h`: 包含所有的头文件
-- `render_soft.h`: 渲染3维世界的软件**渲染器**
-- `spline.h`: 计算样条线
-- `surface_dx8.h`: 使用 DirectDraw(in DirectX8) 创建一个能够绘制图像的窗口
-- `tilemap.h`: 创建一个可渲染的2D网格地图
-- `transform.h`: 定义 `Transform` 组件和 `Projection` 组件
+
+**base**
+
+- `hash.h`: 对一些自定义基础类型注入 `std::hash`
+- `math.h`: 数学
 - `type.h`: 定义基本数据类型，例如 `uint`
 - `util.h`: 实用函数
+
+**window**
+
+- `fps_counter.h`: 帧率计数器
+- `input.h` : 按键状态检测
+- `surface_dx8.h`: 使用 DirectDraw(in DirectX8) 创建一个能够绘制图像的窗口
 - `window.h`: 快速创建 windows 窗口
 - `window_fc.h`: 快速创建带有 fps 显示的 windows 窗口
+
+**render**
+
+- `clipper.h`: 裁切一个几何元
+- `drawer.h`: 绘制/光栅化一个几何元
+- `mesh.h`: 存储3D网格
+- `render_soft.h`: 渲染3维世界的软件**渲染器**
+- `spline.h`: 计算样条线
+- `transform.h`: 定义 `Transform` 组件和 `Projection` 组件
+
+**game tech**
+
+- `noise_gen.h`: 生成一张噪点图，例如 Perlin 噪点
+- `tilemap.h`: 创建一个可渲染的2D网格地图
+
+**ai**
+
+- `path_finding.h`: 寻路算法
 
 
 ## 程序设计
