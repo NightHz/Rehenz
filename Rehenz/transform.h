@@ -30,6 +30,8 @@ namespace Rehenz
 	{
 	public:
 		float fovy, aspect, z_near, z_far;
+		bool parallel_projection;
+		float height;
 
 		// default fovy = pi/2, aspect = 1, z_near = 1, z_far = 500
 		Projection();

@@ -43,7 +43,9 @@ namespace Rehenz
 				int a = tris_mesh[i], b = tris_mesh[i + 1], c = tris_mesh[i + 2];
 				Vertex& va = vertices[a], & vb = vertices[b], & vc = vertices[c];
 
-				auto sight = va.p - origin;
+				auto sight = Vector(0, 0, 1);
+				if (!projection.parallel_projection)
+					sight = va.p - origin;
 				auto normal = TrianglesNormal(va.p, vb.p, vc.p);
 				auto dot_sight_normal = VectorDot(sight, normal);
 

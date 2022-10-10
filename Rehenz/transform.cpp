@@ -62,6 +62,8 @@ namespace Rehenz
 
 	Projection::Projection() :fovy(pi_div2), aspect(1), z_near(1), z_far(500)
 	{
+		parallel_projection = false;
+		height = 8.0f;
 	}
 
 	Projection::~Projection()
@@ -70,12 +72,18 @@ namespace Rehenz
 
 	Matrix Projection::GetTransformMatrix()
 	{
-		return GetMatrixP(fovy, aspect, z_near, z_far);
+		if (!parallel_projection)
+			return GetMatrixP(fovy, aspect, z_near, z_far);
+		else
+			return GetMatrixT(0, 0, -z_near) * GetMatrixS(2 / height / aspect, 2 / height, 1 / (z_far - z_near));
 	}
 
 	Point Projection::GetOrigin()
 	{
-		return Rehenz::GetOriginP(z_near, z_far);
+		if (!parallel_projection)
+			return GetOriginP(z_near, z_far);
+		else
+			return Point(0, 0, -z_near / (z_far - z_near));
 	}
 
 }

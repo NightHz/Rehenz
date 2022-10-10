@@ -169,6 +169,7 @@ int main_surface_dx8_and_render_soft_example()
 	cout << "press I/J/K/L                        to rotate cube" << endl;
 	cout << "press T/F/G/H/R/Y                    to move cube" << endl;
 	cout << "press 8/9                            to switch scene" << endl;
+	cout << "press Z/X                            to switch projection" << endl;
 	// input
 	Mouse mouse;
 
@@ -210,18 +211,24 @@ int main_surface_dx8_and_render_soft_example()
 			mouse.SetToPrev();
 		}
 
-		if (KeyIsDown('I'))      obj_cube->transform.axes.pitch += 0.05f;
-		else if (KeyIsDown('K')) obj_cube->transform.axes.pitch -= 0.05f;
-		if (KeyIsDown('J'))      obj_cube->transform.axes.yaw += 0.05f;
-		else if (KeyIsDown('L')) obj_cube->transform.axes.yaw -= 0.05f;
-		if (KeyIsDown('F'))      obj_cube->transform.pos.x -= 0.1f;
-		else if (KeyIsDown('H')) obj_cube->transform.pos.x += 0.1f;
-		if (KeyIsDown('T'))      obj_cube->transform.pos.y += 0.1f;
-		else if (KeyIsDown('G')) obj_cube->transform.pos.y -= 0.1f;
-		if (KeyIsDown('R'))      obj_cube->transform.pos.z -= 0.1f;
-		else if (KeyIsDown('Y')) obj_cube->transform.pos.z += 0.1f;
+		float obj_move_dis = 4 * dt;
+		float obj_rotate_angle = 3 * dt;
+		if (KeyIsDown('I'))      obj_cube->transform.axes.pitch += obj_rotate_angle;
+		else if (KeyIsDown('K')) obj_cube->transform.axes.pitch -= obj_rotate_angle;
+		if (KeyIsDown('J'))      obj_cube->transform.axes.yaw += obj_rotate_angle;
+		else if (KeyIsDown('L')) obj_cube->transform.axes.yaw -= obj_rotate_angle;
+		if (KeyIsDown('F'))      obj_cube->transform.pos.x -= obj_move_dis;
+		else if (KeyIsDown('H')) obj_cube->transform.pos.x += obj_move_dis;
+		if (KeyIsDown('T'))      obj_cube->transform.pos.y += obj_move_dis;
+		else if (KeyIsDown('G')) obj_cube->transform.pos.y -= obj_move_dis;
+		if (KeyIsDown('R'))      obj_cube->transform.pos.z -= obj_move_dis;
+		else if (KeyIsDown('Y')) obj_cube->transform.pos.z += obj_move_dis;
 		if (KeyIsDown('8'))      scene = &test2;
 		else if (KeyIsDown('9')) scene = &test1;
+
+		if (KeyIsDown('Z'))      camera.projection.parallel_projection = false;
+		else if (KeyIsDown('X')) camera.projection.parallel_projection = true;
+
 		if (KeyIsDown(VK_RETURN))
 			srf_dx8.FillFromImage(camera.RenderImage(*scene));
 		// refresh
@@ -848,9 +855,9 @@ int main()
 	cout << "Hello~ Rehenz~" << endl;
 
 	//return main_noise_example();
-	//return main_surface_dx8_and_render_soft_example();
+	return main_surface_dx8_and_render_soft_example();
 	//return main_clip_test();
-	return main_tilemap_and_path_finding_and_fps_counter_example();
+	//return main_tilemap_and_path_finding_and_fps_counter_example();
 	//return main_two_surface_test();
 	//return main_two_window_test();
 	//return main_drawer_test();
