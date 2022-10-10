@@ -17,9 +17,6 @@ namespace Rehenz
 	struct PixelShaderData;
 	typedef std::function<Vertex(const VertexShaderData&, const Vertex&)> VertexShader;
 	typedef std::function<Color(const PixelShaderData&, const Vertex&)> PixelShader;
-	extern VertexShader DefaultVertexShader;
-	extern PixelShader DefaultPixelShader;
-	extern PixelShader TexturePixelShader;
 
 
 

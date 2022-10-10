@@ -136,6 +136,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="color.cpp" />
+    <ClCompile Include="shader.cpp" />
     <ClCompile Include="spline.cpp" />
     <ClCompile Include="clipper.cpp" />
     <ClCompile Include="drawer.cpp" />
@@ -166,6 +167,7 @@
     <ClInclude Include="path_finding.h" />
     <ClInclude Include="rehenz.h" />
     <ClInclude Include="render_soft.h" />
+    <ClInclude Include="shader.h" />
     <ClInclude Include="spline.h" />
     <ClInclude Include="surface_dx8.h" />
     <ClInclude Include="tilemap.h" />

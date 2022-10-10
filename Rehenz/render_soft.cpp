@@ -2,6 +2,7 @@
 #include "drawer.h"
 #include "clipper.h"
 #include <algorithm>
+#include "shader.h"
 
 namespace Rehenz
 {

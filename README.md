@@ -52,6 +52,7 @@ some code writed by NightHz
 - `drawer.h`: 绘制/光栅化一个几何元
 - `mesh.h`: 存储3D网格
 - `render_soft.h`: 渲染3维世界的软件**渲染器**
+- `shader.h`: 定义基础 shader
 - `spline.h`: 计算样条线
 - `transform.h`: 定义 `Transform` 组件和 `Projection` 组件
 
