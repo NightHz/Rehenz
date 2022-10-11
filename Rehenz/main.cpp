@@ -84,45 +84,6 @@ int main_surface_dx8_and_render_soft_example()
 	auto textureC = CreateTextureC();
 	auto texture_plaid = CreateTexturePlaid();
 	auto texture_dice = CreateTextureDice();
-	// shader
-	PixelShader my_pixel_shader = [](const PixelShaderData& data, const Vertex& v0)->Color
-	{
-		//(data);
-		//return Color(v0.uv.x, v0.uv.y, 0.8f);
-		if (data.texture2 != nullptr)
-			return data.texture2->GetColor(v0.uv2);
-		else
-			return Color(0.1f, 0.1f, 0.1f);
-	};
-	VertexShader vs_light = [](const VertexShaderData& data, const Vertex& v0) -> Vertex
-	{
-		static Color white(1, 1, 1);
-
-		Vertex v(v0);
-		v.p = v.p * data.transform;
-		v.c = white * 0.3f;
-
-		const Vector light_dir(-0.5f, -0.7f, 0.3f);
-		Vector N = VectorNormalize(v.n * data.mat_world * data.mat_view); // normal
-		Vector L = VectorNormalize(-light_dir * data.mat_view);           // to light
-		float s = VectorDot(L, N);
-		if (s > 0)
-			v.c += white * s * 0.8f;
-
-		return v;
-	};
-	PixelShader ps_color = [](const PixelShaderData& data, const Vertex& v0)->Color
-	{
-		(data);
-		return ColorSaturate(v0.c);
-	};
-	PixelShader ps_tex = [](const PixelShaderData& data, const Vertex& v0)->Color
-	{
-		if (data.texture != nullptr)
-			return ColorSaturate(v0.c * data.texture->GetColor(v0.uv));
-		else
-			return ColorSaturate(v0.c);
-	};
 	// scene
 	RenderScene test1;
 	for (float z = -10; z <= 10; z += 1)
@@ -209,7 +170,7 @@ int main_surface_dx8_and_render_soft_example()
 		else if (KeyIsDown('4')) camera.render_mode = Camera::RenderMode::Shader,
 			camera.vertex_shader = DefaultVertexShader, camera.pixel_shader = TexturePixelShader;
 		else if (KeyIsDown('5')) camera.render_mode = Camera::RenderMode::Shader,
-			camera.vertex_shader = DefaultVertexShader, camera.pixel_shader = my_pixel_shader;
+			camera.vertex_shader = DefaultVertexShader, camera.pixel_shader = ps_light;
 		else if (KeyIsDown('6')) camera.render_mode = Camera::RenderMode::Shader,
 			camera.vertex_shader = vs_light, camera.pixel_shader = ps_color;
 		else if (KeyIsDown('7')) camera.render_mode = Camera::RenderMode::Shader,

@@ -17,21 +17,23 @@ namespace Rehenz
 		DrawerV drawer(buffer, width, height, zbuffer.get());
 		DrawerF drawerf(buffer, width, height);
 		// prepare shader data
-		VertexShaderData vshader_data;
-		PixelShaderData pshader_data;
-		vshader_data.mat_view = transform.GetInverseTransformMatrix();
-		vshader_data.mat_project = projection.GetTransformMatrix();
+		ShaderData shader_data;
+		shader_data.mat_view = transform.GetInverseTransformMatrix();
+		shader_data.mat_project = projection.GetTransformMatrix();
 		// traverse objects
 		for (auto pobj = scene.GetRenderObject(); pobj; pobj = scene.GetRenderObject(pobj))
 		{
+			shader_data.mat_world = pobj->transform.GetTransformMatrix();
+			shader_data.mat_inv_world = pobj->transform.GetInverseTransformMatrix();
+			shader_data.transform = shader_data.mat_world * shader_data.mat_view * shader_data.mat_project;
+			shader_data.texture = pobj->texture;
+			shader_data.texture2 = pobj->texture2;
 			// Copy and transform vertices (vertex shader)
-			vshader_data.mat_world = pobj->transform.GetTransformMatrix();
-			vshader_data.transform = vshader_data.mat_world * vshader_data.mat_view * vshader_data.mat_project;
 			auto& vs_mesh = pobj->pmesh->GetVertices();
 			std::vector<Vertex> vertices;
 			for (auto& v : vs_mesh)
 			{
-				vertices.push_back(vertex_shader(vshader_data, v));
+				vertices.push_back(vertex_shader(shader_data, v));
 			}
 
 			// Clipping and back-face culling
@@ -74,8 +76,6 @@ namespace Rehenz
 			// Traverse all triangles and sampling
 			// Compute color for all sampling points (pixel shader)
 			// Use z-buffer merge multiple colors
-			pshader_data.texture = pobj->texture;
-			pshader_data.texture2 = pobj->texture2;
 			for (size_t i = 0; i < triangles.size(); i += 3)
 			{
 				int a = triangles[i], b = triangles[i + 1], c = triangles[i + 2];
@@ -97,7 +97,7 @@ namespace Rehenz
 				}*/
 				else if (render_mode == RenderMode::Shader)
 				{
-					drawer.Triangle(va, vb, vc, pixel_shader, pshader_data);
+					drawer.Triangle(va, vb, vc, pixel_shader, shader_data);
 				}
 			}
 		}

@@ -13,8 +13,9 @@ namespace Rehenz
 
 	class Texture;
 
-	struct VertexShaderData;
-	struct PixelShaderData;
+	struct ShaderData;
+	typedef ShaderData VertexShaderData;
+	typedef ShaderData PixelShaderData;
 	typedef std::function<Vertex(const VertexShaderData&, const Vertex&)> VertexShader;
 	typedef std::function<Color(const PixelShaderData&, const Vertex&)> PixelShader;
 
@@ -149,19 +150,16 @@ namespace Rehenz
 	// create 1-6 dice texture
 	std::shared_ptr<Texture> CreateTextureDice();
 
-	struct VertexShaderData
+	struct ShaderData
 	{
 	public:
 		Matrix mat_world;
+		Matrix mat_inv_world;
 		Matrix mat_view;
 		Matrix mat_project;
 		// = mat_world * mat_view * mat_project
 		Matrix transform;
-	};
 
-	struct PixelShaderData
-	{
-	public:
 		std::shared_ptr<Texture> texture;
 		std::shared_ptr<Texture> texture2;
 	};
