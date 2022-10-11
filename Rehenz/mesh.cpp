@@ -209,47 +209,50 @@ namespace Rehenz
 		std::vector<int> triangles;
 
 		// add vertices by latitude from top(0,1,0) to bottom(0,-1,0)
-		vertices.emplace_back(Point(0, 1, 0), Vector(0, 1, 0));
-		for (int y = 1; y < yn; y++)
+		for (int y = 0; y <= yn; y++)
 		{
-			float theta = pi * y / yn;
-			for (int x = 0; x < xn; x++)
+			float v = static_cast<float>(y) / yn;
+			float theta = pi * v;
+			for (int x = 0; x <= xn; x++)
 			{
-				float phi = pi_mul2 * x / xn;
-				vertices.push_back(Point(sinf(theta) * cosf(phi), cosf(theta), -sinf(theta) * sinf(phi)));
-				vertices.back().n = vertices.back().p;
-				vertices.back().n.w = 0;
+				float u = static_cast<float>(x) / xn;
+				float phi = pi_mul2 * u;
+				Point p(sinf(theta) * cosf(phi), cosf(theta), -sinf(theta) * sinf(phi));
+				Vector n(p.x, p.y, p.z);
+				vertices.emplace_back(p, n, Color::white, UV(u, v));
 			}
 		}
-		vertices.push_back(Point(0, -1, 0));
 
 		// add first part triangles, which include top vertex
-		for (int i = 1; i < xn; i++)
+		for (int x = 0; x < xn; x++)
 		{
-			triangles.push_back(0); triangles.push_back(i); triangles.push_back(i + 1);
+			int a = x;
+			int c = a + (xn + 1);
+			int d = c + 1;
+			triangles.push_back(a); triangles.push_back(c); triangles.push_back(d);
 		}
-		triangles.push_back(0); triangles.push_back(xn); triangles.push_back(1);
 		// add second part triangles
-		for (int j = 2; j < yn; j++)
+		for (int y = 1; y < yn - 1; y++)
 		{
-			int a = 1 + xn * (j - 2); // upper starting vertex
-			int b = 1 + xn * (j - 1); // below starting vertex
-			for (int i = 0; i < xn - 1; i++)
+			for (int x = 0; x < xn; x++)
 			{
-				triangles.push_back(a + i); triangles.push_back(b + i); triangles.push_back(b + i + 1);
-				triangles.push_back(a + i); triangles.push_back(b + i + 1); triangles.push_back(a + i + 1);
+				int a = y * (xn + 1) + x; // left upper vertex
+				int b = a + 1;            // right upper vertex
+				int c = a + (xn + 1);     // left below vertex
+				int d = c + 1;            // right below vertex
+				triangles.push_back(a); triangles.push_back(c); triangles.push_back(d);
+				triangles.push_back(a); triangles.push_back(d); triangles.push_back(b);
 			}
-			triangles.push_back(a + xn - 1); triangles.push_back(b + xn - 1); triangles.push_back(b);
-			triangles.push_back(a + xn - 1); triangles.push_back(b); triangles.push_back(a);
 		}
 		// add last part triangles, which include bottom vertex
-		int bottom = xn * (yn - 1) + 1;
-		int a = 1 + xn * (yn - 2); // starting vertex
-		for (int i = 0; i < xn - 1; i++)
+		for (int x = 0; x < xn; x++)
 		{
-			triangles.push_back(a + i + 1); triangles.push_back(a + i); triangles.push_back(bottom);
+			int a = (yn - 1) * (xn + 1) + x;
+			int b = a + 1;
+			int c = a + (xn + 1);
+			int d = c + 1;
+			triangles.push_back(a); triangles.push_back(d); triangles.push_back(b);
 		}
-		triangles.push_back(a); triangles.push_back(a + xn - 1); triangles.push_back(bottom);
 
 		return std::make_shared<Mesh>(std::move(vertices), std::move(triangles));
 	}
@@ -323,6 +326,7 @@ namespace Rehenz
 
 		return triangles;
 	}
+	// compute sphere skeleton for two key vertex
 	void SphereSkeleton(std::vector<Vertex>& vertices, int smooth, int a, int b)
 	{
 		for (int i = 1; i < smooth; i++)
@@ -336,6 +340,10 @@ namespace Rehenz
 			vertices.push_back(v_new);
 		}
 	}
+	// generate vertex indices of big triangle using three key vertex and three edge skeleton
+	// vn = key vertex number, it's skeleton's index offset
+	// a,b,c = key vertex index
+	// eab,ebc,eca = skeleton index, op means order
 	std::vector<int> SphereBigTriangle(int smooth, int vn, int a, int b, int c, int eab, int ebc, int eca)
 	{
 		std::vector<int> big_tri;
@@ -371,19 +379,26 @@ namespace Rehenz
 		std::vector<int> triangles;
 
 		// add first part vertices
-		vertices.push_back(Point(0, 1, 0));
-		vertices.push_back(Point(1, 0, 0));
-		vertices.push_back(Point(0, 0, -1));
-		vertices.push_back(Point(-1, 0, 0));
-		vertices.push_back(Point(0, 0, 1));
-		vertices.push_back(Point(0, -1, 0));
+		vertices.emplace_back(Point(0, 1, 0), Color::white, UV(4 / 7.0f, 1 / 3.0f));  // 0
+		vertices.emplace_back(Point(1, 0, 0), Color::white, UV(3 / 7.0f, 2 / 3.0f));  // 1
+		vertices.emplace_back(Point(0, 0, -1), Color::white, UV(5 / 7.0f, 2 / 3.0f)); // 2
+		vertices.emplace_back(Point(-1, 0, 0), Color::white, UV(6 / 7.0f, 1 / 3.0f)); // 3
+		vertices.emplace_back(Point(0, 0, 1), Color::white, UV(2 / 7.0f, 1 / 3.0f));  // 4
+		vertices.emplace_back(Point(0, -1, 0), Color::white, UV(1 / 7.0f, 2 / 3.0f)); // 5
+		vertices.emplace_back(Point(-1, 0, 0), Color::white, UV(3 / 7.0f, 0 / 3.0f)); // 6 = 3
+		vertices.emplace_back(Point(-1, 0, 0), Color::white, UV(0 / 7.0f, 1 / 3.0f)); // 7 = 3
+		vertices.emplace_back(Point(0, -1, 0), Color::white, UV(4 / 7.0f, 3 / 3.0f)); // 8 = 5
+		vertices.emplace_back(Point(0, -1, 0), Color::white, UV(7 / 7.0f, 2 / 3.0f)); // 9 = 5
 		// add second part vertices
-		SphereSkeleton(vertices, smooth, 0, 1); SphereSkeleton(vertices, smooth, 0, 2);
-		SphereSkeleton(vertices, smooth, 0, 3); SphereSkeleton(vertices, smooth, 0, 4);
-		SphereSkeleton(vertices, smooth, 1, 2); SphereSkeleton(vertices, smooth, 2, 3);
-		SphereSkeleton(vertices, smooth, 3, 4); SphereSkeleton(vertices, smooth, 4, 1);
-		SphereSkeleton(vertices, smooth, 1, 5); SphereSkeleton(vertices, smooth, 2, 5);
-		SphereSkeleton(vertices, smooth, 3, 5); SphereSkeleton(vertices, smooth, 4, 5);
+		SphereSkeleton(vertices, smooth, 0, 1);                                         // 1
+		SphereSkeleton(vertices, smooth, 0, 2); SphereSkeleton(vertices, smooth, 1, 2); // 2  3
+		SphereSkeleton(vertices, smooth, 0, 4); SphereSkeleton(vertices, smooth, 1, 4); // 4  5
+		SphereSkeleton(vertices, smooth, 0, 3); SphereSkeleton(vertices, smooth, 2, 3); // 6  7
+		SphereSkeleton(vertices, smooth, 1, 5); SphereSkeleton(vertices, smooth, 4, 5); // 8  9
+		SphereSkeleton(vertices, smooth, 0, 6); SphereSkeleton(vertices, smooth, 4, 6); // 10 11
+		SphereSkeleton(vertices, smooth, 4, 7); SphereSkeleton(vertices, smooth, 5, 7); // 12 13
+		SphereSkeleton(vertices, smooth, 1, 8); SphereSkeleton(vertices, smooth, 2, 8); // 14 15
+		SphereSkeleton(vertices, smooth, 2, 9); SphereSkeleton(vertices, smooth, 3, 9); // 16 17
 		// update normal
 		for (auto& v : vertices)
 		{
@@ -391,14 +406,14 @@ namespace Rehenz
 			v.n.w = 0;
 		}
 		// add triangles
-		TrianglesAppend(triangles, BigTriangleLerp(vertices, SphereBigTriangle(smooth, 6, 0, 1, 2, +1, +5, -2), true));
-		TrianglesAppend(triangles, BigTriangleLerp(vertices, SphereBigTriangle(smooth, 6, 0, 2, 3, +2, +6, -3), true));
-		TrianglesAppend(triangles, BigTriangleLerp(vertices, SphereBigTriangle(smooth, 6, 0, 3, 4, +3, +7, -4), true));
-		TrianglesAppend(triangles, BigTriangleLerp(vertices, SphereBigTriangle(smooth, 6, 0, 4, 1, +4, +8, -1), true));
-		TrianglesAppend(triangles, BigTriangleLerp(vertices, SphereBigTriangle(smooth, 6, 5, 2, 1, -10, -5, +9), true));
-		TrianglesAppend(triangles, BigTriangleLerp(vertices, SphereBigTriangle(smooth, 6, 5, 3, 2, -11, -6, +10), true));
-		TrianglesAppend(triangles, BigTriangleLerp(vertices, SphereBigTriangle(smooth, 6, 5, 4, 3, -12, -7, +11), true));
-		TrianglesAppend(triangles, BigTriangleLerp(vertices, SphereBigTriangle(smooth, 6, 5, 1, 4, -9, -8, +12), true));
+		TrianglesAppend(triangles, BigTriangleLerp(vertices, SphereBigTriangle(smooth, 10, 0, 1, 2, +1, +3, -2), true));
+		TrianglesAppend(triangles, BigTriangleLerp(vertices, SphereBigTriangle(smooth, 10, 1, 0, 4, -1, +4, -5), true));
+		TrianglesAppend(triangles, BigTriangleLerp(vertices, SphereBigTriangle(smooth, 10, 0, 2, 3, +2, +7, -6), true));
+		TrianglesAppend(triangles, BigTriangleLerp(vertices, SphereBigTriangle(smooth, 10, 1, 4, 5, +5, +9, -8), true));
+		TrianglesAppend(triangles, BigTriangleLerp(vertices, SphereBigTriangle(smooth, 10, 4, 0, 6, -4, +10, -11), true));
+		TrianglesAppend(triangles, BigTriangleLerp(vertices, SphereBigTriangle(smooth, 10, 5, 4, 7, -9, +12, -13), true));
+		TrianglesAppend(triangles, BigTriangleLerp(vertices, SphereBigTriangle(smooth, 10, 2, 1, 8, -3, +14, -15), true));
+		TrianglesAppend(triangles, BigTriangleLerp(vertices, SphereBigTriangle(smooth, 10, 3, 2, 9, -7, +16, -17), true));
 
 		return std::make_shared<Mesh>(std::move(vertices), std::move(triangles));
 	}
@@ -409,14 +424,18 @@ namespace Rehenz
 
 		// add first part vertices
 		float sqr2 = sqrtf(2), sqr6 = sqrtf(6);
-		vertices.push_back(Point(0, 1, 0));
-		vertices.push_back(Point(2 * sqr2 / 3, -1.0f / 3, 0));
-		vertices.push_back(Point(-sqr2 / 3, -1.0f / 3, -sqr6 / 3));
-		vertices.push_back(Point(-sqr2 / 3, -1.0f / 3, +sqr6 / 3));
+		vertices.emplace_back(Point(0, 1, 0), Color::white, UV(2 / 4.0f, 0 / 2.0f));                         // 0
+		vertices.emplace_back(Point(2 * sqr2 / 3, -1.0f / 3, 0), Color::white, UV(1 / 4.0f, 1 / 2.0f));      // 1
+		vertices.emplace_back(Point(-sqr2 / 3, -1.0f / 3, -sqr6 / 3), Color::white, UV(3 / 4.0f, 1 / 2.0f)); // 2
+		vertices.emplace_back(Point(-sqr2 / 3, -1.0f / 3, +sqr6 / 3), Color::white, UV(0 / 4.0f, 0 / 2.0f)); // 3
+		vertices.emplace_back(Point(-sqr2 / 3, -1.0f / 3, +sqr6 / 3), Color::white, UV(4 / 4.0f, 0 / 2.0f)); // 4 = 3
+		vertices.emplace_back(Point(-sqr2 / 3, -1.0f / 3, +sqr6 / 3), Color::white, UV(2 / 4.0f, 2 / 2.0f)); // 5 = 3
 		// add second part vertices
-		SphereSkeleton(vertices, smooth, 0, 1); SphereSkeleton(vertices, smooth, 0, 2);
-		SphereSkeleton(vertices, smooth, 0, 3); SphereSkeleton(vertices, smooth, 1, 2);
-		SphereSkeleton(vertices, smooth, 2, 3); SphereSkeleton(vertices, smooth, 3, 1);
+		SphereSkeleton(vertices, smooth, 0, 1);                                         // 1
+		SphereSkeleton(vertices, smooth, 0, 2); SphereSkeleton(vertices, smooth, 1, 2); // 2  3
+		SphereSkeleton(vertices, smooth, 0, 3); SphereSkeleton(vertices, smooth, 1, 3); // 4  5
+		SphereSkeleton(vertices, smooth, 0, 4); SphereSkeleton(vertices, smooth, 2, 4); // 6  7
+		SphereSkeleton(vertices, smooth, 1, 5); SphereSkeleton(vertices, smooth, 2, 5); // 8  9
 		// update normal
 		for (auto& v : vertices)
 		{
@@ -424,10 +443,10 @@ namespace Rehenz
 			v.n.w = 0;
 		}
 		// add triangles
-		TrianglesAppend(triangles, BigTriangleLerp(vertices, SphereBigTriangle(smooth, 4, 0, 1, 2, +1, +4, -2), true));
-		TrianglesAppend(triangles, BigTriangleLerp(vertices, SphereBigTriangle(smooth, 4, 0, 2, 3, +2, +5, -3), true));
-		TrianglesAppend(triangles, BigTriangleLerp(vertices, SphereBigTriangle(smooth, 4, 0, 3, 1, +3, +6, -1), true));
-		TrianglesAppend(triangles, BigTriangleLerp(vertices, SphereBigTriangle(smooth, 4, 1, 3, 2, -6, -5, -4), true));
+		TrianglesAppend(triangles, BigTriangleLerp(vertices, SphereBigTriangle(smooth, 6, 0, 1, 2, +1, +3, -2), true));
+		TrianglesAppend(triangles, BigTriangleLerp(vertices, SphereBigTriangle(smooth, 6, 1, 0, 3, -1, +4, -5), true));
+		TrianglesAppend(triangles, BigTriangleLerp(vertices, SphereBigTriangle(smooth, 6, 0, 2, 4, +2, +7, -6), true));
+		TrianglesAppend(triangles, BigTriangleLerp(vertices, SphereBigTriangle(smooth, 6, 2, 1, 5, -3, +8, -9), true));
 
 		return std::make_shared<Mesh>(std::move(vertices), std::move(triangles));
 	}
@@ -437,44 +456,60 @@ namespace Rehenz
 		std::vector<int> triangles;
 
 		// add first part vertices
-		float sqr3 = sqrtf(3), sqr5 = sqrtf(5);
-		vertices.push_back(Point(1, sqr3, (3 + sqr5) / 2));
-		vertices.push_back(Point(-2, 0, (3 + sqr5) / 2));
-		vertices.push_back(Point(1, -sqr3, (3 + sqr5) / 2));
-		vertices.push_back(Point(-(1 + sqr5) / 2, -(1 + sqr5) * sqr3 / 2, (sqr5 - 1) / 2));
-		vertices.push_back(Point(1 + sqr5, 0, (sqr5 - 1) / 2));
-		vertices.push_back(Point(-(1 + sqr5) / 2, (1 + sqr5) * sqr3 / 2, (sqr5 - 1) / 2));
-		vertices.push_back(Point((1 + sqr5) / 2, (1 + sqr5) * sqr3 / 2, -(sqr5 - 1) / 2));
-		vertices.push_back(Point(-(1 + sqr5), 0, -(sqr5 - 1) / 2));
-		vertices.push_back(Point((1 + sqr5) / 2, -(1 + sqr5) * sqr3 / 2, -(sqr5 - 1) / 2));
-		vertices.push_back(Point(-1, -sqr3, -(3 + sqr5) / 2));
-		vertices.push_back(Point(2, 0, -(3 + sqr5) / 2));
-		vertices.push_back(Point(-1, sqr3, -(3 + sqr5) / 2));
+		float tau = (1 + sqrtf(5)) / 2;
+		vertices.emplace_back(Point(0, +tau, +1), Color::white, UV(1 / 11.0f, 0 / 3.0f));  // 0 (- 1,2,3,4,5)
+		vertices.emplace_back(Point(0, +tau, -1), Color::white, UV(2 / 11.0f, 1 / 3.0f));  // 1 (- 0,5,6,7,2)
+		vertices.emplace_back(Point(-tau, +1, 0), Color::white, UV(4 / 11.0f, 1 / 3.0f));  // 2 (- 0,1,7,8,3)
+		vertices.emplace_back(Point(-1, 0, +tau), Color::white, UV(6 / 11.0f, 1 / 3.0f));  // 3
+		vertices.emplace_back(Point(+1, 0, +tau), Color::white, UV(8 / 11.0f, 1 / 3.0f));  // 4
+		vertices.emplace_back(Point(+tau, +1, 0), Color::white, UV(0 / 11.0f, 1 / 3.0f));  // 5
+		vertices.emplace_back(Point(+1, 0, -tau), Color::white, UV(1 / 11.0f, 2 / 3.0f));  // 6
+		vertices.emplace_back(Point(-1, 0, -tau), Color::white, UV(3 / 11.0f, 2 / 3.0f));  // 7
+		vertices.emplace_back(Point(-tau, -1, 0), Color::white, UV(5 / 11.0f, 2 / 3.0f));  // 8
+		vertices.emplace_back(Point(0, -tau, +1), Color::white, UV(7 / 11.0f, 2 / 3.0f));  // 9
+		vertices.emplace_back(Point(+tau, -1, 0), Color::white, UV(9 / 11.0f, 2 / 3.0f));  // 10
+		vertices.emplace_back(Point(0, -tau, -1), Color::white, UV(2 / 11.0f, 3 / 3.0f));  // 11 (- 6,7,8,9,10)
+		vertices.emplace_back(Point(0, +tau, +1), Color::white, UV(3 / 11.0f, 0 / 3.0f));  // 12 = 0
+		vertices.emplace_back(Point(0, +tau, +1), Color::white, UV(5 / 11.0f, 0 / 3.0f));  // 13 = 0
+		vertices.emplace_back(Point(0, +tau, +1), Color::white, UV(7 / 11.0f, 0 / 3.0f));  // 14 = 0
+		vertices.emplace_back(Point(0, +tau, +1), Color::white, UV(9 / 11.0f, 0 / 3.0f));  // 15 = 0
+		vertices.emplace_back(Point(+tau, +1, 0), Color::white, UV(10 / 11.0f, 1 / 3.0f)); // 16 = 5
+		vertices.emplace_back(Point(+1, 0, -tau), Color::white, UV(11 / 11.0f, 2 / 3.0f)); // 17 = 6
+		vertices.emplace_back(Point(0, -tau, -1), Color::white, UV(4 / 11.0f, 3 / 3.0f));  // 18 = 11
+		vertices.emplace_back(Point(0, -tau, -1), Color::white, UV(6 / 11.0f, 3 / 3.0f));  // 19 = 11
+		vertices.emplace_back(Point(0, -tau, -1), Color::white, UV(8 / 11.0f, 3 / 3.0f));  // 20 = 11
+		vertices.emplace_back(Point(0, -tau, -1), Color::white, UV(10 / 11.0f, 3 / 3.0f)); // 21 = 11
 		for (auto& v : vertices)
 		{
+			v.p.w = 0;
 			float length = VectorLength(v.p);
 			if (length != 0)
 				v.p /= length;
 			v.p.w = 1;
 		}
 		// add second part vertices
-		SphereSkeleton(vertices, smooth, 0, 1); SphereSkeleton(vertices, smooth, 0, 2);
-		SphereSkeleton(vertices, smooth, 0, 4); SphereSkeleton(vertices, smooth, 0, 6);
-		SphereSkeleton(vertices, smooth, 0, 5); SphereSkeleton(vertices, smooth, 1, 2);
-		SphereSkeleton(vertices, smooth, 2, 4); SphereSkeleton(vertices, smooth, 4, 6);
-		SphereSkeleton(vertices, smooth, 6, 5); SphereSkeleton(vertices, smooth, 5, 1);
-		// 1 2 4 6 5
-		SphereSkeleton(vertices, smooth, 1, 7); SphereSkeleton(vertices, smooth, 1, 3);
-		SphereSkeleton(vertices, smooth, 2, 3); SphereSkeleton(vertices, smooth, 2, 8);
-		SphereSkeleton(vertices, smooth, 4, 8); SphereSkeleton(vertices, smooth, 4, 10);
-		SphereSkeleton(vertices, smooth, 6, 10); SphereSkeleton(vertices, smooth, 6, 11);
-		SphereSkeleton(vertices, smooth, 5, 11); SphereSkeleton(vertices, smooth, 5, 7);
-		// 7 3 8 10 11
-		SphereSkeleton(vertices, smooth, 7, 3); SphereSkeleton(vertices, smooth, 3, 8);
-		SphereSkeleton(vertices, smooth, 8, 10); SphereSkeleton(vertices, smooth, 10, 11);
-		SphereSkeleton(vertices, smooth, 11, 7); SphereSkeleton(vertices, smooth, 7, 9);
-		SphereSkeleton(vertices, smooth, 3, 9); SphereSkeleton(vertices, smooth, 8, 9);
-		SphereSkeleton(vertices, smooth, 10, 9); SphereSkeleton(vertices, smooth, 11, 9);
+		SphereSkeleton(vertices, smooth, 0, 5); SphereSkeleton(vertices, smooth, 0, 1);    // 1  2
+		SphereSkeleton(vertices, smooth, 12, 1); SphereSkeleton(vertices, smooth, 12, 2);  // 3  4
+		SphereSkeleton(vertices, smooth, 13, 2); SphereSkeleton(vertices, smooth, 13, 3);  // 5  6
+		SphereSkeleton(vertices, smooth, 14, 3); SphereSkeleton(vertices, smooth, 14, 4);  // 7  8
+		SphereSkeleton(vertices, smooth, 15, 4); SphereSkeleton(vertices, smooth, 15, 16); // 9  10
+		SphereSkeleton(vertices, smooth, 5, 1); SphereSkeleton(vertices, smooth, 1, 2);    // 11 12
+		SphereSkeleton(vertices, smooth, 2, 3); SphereSkeleton(vertices, smooth, 3, 4);    // 13 14
+		SphereSkeleton(vertices, smooth, 4, 16);                                           // 15
+		SphereSkeleton(vertices, smooth, 5, 6); SphereSkeleton(vertices, smooth, 6, 1);    // 16 17
+		SphereSkeleton(vertices, smooth, 1, 7); SphereSkeleton(vertices, smooth, 7, 2);    // 18 19
+		SphereSkeleton(vertices, smooth, 2, 8); SphereSkeleton(vertices, smooth, 8, 3);    // 20 21
+		SphereSkeleton(vertices, smooth, 3, 9); SphereSkeleton(vertices, smooth, 9, 4);    // 22 23
+		SphereSkeleton(vertices, smooth, 4, 10); SphereSkeleton(vertices, smooth, 10, 16); // 24 25
+		SphereSkeleton(vertices, smooth, 16, 17);                                          // 26
+		SphereSkeleton(vertices, smooth, 6, 7); SphereSkeleton(vertices, smooth, 7, 8);    // 27 28
+		SphereSkeleton(vertices, smooth, 8, 9); SphereSkeleton(vertices, smooth, 9, 10);   // 29 30
+		SphereSkeleton(vertices, smooth, 10, 17);                                          // 31
+		SphereSkeleton(vertices, smooth, 6, 11); SphereSkeleton(vertices, smooth, 7, 11);  // 32 33
+		SphereSkeleton(vertices, smooth, 7, 18); SphereSkeleton(vertices, smooth, 8, 18);  // 34 35
+		SphereSkeleton(vertices, smooth, 8, 19); SphereSkeleton(vertices, smooth, 9, 19);  // 36 37
+		SphereSkeleton(vertices, smooth, 9, 20); SphereSkeleton(vertices, smooth, 10, 20); // 38 39
+		SphereSkeleton(vertices, smooth, 10, 21); SphereSkeleton(vertices, smooth, 17, 21);// 40 41
 		// update normal
 		for (auto& v : vertices)
 		{
@@ -482,28 +517,26 @@ namespace Rehenz
 			v.n.w = 0;
 		}
 		// add triangles
-		TrianglesAppend(triangles, BigTriangleLerp(vertices, SphereBigTriangle(smooth, 12, 0, 1, 2, +1, +6, -2), true));
-		TrianglesAppend(triangles, BigTriangleLerp(vertices, SphereBigTriangle(smooth, 12, 0, 2, 4, +2, +7, -3), true));
-		TrianglesAppend(triangles, BigTriangleLerp(vertices, SphereBigTriangle(smooth, 12, 0, 4, 6, +3, +8, -4), true));
-		TrianglesAppend(triangles, BigTriangleLerp(vertices, SphereBigTriangle(smooth, 12, 0, 6, 5, +4, +9, -5), true));
-		TrianglesAppend(triangles, BigTriangleLerp(vertices, SphereBigTriangle(smooth, 12, 0, 5, 1, +5, +10, -1), true));
-		// 1 2 4 6 5
-		TrianglesAppend(triangles, BigTriangleLerp(vertices, SphereBigTriangle(smooth, 12, 1, 7, 3, +11, +21, -12), true));
-		TrianglesAppend(triangles, BigTriangleLerp(vertices, SphereBigTriangle(smooth, 12, 1, 3, 2, +12, -13, -6), true));
-		TrianglesAppend(triangles, BigTriangleLerp(vertices, SphereBigTriangle(smooth, 12, 2, 3, 8, +13, +22, -14), true));
-		TrianglesAppend(triangles, BigTriangleLerp(vertices, SphereBigTriangle(smooth, 12, 2, 8, 4, +14, -15, -7), true));
-		TrianglesAppend(triangles, BigTriangleLerp(vertices, SphereBigTriangle(smooth, 12, 4, 8, 10, +15, +23, -16), true));
-		TrianglesAppend(triangles, BigTriangleLerp(vertices, SphereBigTriangle(smooth, 12, 4, 10, 6, +16, -17, -8), true));
-		TrianglesAppend(triangles, BigTriangleLerp(vertices, SphereBigTriangle(smooth, 12, 6, 10, 11, +17, +24, -18), true));
-		TrianglesAppend(triangles, BigTriangleLerp(vertices, SphereBigTriangle(smooth, 12, 6, 11, 5, +18, -19, -9), true));
-		TrianglesAppend(triangles, BigTriangleLerp(vertices, SphereBigTriangle(smooth, 12, 5, 11, 7, +19, +25, -20), true));
-		TrianglesAppend(triangles, BigTriangleLerp(vertices, SphereBigTriangle(smooth, 12, 5, 7, 1, +20, -11, -10), true));
-		// 7 3 8 10 11
-		TrianglesAppend(triangles, BigTriangleLerp(vertices, SphereBigTriangle(smooth, 12, 9, 3, 7, -27, -21, +26), true));
-		TrianglesAppend(triangles, BigTriangleLerp(vertices, SphereBigTriangle(smooth, 12, 9, 8, 3, -28, -22, +27), true));
-		TrianglesAppend(triangles, BigTriangleLerp(vertices, SphereBigTriangle(smooth, 12, 9, 10, 8, -29, -23, +28), true));
-		TrianglesAppend(triangles, BigTriangleLerp(vertices, SphereBigTriangle(smooth, 12, 9, 11, 10, -30, -24, +29), true));
-		TrianglesAppend(triangles, BigTriangleLerp(vertices, SphereBigTriangle(smooth, 12, 9, 7, 11, -26, -25, +30), true));
+		TrianglesAppend(triangles, BigTriangleLerp(vertices, SphereBigTriangle(smooth, 22, 0, 5, 1, +1, +11, -2), true));
+		TrianglesAppend(triangles, BigTriangleLerp(vertices, SphereBigTriangle(smooth, 22, 12, 1, 2, +3, +12, -4), true));
+		TrianglesAppend(triangles, BigTriangleLerp(vertices, SphereBigTriangle(smooth, 22, 13, 2, 3, +5, +13, -6), true));
+		TrianglesAppend(triangles, BigTriangleLerp(vertices, SphereBigTriangle(smooth, 22, 14, 3, 4, +7, +14, -8), true));
+		TrianglesAppend(triangles, BigTriangleLerp(vertices, SphereBigTriangle(smooth, 22, 15, 4, 16, +9, +15, -10), true));
+		TrianglesAppend(triangles, BigTriangleLerp(vertices, SphereBigTriangle(smooth, 22, 1, 5, 6, -11, +16, +17), true));
+		TrianglesAppend(triangles, BigTriangleLerp(vertices, SphereBigTriangle(smooth, 22, 1, 6, 7, -17, +27, -18), true));
+		TrianglesAppend(triangles, BigTriangleLerp(vertices, SphereBigTriangle(smooth, 22, 2, 1, 7, -12, +18, +19), true));
+		TrianglesAppend(triangles, BigTriangleLerp(vertices, SphereBigTriangle(smooth, 22, 2, 7, 8, -19, +28, -20), true));
+		TrianglesAppend(triangles, BigTriangleLerp(vertices, SphereBigTriangle(smooth, 22, 3, 2, 8, -13, +20, +21), true));
+		TrianglesAppend(triangles, BigTriangleLerp(vertices, SphereBigTriangle(smooth, 22, 3, 8, 9, -21, +29, -22), true));
+		TrianglesAppend(triangles, BigTriangleLerp(vertices, SphereBigTriangle(smooth, 22, 4, 3, 9, -14, +22, +23), true));
+		TrianglesAppend(triangles, BigTriangleLerp(vertices, SphereBigTriangle(smooth, 22, 4, 9, 10, -23, +30, -24), true));
+		TrianglesAppend(triangles, BigTriangleLerp(vertices, SphereBigTriangle(smooth, 22, 16, 4, 10, -15, +24, +25), true));
+		TrianglesAppend(triangles, BigTriangleLerp(vertices, SphereBigTriangle(smooth, 22, 16, 10, 17, -25, +31, -26), true));
+		TrianglesAppend(triangles, BigTriangleLerp(vertices, SphereBigTriangle(smooth, 22, 7, 6, 11, -27, +32, -33), true));
+		TrianglesAppend(triangles, BigTriangleLerp(vertices, SphereBigTriangle(smooth, 22, 8, 7, 18, -28, +34, -35), true));
+		TrianglesAppend(triangles, BigTriangleLerp(vertices, SphereBigTriangle(smooth, 22, 9, 8, 19, -29, +36, -37), true));
+		TrianglesAppend(triangles, BigTriangleLerp(vertices, SphereBigTriangle(smooth, 22, 10, 9, 20, -30, +38, -39), true));
+		TrianglesAppend(triangles, BigTriangleLerp(vertices, SphereBigTriangle(smooth, 22, 17, 10, 21, -31, +40, -41), true));
 
 		return std::make_shared<Mesh>(std::move(vertices), std::move(triangles));
 	}
@@ -513,9 +546,12 @@ namespace Rehenz
 		std::vector<int> triangles;
 
 		std::ifstream fs(filename.c_str());
+		if (fs.fail())
+			return nullptr;
+
 		std::vector<Point> vs;
 		std::vector<UV> vts;
-		std::vector<Color> vns;
+		std::vector<Vector> vns;
 
 		while (fs.good())
 		{
@@ -530,6 +566,8 @@ namespace Rehenz
 			else if (str[0] == '#') // comment line
 				continue;
 			else if (str == "mtlib") // material // ignore
+				continue;
+			else if (str == "newmtl") // material // ignore
 				continue;
 			else if (str == "usemtl") // material // ignore
 				continue;
@@ -549,18 +587,20 @@ namespace Rehenz
 			}
 			else if (str == "vn") // normal
 			{
-				Color c;
-				ss >> c.x >> c.y >> c.z;
-				vns.push_back(c);
+				Vector n;
+				ss >> n.x >> n.y >> n.z;
+				vns.push_back(n);
 			}
 			else if (str == "f") // face
 			{
-				for (int i = 0; i < 3; i++)
+				for (int i = 0; i < 4; i++)
 				{
 					int values[3]{ 0,0,0 };
 
+					// read
 					std::string part;
-					ss >> part;
+					if (!(ss >> part))
+						break;
 					std::istringstream part_ss(part);
 					for (int j = 0; j < 3; j++)
 					{
@@ -572,17 +612,40 @@ namespace Rehenz
 					for (int j = 0; j < 3; j++)
 						values[j] -= 1;
 
-					triangles.push_back(static_cast<int>(vertices.size()));
+					// add vertex
 					if (values[0] < 0 || values[0] >= vs.size()) // no pos, ignore the face
 						break;
 					Vertex v(vs[values[0]]);
 					if (values[2] >= 0 && values[2] < vns.size())
-						v.c = vns[values[2]];
+						v.n = vns[values[2]];
 					if (values[1] >= 0 && values[1] < vts.size())
 						v.uv = vts[values[1]];
+					v.c = Color::white;
 					vertices.push_back(v);
+
+					// add triangle
+					if (i == 2)
+					{
+						int vi = static_cast<int>(vertices.size()) - 1;
+						triangles.push_back(vi - 2); triangles.push_back(vi - 1); triangles.push_back(vi);
+					}
+					else if (i == 3)
+					{
+						int vi = static_cast<int>(vertices.size()) - 1;
+						triangles.push_back(vi - 3); triangles.push_back(vi - 1); triangles.push_back(vi);
+					}
 				}
 			}
+			else if (str == "Ka") // material // ignore
+				continue;
+			else if (str == "Kd") // material // ignore
+				continue;
+			else if (str == "d") // material // ignore
+				continue;
+			else if (str == "illum") // illumination // ignore
+				continue;
+			else if (str.substr(0, 4) == "map_") // texture // ignore
+				continue;
 			else // other // ignore
 				continue;
 		}
@@ -599,139 +662,106 @@ namespace Rehenz
 
 		std::vector<Vertex> vertices;
 		std::vector<int> triangles;
-		int base_vi, i0, i1, i2, i3;
+		int base_vi;
 
-		// add top disc (1+xn*trn vertices)
+		// add top disc
 		if (top_radius > 0)
 		{
-			base_vi = static_cast<int>(vertices.size());
-			vertices.emplace_back(Point(0, 1, 0), Vector(0, 1, 0));
-			for (int x = 0; x < xn; x++)
+			for (int r = 0; r <= trn; r++)
 			{
-				float theta = pi_mul2 * x / xn;
-				float costheta = cosf(theta);
-				float sintheta = sinf(theta);
-				for (int r = 1; r <= trn; r++)
+				float t = static_cast<float>(r) / trn;
+				float v = t * 0.25f;
+				float radius = t * top_radius;
+				for (int x = 0; x <= xn; x++)
 				{
-					float radius = top_radius * r / trn;
-					vertices.emplace_back(Point(radius * costheta, 1, radius * sintheta), Vector(0, 1, 0));
+					float u = static_cast<float>(x) / xn;
+					float phi = pi_mul2 * u;
+					Point p(radius * cosf(phi), 1, -radius * sinf(phi));
+					vertices.emplace_back(p, Vector(0, 1, 0), Color::white, UV(u, v));
 				}
 			}
-			for (int x = 0; x < xn - 1; x++)
+			for (int r = 0; r < trn; r++)
 			{
-				i0 = base_vi + 0;
-				i1 = base_vi + 1 + x * trn;
-				i2 = i1 + trn;
-				triangles.push_back(i0); triangles.push_back(i2); triangles.push_back(i1);
-			}
-			i0 = base_vi + 0;
-			i1 = base_vi + 1 + (xn - 1) * trn;
-			i2 = base_vi + 1 + 0 * trn;
-			triangles.push_back(i0); triangles.push_back(i2); triangles.push_back(i1);
-			for (int r = 2; r <= trn; r++)
-			{
-				for (int x = 0; x < xn - 1; x++)
+				for (int x = 0; x < xn; x++)
 				{
-					i0 = base_vi + 1 + x * trn + r - 2;
-					i1 = i0 + trn;
-					i2 = i0 + 1;
-					i3 = i2 + trn;
-					triangles.push_back(i0); triangles.push_back(i1); triangles.push_back(i2);
-					triangles.push_back(i2); triangles.push_back(i1); triangles.push_back(i3);
+					int a = r * (xn + 1) + x;
+					int b = a + 1;
+					int c = a + (xn + 1);
+					int d = c + 1;
+					triangles.push_back(a); triangles.push_back(c); triangles.push_back(d);
+					if (r != 0)
+					{
+						triangles.push_back(a); triangles.push_back(d); triangles.push_back(b);
+					}
 				}
-				i0 = base_vi + 1 + (xn - 1) * trn + r - 2;
-				i1 = base_vi + 1 + 0 * trn + r - 2;
-				i2 = i0 + 1;
-				i3 = i1 + 1;
-				triangles.push_back(i0); triangles.push_back(i1); triangles.push_back(i2);
-				triangles.push_back(i2); triangles.push_back(i1); triangles.push_back(i3);
 			}
 		}
-
-		// add bottom disc (1+xn*brn vertices)
-		base_vi = static_cast<int>(vertices.size());
-		vertices.emplace_back(Point(0, -1, 0), Vector(0, -1, 0));
-		for (int x = 0; x < xn; x++)
-		{
-			float theta = pi_mul2 * x / xn;
-			float costheta = cosf(theta);
-			float sintheta = sinf(theta);
-			for (int r = 1; r <= brn; r++)
-			{
-				float radius = 1.0f * r / brn;
-				vertices.emplace_back(Point(radius * costheta, -1, radius * sintheta), Vector(0, -1, 0));
-			}
-		}
-		for (int x = 0; x < xn - 1; x++)
-		{
-			i0 = base_vi + 0;
-			i1 = base_vi + 1 + x * brn;
-			i2 = i1 + brn;
-			triangles.push_back(i0); triangles.push_back(i1); triangles.push_back(i2);
-		}
-		i0 = base_vi + 0;
-		i1 = base_vi + 1 + (xn - 1) * brn;
-		i2 = base_vi + 1 + 0 * brn;
-		triangles.push_back(i0); triangles.push_back(i1); triangles.push_back(i2);
-		for (int r = 2; r <= brn; r++)
-		{
-			for (int x = 0; x < xn - 1; x++)
-			{
-				i0 = base_vi + 1 + x * brn + r - 2;
-				i1 = i0 + brn;
-				i2 = i0 + 1;
-				i3 = i2 + brn;
-				triangles.push_back(i0); triangles.push_back(i2); triangles.push_back(i1);
-				triangles.push_back(i1); triangles.push_back(i2); triangles.push_back(i3);
-			}
-			i0 = base_vi + 1 + (xn - 1) * brn + r - 2;
-			i1 = base_vi + 1 + 0 * brn + r - 2;
-			i2 = i0 + 1;
-			i3 = i1 + 1;
-			triangles.push_back(i0); triangles.push_back(i2); triangles.push_back(i1);
-			triangles.push_back(i1); triangles.push_back(i2); triangles.push_back(i3);
-		}
-
-		// add side face (xn*yn vertices)
+		// add side face
 		Vector normal(2, 1 - top_radius, 0);
 		normal = VectorNormalize(normal);
 		base_vi = static_cast<int>(vertices.size());
-		for (int x = 0; x < xn; x++)
+		for (int y = 0; y <= yn; y++)
 		{
-			float theta = pi_mul2 * x / xn;
-			float costheta = cosf(theta);
-			float sintheta = sinf(theta);
-			Vector normal2(normal.x * costheta, normal.y, normal.x * sintheta);
-			for (int y = 0; y <= yn; y++)
+			float t = static_cast<float>(y) / yn;
+			float v = t * 0.5f + 0.25f;
+			float height = 1 - 2 * t;
+			float radius = Lerp(top_radius, 1.0f, t);
+			for (int x = 0; x <= xn; x++)
 			{
-				float t = static_cast<float>(y) / yn;
-				float radius = Lerp(top_radius, 1.0f, t);
-				vertices.emplace_back(Point(radius * costheta, 1 - 2 * t, radius * sintheta), normal2);
+				float u = static_cast<float>(x) / xn;
+				float phi = pi_mul2 * u;
+				Point p(radius * cosf(phi), height, -radius * sinf(phi));
+				Vector n(normal.x * cosf(phi), normal.y, normal.x * sinf(phi));
+				vertices.emplace_back(p, n, Color::white, UV(u, v));
 			}
 		}
 		for (int y = 0; y < yn; y++)
 		{
-			for (int x = 0; x < xn - 1; x++)
+			for (int x = 0; x < xn; x++)
 			{
-				i0 = base_vi + x * (yn + 1) + y;
-				i1 = i0 + (yn + 1);
-				i2 = i0 + 1;
-				i3 = i2 + (yn + 1);
-				if (y != 0 || top_radius != 0)
+				int a = base_vi + y * (xn + 1) + x;
+				int b = a + 1;
+				int c = a + (xn + 1);
+				int d = c + 1;
+				triangles.push_back(a); triangles.push_back(c); triangles.push_back(d);
+				if (top_radius != 0 || y != 0)
 				{
-					triangles.push_back(i0); triangles.push_back(i1); triangles.push_back(i2);
+					triangles.push_back(a); triangles.push_back(d); triangles.push_back(b);
 				}
-				triangles.push_back(i2); triangles.push_back(i1); triangles.push_back(i3);
 			}
-			i0 = base_vi + (xn - 1) * (yn + 1) + y;
-			i1 = base_vi + 0 * (yn + 1) + y;
-			i2 = i0 + 1;
-			i3 = i1 + 1;
-			if (y != 0 || top_radius != 0)
+		}
+		// add bottom disc
+		base_vi = static_cast<int>(vertices.size());
+		if (top_radius > 0)
+		{
+			for (int r = 0; r <= brn; r++)
 			{
-				triangles.push_back(i0); triangles.push_back(i1); triangles.push_back(i2);
+				float t = static_cast<float>(r) / trn;
+				float v = t * 0.25f + 0.75f;
+				float radius = 1 - t;
+				for (int x = 0; x <= xn; x++)
+				{
+					float u = static_cast<float>(x) / xn;
+					float phi = pi_mul2 * u;
+					Point p(radius * cosf(phi), -1, -radius * sinf(phi));
+					vertices.emplace_back(p, Vector(0, -1, 0), Color::white, UV(u, v));
+				}
 			}
-			triangles.push_back(i2); triangles.push_back(i1); triangles.push_back(i3);
+			for (int r = 0; r < brn; r++)
+			{
+				for (int x = 0; x < xn; x++)
+				{
+					int a = base_vi + r * (xn + 1) + x;
+					int b = a + 1;
+					int c = a + (xn + 1);
+					int d = c + 1;
+					if (r != brn - 1)
+					{
+						triangles.push_back(a); triangles.push_back(c); triangles.push_back(d);
+					}
+					triangles.push_back(a); triangles.push_back(d); triangles.push_back(b);
+				}
+			}
 		}
 
 		return std::make_shared<Mesh>(std::move(vertices), std::move(triangles));
@@ -792,15 +822,19 @@ namespace Rehenz
 			pt->buffer[i] = (imageC[i] + 1) / 2.0f * Color(1, 1, 1);
 		return pt;
 	}
-	std::shared_ptr<Texture> CreateTexturePlaid()
+	std::shared_ptr<Texture> CreateTexturePlaid(int n)
 	{
-		auto pt = std::make_shared<Texture>(9, 9);
-		for (int i = 0; i < 81; i++)
+		auto pt = std::make_shared<Texture>(n, n);
+		for (int y = 0; y < n; y++)
 		{
-			if (i % 2 == 0)
-				pt->buffer[i] = Color(1, 1, 1);
-			else
-				pt->buffer[i] = Color(0, 0, 1);
+			for (int x = 0; x < n; x++)
+			{
+				int i = y * n + x;
+				if ((x + y) % 2 == 0)
+					pt->buffer[i] = Color(1, 1, 1);
+				else
+					pt->buffer[i] = Color(0, 0, 1);
+			}
 		}
 		return pt;
 	}

@@ -95,24 +95,32 @@ namespace Rehenz
 		return CreateCubeMesh(colors, smooth);
 	}
 
-	// create sphere mesh which includes pos, normal info
+	// create sphere mesh
 	// pos   : unit sphere, and (0,0,0) is center point
 	// normal: point out of the ball through ball center
+	// color : white
+	// uv    : (u=phi/2pi, v=theta/pi)
 	std::shared_ptr<Mesh> CreateSphereMesh(int smooth = 10);
 	// another sphere mesh layout. I call it B layout. default is A layout
+	// only uv is different with A layout : tile big triangles to define uv, be same with Net (polyhedron)
 	std::shared_ptr<Mesh> CreateSphereMeshB(int smooth = 5);
-	// sphere mesh C layout
+	// sphere mesh C layout, uv same with B
 	std::shared_ptr<Mesh> CreateSphereMeshC(int smooth = 8);
-	// sphere mesh D layout
+	// sphere mesh D layout, uv same with B
 	std::shared_ptr<Mesh> CreateSphereMeshD(int smooth = 4);
 
 	// create mesh from .obj file
-	// include pos, normal, uv info
+	// pos   : from file
+	// normal: from file
+	// color : white
+	// uv    : from file
 	std::shared_ptr<Mesh> CreateMeshFromObjFile(const std::string& filename);
 
 	// create frustum mesh which includes pos, normal info
 	// pos   : height = 2, bottom radius = 1, (0,0,0) is center point
 	// normal: 
+	// color : white
+	// uv    : topologically be same with sphere A
 	std::shared_ptr<Mesh> CreateFrustumMesh(float top_radius = 0.5f, int smooth = 10);
 
 	class Texture
@@ -137,7 +145,7 @@ namespace Rehenz
 	// create letter C texture
 	std::shared_ptr<Texture> CreateTextureC();
 	// create white-blue plaid texture
-	std::shared_ptr<Texture> CreateTexturePlaid();
+	std::shared_ptr<Texture> CreateTexturePlaid(int n = 10);
 	// create 1-6 dice texture
 	std::shared_ptr<Texture> CreateTextureDice();
 
