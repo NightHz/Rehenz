@@ -60,7 +60,7 @@ namespace Rehenz
 			axes.pitch = -atanf(front.y / r);
 	}
 
-	Projection::Projection() :fovy(pi_div2), aspect(1), z_near(1), z_far(500)
+	Projection::Projection() :fovy(pi_div2), aspect(1), z_near(0.1f), z_far(50)
 	{
 		parallel_projection = false;
 		height = 8.0f;
