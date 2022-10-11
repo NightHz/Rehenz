@@ -35,10 +35,12 @@ namespace Rehenz
 
 	Color operator*(Color c1, Color c2);
 
+	// ouput format : high-(0,R,G,B)-low = 32bppBGR
 	inline static uint ColorRGB(int r, int g, int b)
 	{
 		return ((r & 0xff) << 16) | ((g & 0xff) << 8) | ((b & 0xff) << 0);
 	}
+	// ouput format : high-(0,R,G,B)-low = 32bppBGR
 	inline static uint ColorRGB(Color c)
 	{
 		return ColorRGB(static_cast<int>(c.x * 0xff), static_cast<int>(c.y * 0xff), static_cast<int>(c.z * 0xff));
@@ -47,6 +49,7 @@ namespace Rehenz
 	struct ColorRGB
 	{
 	public:
+		ColorRGB() = delete;
 		// 8 pure color
 		static uint white, black, red, green, blue, yellow, magenta, cyan;
 		// 7 light color
