@@ -99,6 +99,9 @@
     <ClCompile Include="shader.cpp">
       <Filter>source\render</Filter>
     </ClCompile>
+    <ClCompile Include="image_reader.cpp">
+      <Filter>source\window</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="rehenz.h">
@@ -163,6 +166,9 @@
     </ClInclude>
     <ClInclude Include="shader.h">
       <Filter>header\render</Filter>
+    </ClInclude>
+    <ClInclude Include="image_reader.h">
+      <Filter>header\window</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

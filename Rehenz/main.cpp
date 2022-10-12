@@ -830,12 +830,45 @@ int main_drawerf_test_triangle()
 	return 0;
 }
 
+int main_image_reader_text()
+{
+	// read image
+	uint width;
+	uint height;
+	auto image = LoadImageFile(L"assets/NightHz.jpg", width, height);
+	if (image == nullptr)
+	{
+		cout << "file not exist" << endl;
+		return 1;
+	}
+
+	SurfaceDx8 srf_dx8;
+	const String title = "image reader";
+	srf_dx8.Create(GetModuleHandle(nullptr), width, height, title.c_str());
+
+	cout << "press Q to exit" << endl;
+	while (srf_dx8.GetWindowState())
+	{
+		// copy
+		srf_dx8.FillFromImage(image.get());
+		// refresh
+		srf_dx8.Present();
+		// msg
+		SimpleMessageProcess();
+		// exit
+		if (KeyIsDown('Q'))
+			break;
+	}
+	srf_dx8.Destroy();
+	return 0;
+}
+
 int main()
 {
 	cout << "Hello~ Rehenz~" << endl;
 
 	//return main_noise_example();
-	return main_surface_dx8_and_render_soft_example();
+	//return main_surface_dx8_and_render_soft_example();
 	//return main_clip_test();
 	//return main_tilemap_and_path_finding_and_fps_counter_example();
 	//return main_two_surface_test();
@@ -843,4 +876,5 @@ int main()
 	//return main_drawer_test();
 	//return main_drawer_test_triangle();
 	//return main_drawerf_test_triangle();
+	return main_image_reader_text();
 }

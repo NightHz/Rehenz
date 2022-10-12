@@ -4,6 +4,7 @@
 #include "drawer.h"
 #include "fps_counter.h"
 #include "hash.h"
+#include "image_reader.h"
 #include "input.h"
 #include "math.h"
 #include "mesh.h"

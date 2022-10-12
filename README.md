@@ -14,6 +14,7 @@ some code writed by NightHz
 - [寻路算法](#path_finding)（`path_finding.h`）
 - 创建一个网格地图（`tilemap.h`）
 - 计算样条线（`spline.h`）
+- 读取图片文件（`image_reader.h`）
 
 
 ## 代码规范
@@ -40,6 +41,7 @@ some code writed by NightHz
 **window**
 
 - `fps_counter.h`: 帧率计数器
+- `image_reader.h`: 读取图片文件
 - `input.h` : 按键状态检测
 - `surface_dx8.h`: 使用 DirectDraw(in DirectX8) 创建一个能够绘制图像的窗口
 - `window.h`: 快速创建 windows 窗口
