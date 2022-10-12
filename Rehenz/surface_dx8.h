@@ -37,6 +37,7 @@ namespace Rehenz
 		void Destroy();
 
 		// Draw Method
+		// required format : high-(x,R,G,B)-low = 32bppBGR
 		bool FillFromImage(const uint* image);
 
 		// Display Method
