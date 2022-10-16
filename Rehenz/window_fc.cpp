@@ -19,8 +19,16 @@ namespace Rehenz
 		return li.QuadPart;
 	}
 
+	FpsCounterS::FpsCounterS() : FpsCounter(QueryPerformanceGetTime, QueryPerformanceGetFrequency())
+	{
+	}
+
+	FpsCounterS::~FpsCounterS()
+	{
+	}
+
 	SimpleWindowWithFC::SimpleWindowWithFC(HINSTANCE _hinstance, int _width, int _height, String _title_base)
-		: SimpleWindow(_hinstance, _width, _height, _title_base), title_base(std::move(_title_base)), fps_counter(QueryPerformanceGetTime, QueryPerformanceGetFrequency())
+		: SimpleWindow(_hinstance, _width, _height, _title_base), title_base(std::move(_title_base)), fps_counter()
 	{
 		fps_counter.LockFps(100);
 		auto updateFps = [this](Rehenz::uint fps)
