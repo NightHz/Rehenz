@@ -10,7 +10,7 @@ namespace Rehenz
         UINT struct_size;
         UINT buffer_size;
         D3D12_HEAP_TYPE heap_type;
-        ID3D12Resource2* buffer;
+        ComPtr<ID3D12Resource2> buffer;
         //BYTE* data;
 
     public:
@@ -24,7 +24,7 @@ namespace Rehenz
         D3d12BufferBase& operator=(const D3d12BufferBase&) = delete;
         ~D3d12BufferBase();
 
-        inline ID3D12Resource2* Get() { return buffer; }
+        inline ID3D12Resource2* Get() { return buffer.Get(); }
         inline D3D12_GPU_VIRTUAL_ADDRESS GetGpuLocation(UINT i)
         {
             return buffer->GetGPUVirtualAddress() + i * static_cast<UINT64>(struct_size);
@@ -94,7 +94,7 @@ namespace Rehenz
         UINT16 mip_levels;
         static const DXGI_FORMAT format = DXGI_FORMAT_B8G8R8A8_UNORM;
         D3D12_HEAP_TYPE heap_type;
-        ID3D12Resource2* texture;
+        ComPtr<ID3D12Resource2> texture;
 
     public:
         D3d12Texture(const D3D12_RESOURCE_DESC& rc_desc, D3D12_HEAP_TYPE _heap_type, ID3D12Device8* device,
@@ -105,7 +105,7 @@ namespace Rehenz
         D3d12Texture& operator=(const D3d12Texture&) = delete;
         ~D3d12Texture();
 
-        inline ID3D12Resource2* Get() { return texture; }
+        inline ID3D12Resource2* Get() { return texture.Get(); }
         inline D3D12_GPU_VIRTUAL_ADDRESS GetGpuLocation()
         {
             return texture->GetGPUVirtualAddress();

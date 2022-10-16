@@ -16,17 +16,6 @@ namespace Rehenz
     // smart pointer for COM
     using Microsoft::WRL::ComPtr;
 
-    // safe release COM
-    template<typename T>
-    inline void ReleaseCom(T*& com)
-    {
-        if (com)
-        {
-            com->Release();
-            com = nullptr;
-        }
-    }
-
     // DirectX Math
     namespace dxm
     {

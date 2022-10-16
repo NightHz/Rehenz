@@ -13,7 +13,7 @@ namespace Rehenz
 
 		auto rc_desc = D3d12Util::GetBufferRcDesc(buffer_size, flag);
 		auto heap_prop = D3d12Util::GetHeapProperties(heap_type);
-		HRESULT hr = device->CreateCommittedResource(&heap_prop, D3D12_HEAP_FLAG_NONE, &rc_desc, state, nullptr, IID_PPV_ARGS(&buffer));
+		HRESULT hr = device->CreateCommittedResource(&heap_prop, D3D12_HEAP_FLAG_NONE, &rc_desc, state, nullptr, IID_PPV_ARGS(buffer.GetAddressOf()));
 		if (FAILED(hr))
 		{
 			buffer = nullptr;
@@ -23,7 +23,6 @@ namespace Rehenz
 
 	D3d12BufferBase::~D3d12BufferBase()
 	{
-		ReleaseCom(buffer);
 	}
 
 	D3d12Texture::D3d12Texture(const D3D12_RESOURCE_DESC& rc_desc, D3D12_HEAP_TYPE _heap_type, ID3D12Device8* device, D3D12_RESOURCE_STATES state, D3D12_CLEAR_VALUE* clear_value)
@@ -34,7 +33,7 @@ namespace Rehenz
 		heap_type = _heap_type;
 
 		auto heap_prop = D3d12Util::GetHeapProperties(heap_type);
-		HRESULT hr = device->CreateCommittedResource(&heap_prop, D3D12_HEAP_FLAG_NONE, &rc_desc, state, clear_value, IID_PPV_ARGS(&texture));
+		HRESULT hr = device->CreateCommittedResource(&heap_prop, D3D12_HEAP_FLAG_NONE, &rc_desc, state, clear_value, IID_PPV_ARGS(texture.GetAddressOf()));
 		if (FAILED(hr))
 		{
 			texture = nullptr;
@@ -44,7 +43,6 @@ namespace Rehenz
 
 	D3d12Texture::~D3d12Texture()
 	{
-		ReleaseCom(texture);
 	}
 
 }
