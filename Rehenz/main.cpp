@@ -250,7 +250,7 @@ int main_tilemap_and_path_finding_and_fps_counter_example()
 	String title = "surface by dx8";
 	const int width = 800;
 	const int height = 600;
-	std::unique_ptr<uint[]> image = std::make_unique<uint[]>(width * height);
+	std::unique_ptr<uint[]> image = std::make_unique<uint[]>(static_cast<size_t>(width) * height);
 	srf_dx8.Create(GetModuleHandle(nullptr), width, height, title.c_str());
 
 	cout << "Create a tilemap" << endl;
@@ -432,13 +432,13 @@ int main_two_surface_test()
 	const String title = "surface by dx8";
 	const int width = 800;
 	const int height = 600;
-	std::unique_ptr<uint[]> image = std::make_unique<uint[]>(width * height);
+	std::unique_ptr<uint[]> image = std::make_unique<uint[]>(static_cast<size_t>(width) * height);
 	srf_dx8.Create(GetModuleHandle(nullptr), width, height, title.c_str());
 
 	cout << "Open second surface with dx8" << endl;
 	SurfaceDx8 srf_dx8_2;
 	const String title2 = "second surface by dx8";
-	std::unique_ptr<uint[]> image2 = std::make_unique<uint[]>(width * height);
+	std::unique_ptr<uint[]> image2 = std::make_unique<uint[]>(static_cast<size_t>(width) * height);
 	srf_dx8_2.Create(GetModuleHandle(nullptr), width, height, title2.c_str());
 
 	cout << "press Q to exit" << endl;
@@ -495,10 +495,10 @@ int main_drawer_test()
 	const int h2 = h * s;
 	srf.Create(GetModuleHandle(nullptr), w2, h2, "Rehenz drawer test");
 
-	std::unique_ptr<uint[]> image = std::make_unique<uint[]>(w * h);
+	std::unique_ptr<uint[]> image = std::make_unique<uint[]>(static_cast<size_t>(w) * h);
 	Drawer drawer(image.get(), w, h);
 	DrawerF drawerf(image.get(), w, h);
-	std::unique_ptr<uint[]> image2 = std::make_unique<uint[]>(w2 * h2);
+	std::unique_ptr<uint[]> image2 = std::make_unique<uint[]>(static_cast<size_t>(w2) * h2);
 	Drawer drawer2(image2.get(), w2, h2);
 	DrawerF drawerf2(image2.get(), w2, h2);
 	while (srf.GetWindowState())
@@ -615,9 +615,9 @@ int main_drawer_test_triangle()
 	const int h2 = h * s;
 	srf.Create(GetModuleHandle(nullptr), w2, h2, "Rehenz drawer test triangle");
 
-	std::unique_ptr<uint[]> image = std::make_unique<uint[]>(w * h);
+	std::unique_ptr<uint[]> image = std::make_unique<uint[]>(static_cast<size_t>(w) * h);
 	Drawer drawer(image.get(), w, h);
-	std::unique_ptr<uint[]> image2 = std::make_unique<uint[]>(w2 * h2);
+	std::unique_ptr<uint[]> image2 = std::make_unique<uint[]>(static_cast<size_t>(w2) * h2);
 	Drawer drawer2(image2.get(), w2, h2);
 	while (srf.GetWindowState())
 	{
@@ -697,9 +697,9 @@ int main_drawerf_test_triangle()
 	srf1.Create(GetModuleHandle(nullptr), w2, h2, "Rehenz drawerf test triangle : normal draw order");
 	srf1.GetWindow()->fps_counter.LockFps(0);
 
-	std::unique_ptr<uint[]> image1 = std::make_unique<uint[]>(w * h);
+	std::unique_ptr<uint[]> image1 = std::make_unique<uint[]>(static_cast<size_t>(w) * h);
 	DrawerF drawer1(image1.get(), w, h);
-	std::unique_ptr<uint[]> image1_srf = std::make_unique<uint[]>(w2 * h2);
+	std::unique_ptr<uint[]> image1_srf = std::make_unique<uint[]>(static_cast<size_t>(w2) * h2);
 	Drawer drawer1_srf(image1_srf.get(), w2, h2);
 	DrawerF drawerf1_srf(image1_srf.get(), w2, h2);
 
@@ -707,9 +707,9 @@ int main_drawerf_test_triangle()
 	srf2.Create(GetModuleHandle(nullptr), w2, h2, "Rehenz drawerf test triangle : reverse draw order");
 	srf2.GetWindow()->fps_counter.LockFps(0);
 
-	std::unique_ptr<uint[]> image2 = std::make_unique<uint[]>(w * h);
+	std::unique_ptr<uint[]> image2 = std::make_unique<uint[]>(static_cast<size_t>(w) * h);
 	DrawerF drawer2(image2.get(), w, h);
-	std::unique_ptr<uint[]> image2_srf = std::make_unique<uint[]>(w2 * h2);
+	std::unique_ptr<uint[]> image2_srf = std::make_unique<uint[]>(static_cast<size_t>(w2) * h2);
 	Drawer drawer2_srf(image2_srf.get(), w2, h2);
 	DrawerF drawerf2_srf(image2_srf.get(), w2, h2);
 
@@ -717,7 +717,7 @@ int main_drawerf_test_triangle()
 	srf3.Create(GetModuleHandle(nullptr), w2, h2, "Rehenz drawerf test triangle");
 	srf3.GetWindow()->fps_counter.LockFps(0);
 
-	std::unique_ptr<uint[]> image3_srf = std::make_unique<uint[]>(w2 * h2);
+	std::unique_ptr<uint[]> image3_srf = std::make_unique<uint[]>(static_cast<size_t>(w2) * h2);
 	Drawer drawer3_srf(image3_srf.get(), w2, h2);
 
 	uint red = Drawer::ColorRGB(242, 129, 128);
@@ -830,7 +830,7 @@ int main_drawerf_test_triangle()
 	return 0;
 }
 
-int main_image_reader_text()
+int main_image_reader_test()
 {
 	// read image
 	uint width;
@@ -965,6 +965,6 @@ int main()
 	//return main_drawer_test();
 	//return main_drawer_test_triangle();
 	//return main_drawerf_test_triangle();
-	//return main_image_reader_text();
+	//return main_image_reader_test();
 	return main_d3d12_example();
 }
