@@ -23,8 +23,8 @@ namespace Rehenz
 		static Color yellow_tm, yellow_green_tm, green_tm, blue_tm, purple_tm;
 		static Color pink_tm, orange_tm, gray_tm, black_tm;
 		static Color red_dark_tm, blue_dark_tm, green_dark_tm;
-		// 1 other color
-		static Color yellow_dark_o;
+		// 2 other color
+		static Color yellow_dark_o, yellow_green_o;
 	};
 
 	// clmap to [0,1]
@@ -58,7 +58,7 @@ namespace Rehenz
 		static uint yellow_tm, yellow_green_tm, green_tm, blue_tm, purple_tm;
 		static uint pink_tm, orange_tm, gray_tm, black_tm;
 		static uint red_dark_tm, blue_dark_tm, green_dark_tm;
-		// 1 other color
-		static uint yellow_dark_o;
+		// 2 other color
+		static uint yellow_dark_o, yellow_green_o;
 	};
 }

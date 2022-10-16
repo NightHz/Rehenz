@@ -17,28 +17,29 @@ namespace Rehenz
 	Color Color::magenta = Color(1, 0, 1);
 	Color Color::cyan = Color(0, 1, 1);
 
-	Color Color::red_l = Color(242, 129, 128) / 255;
-	Color Color::yellow_l = Color(223, 218, 129) / 255;
-	Color Color::blue_l = Color(141, 219, 254) / 255;
-	Color Color::green_l = Color(149, 224, 129) / 255;
-	Color Color::purple_l = Color(141, 133, 253) / 255;
-	Color Color::pink_l = Color(231, 162, 244) / 255;
-	Color Color::orange_l = Color(255, 178, 125) / 255;
+	Color Color::red_l = Color(242, 129, 128, 255) / 255;
+	Color Color::yellow_l = Color(223, 218, 129, 255) / 255;
+	Color Color::blue_l = Color(141, 219, 254, 255) / 255;
+	Color Color::green_l = Color(149, 224, 129, 255) / 255;
+	Color Color::purple_l = Color(141, 133, 253, 255) / 255;
+	Color Color::pink_l = Color(231, 162, 244, 255) / 255;
+	Color Color::orange_l = Color(255, 178, 125, 255) / 255;
 
-	Color Color::yellow_tm = Color(252, 200, 0) / 255;
-	Color Color::yellow_green_tm = Color(123, 141, 66) / 255;
-	Color Color::blue_tm = Color(137, 195, 235) / 255;
-	Color Color::purple_tm = Color(166, 154, 189) / 255;
-	Color Color::orange_tm = Color(240, 131, 0) / 255;
-	Color Color::green_dark_tm = Color(0, 85, 46) / 255;
-	Color Color::blue_dark_tm = Color(25, 47, 96) / 255;
-	Color Color::gray_tm = Color(125, 125, 125) / 255;
-	Color Color::pink_tm = Color(238, 187, 203) / 255;
-	Color Color::red_dark_tm = Color(108, 44, 47) / 255;
-	Color Color::green_tm = Color(168, 201, 127) / 255;
-	Color Color::black_tm = Color(43, 43, 43) / 255;
+	Color Color::yellow_tm = Color(252, 200, 0, 255) / 255;
+	Color Color::yellow_green_tm = Color(123, 141, 66, 255) / 255;
+	Color Color::blue_tm = Color(137, 195, 235, 255) / 255;
+	Color Color::purple_tm = Color(166, 154, 189, 255) / 255;
+	Color Color::orange_tm = Color(240, 131, 0, 255) / 255;
+	Color Color::green_dark_tm = Color(0, 85, 46, 255) / 255;
+	Color Color::blue_dark_tm = Color(25, 47, 96, 255) / 255;
+	Color Color::gray_tm = Color(125, 125, 125, 255) / 255;
+	Color Color::pink_tm = Color(238, 187, 203, 255) / 255;
+	Color Color::red_dark_tm = Color(108, 44, 47, 255) / 255;
+	Color Color::green_tm = Color(168, 201, 127, 255) / 255;
+	Color Color::black_tm = Color(43, 43, 43, 255) / 255;
 
-	Color Color::yellow_dark_o = Color(123, 141, 66) / 255;
+	Color Color::yellow_dark_o = Color(123, 141, 66, 255) / 255;
+	Color Color::yellow_green_o = Color(199, 220, 104, 255) / 255;
 
 
 	uint ColorRGB::white = Rehenz::ColorRGB(255, 255, 255);
@@ -72,4 +73,5 @@ namespace Rehenz
 	uint ColorRGB::green_dark_tm = Rehenz::ColorRGB(0, 85, 46);
 
 	uint ColorRGB::yellow_dark_o = Rehenz::ColorRGB(123, 141, 66);
+	uint ColorRGB::yellow_green_o = Rehenz::ColorRGB(199, 220, 104);
 }
