@@ -87,7 +87,7 @@
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
-      <AdditionalDependencies>user32.lib;ddraw.lib;dxguid.lib;ole32.lib</AdditionalDependencies>
+      <AdditionalDependencies>user32.lib;ddraw.lib;dxguid.lib;ole32.lib;d3d12.lib;dxgi.lib;d3dcompiler.lib</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -99,7 +99,7 @@
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
-      <AdditionalDependencies>user32.lib;ddraw.lib;dxguid.lib;ole32.lib</AdditionalDependencies>
+      <AdditionalDependencies>user32.lib;ddraw.lib;dxguid.lib;ole32.lib;d3d12.lib;dxgi.lib;d3dcompiler.lib</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -115,7 +115,7 @@
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>user32.lib;ddraw.lib;dxguid.lib;ole32.lib</AdditionalDependencies>
+      <AdditionalDependencies>user32.lib;ddraw.lib;dxguid.lib;ole32.lib;d3d12.lib;dxgi.lib;d3dcompiler.lib</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -131,11 +131,14 @@
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>user32.lib;ddraw.lib;dxguid.lib;ole32.lib</AdditionalDependencies>
+      <AdditionalDependencies>user32.lib;ddraw.lib;dxguid.lib;ole32.lib;d3d12.lib;dxgi.lib;d3dcompiler.lib</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="color.cpp" />
+    <ClCompile Include="d3d12device.cpp" />
+    <ClCompile Include="d3d12resource.cpp" />
+    <ClCompile Include="d3d12util.cpp" />
     <ClCompile Include="image_reader.cpp" />
     <ClCompile Include="shader.cpp" />
     <ClCompile Include="spline.cpp" />
@@ -158,6 +161,9 @@
   <ItemGroup>
     <ClInclude Include="clipper.h" />
     <ClInclude Include="color.h" />
+    <ClInclude Include="d3d12device.h" />
+    <ClInclude Include="d3d12resource.h" />
+    <ClInclude Include="d3d12util.h" />
     <ClInclude Include="drawer.h" />
     <ClInclude Include="fps_counter.h" />
     <ClInclude Include="hash.h" />

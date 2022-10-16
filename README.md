@@ -58,6 +58,12 @@ some code writed by NightHz
 - `spline.h`: 计算样条线
 - `transform.h`: 定义 `Transform` 组件和 `Projection` 组件
 
+**d3d12**
+
+- `d3d12device.h`: 定义 d3d12 设备
+- `d3d12resource.h`: 定义 d3d12 资源
+- `d3d12util.h`: d3d12 实用函数
+
 **game tech**
 
 - `noise_gen.h`: 生成一张噪点图，例如 Perlin 噪点

@@ -863,6 +863,95 @@ int main_image_reader_text()
 	return 0;
 }
 
+int main_d3d12_example()
+{
+	cout << endl << "create window ..." << endl;
+	const std::string title = "d3d12 example";
+	const int width = 800;
+	const int height = 600;
+	auto window = std::make_unique<SimpleWindowWithFC>(GetModuleHandle(nullptr), width, height, title);
+	if (!window->CheckWindowState())
+		return 1;
+
+	cout << "create d3d12 device ..." << endl;
+	auto device = std::make_unique<D3d12Device>();
+	auto SafeReturn = [&device](int return_v)
+	{
+		if (device)
+			device->FlushGpu();
+		return return_v;
+	};
+	auto cmd_list = device->Create(window.get());
+	if (!cmd_list)
+		return SafeReturn(1);
+
+	cout << "setup resource ..." << endl;
+	D3D12_RESOURCE_DESC rc_desc{};
+	D3D12_CLEAR_VALUE clear_value{};
+	D3D12_RESOURCE_BARRIER rc_barr{};
+
+	// create target
+	rc_desc = D3d12Util::GetTexture2dRcDesc(width, height, 1, device->GetScFormat(), 1, false, D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET);
+	clear_value = D3d12Util::GetTexture2dClearStruct(device->GetScFormat(), Color::yellow_green_o.v);
+	auto target = std::make_shared<D3d12Texture>(rc_desc, D3D12_HEAP_TYPE_DEFAULT, device->Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, &clear_value);
+	if (!target->Get())
+		return SafeReturn(1);
+	const Color target_bg_color = Color::yellow_green_o;
+	const UINT target_rtv = 0;
+	device->Get()->CreateRenderTargetView(target->Get(), nullptr, device->GetRtv(target_rtv));
+
+	// create zbuffer
+	rc_desc = D3d12Util::GetTexture2dRcDesc(width, height, 1, DXGI_FORMAT_D24_UNORM_S8_UINT, 1, false, D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL);
+	clear_value = D3d12Util::GetDepthStencilClearStruct(DXGI_FORMAT_D24_UNORM_S8_UINT, 1, 0);
+	auto zbuffer = std::make_shared<D3d12Texture>(rc_desc, D3D12_HEAP_TYPE_DEFAULT, device->Get(), D3D12_RESOURCE_STATE_DEPTH_WRITE, &clear_value);
+	if (!zbuffer->Get())
+		return SafeReturn(1);
+	const UINT zbuffer_dsv = 0;
+	device->Get()->CreateDepthStencilView(zbuffer->Get(), nullptr, device->GetDsv(zbuffer_dsv));
+
+	// finish
+	if (!device->ExecuteCommand())
+		return SafeReturn(1);
+	if (!device->FlushGpu())
+		return SafeReturn(1);
+
+	cout << "press Q to exit" << endl;
+	while (window->CheckWindowState())
+	{
+		// render
+		if (device->CheckCmdAllocator())
+		{
+			D3D12_CPU_DESCRIPTOR_HANDLE rtv{}, dsv{};
+			cmd_list = device->ResetCommand();
+			if (!cmd_list)
+				return SafeReturn(1);
+
+			// clear
+			cmd_list->ClearRenderTargetView(device->GetRtv(target_rtv), target_bg_color.v, 0, nullptr);
+			cmd_list->ClearDepthStencilView(device->GetDsv(zbuffer_dsv), D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, nullptr);
+
+			// render to target
+			rtv = device->GetRtv(target_rtv);
+			dsv = device->GetDsv(zbuffer_dsv);
+			cmd_list->OMSetRenderTargets(1, &rtv, true, &dsv);
+
+			// present
+			if (!device->ExecuteCommandAndPresent(target->Get(), false))
+				return SafeReturn(1);
+
+			// refresh
+			window->Present();
+		}
+
+		// msg
+		SimpleMessageProcess();
+		// exit
+		if (KeyIsDown('Q'))
+			break;
+	}
+	return SafeReturn(0);
+}
+
 int main()
 {
 	cout << "Hello~ Rehenz~" << endl;
@@ -876,5 +965,6 @@ int main()
 	//return main_drawer_test();
 	//return main_drawer_test_triangle();
 	//return main_drawerf_test_triangle();
-	return main_image_reader_text();
+	//return main_image_reader_text();
+	return main_d3d12_example();
 }

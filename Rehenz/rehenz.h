@@ -1,6 +1,9 @@
 #pragma once
 #include "clipper.h"
 #include "color.h"
+#include "d3d12device.h"
+#include "d3d12resource.h"
+#include "d3d12util.h"
 #include "drawer.h"
 #include "fps_counter.h"
 #include "hash.h"

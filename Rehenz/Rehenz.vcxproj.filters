@@ -43,6 +43,12 @@
     <Filter Include="source\game tech">
       <UniqueIdentifier>{ba6b3bf6-e1eb-4b50-83db-bae0d69e99c1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="header\d3d12">
+      <UniqueIdentifier>{76584f5f-9f44-43be-8316-6d10005f41a5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="source\d3d12">
+      <UniqueIdentifier>{f4364b75-f83f-48a8-90b5-d8c988148dd7}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -101,6 +107,15 @@
     </ClCompile>
     <ClCompile Include="image_reader.cpp">
       <Filter>source\window</Filter>
+    </ClCompile>
+    <ClCompile Include="d3d12device.cpp">
+      <Filter>source\d3d12</Filter>
+    </ClCompile>
+    <ClCompile Include="d3d12util.cpp">
+      <Filter>source\d3d12</Filter>
+    </ClCompile>
+    <ClCompile Include="d3d12resource.cpp">
+      <Filter>source\d3d12</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -169,6 +184,15 @@
     </ClInclude>
     <ClInclude Include="image_reader.h">
       <Filter>header\window</Filter>
+    </ClInclude>
+    <ClInclude Include="d3d12device.h">
+      <Filter>header\d3d12</Filter>
+    </ClInclude>
+    <ClInclude Include="d3d12util.h">
+      <Filter>header\d3d12</Filter>
+    </ClInclude>
+    <ClInclude Include="d3d12resource.h">
+      <Filter>header\d3d12</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
