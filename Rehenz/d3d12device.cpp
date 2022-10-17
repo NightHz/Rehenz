@@ -7,12 +7,17 @@ namespace Rehenz
         current_fence_v = 0;
 
         cmd_list_is_closed = true;
+        cmd_alloc_count = 2;
         current_cmd_alloc_i = 0;
 
-        rtv_heap_size = rtv_heap_default_size;
-        dsv_heap_size = dsv_heap_default_size;
-        cbv_heap_size = cbv_heap_default_size;
-        sampler_heap_size = sampler_heap_default_size;
+        sc_format = DXGI_FORMAT_B8G8R8A8_UNORM;
+        sc_buffer_count = 2;
+
+        rtv_size = dsv_size = cbv_size = sampler_size = 0;
+        rtv_heap_size = 80;
+        dsv_heap_size = 20;
+        cbv_heap_size = 800;
+        sampler_heap_size = 20;
     }
 
     D3d12Device::~D3d12Device()
@@ -102,7 +107,7 @@ namespace Rehenz
             return nullptr;
         // get buffer of swap chain
         sc_buffers = std::make_unique<ComPtr<ID3D12Resource2>[]>(sc_buffer_count);
-        for (int i = 0; i < sc_buffer_count; i++)
+        for (UINT i = 0; i < sc_buffer_count; i++)
         {
             hr = sc->GetBuffer(i, IID_PPV_ARGS(sc_buffers[i].GetAddressOf()));
             if (FAILED(hr))
@@ -233,7 +238,7 @@ namespace Rehenz
         return true;
     }
 
-    ID3D12GraphicsCommandList6* D3d12Device::ResetCommand()
+    ID3D12GraphicsCommandList6* D3d12Device::ResetCommand(bool set_buildin_objs)
     {
         if (!device)
             return nullptr;
@@ -254,16 +259,19 @@ namespace Rehenz
             return nullptr;
         cmd_list_is_closed = false;
 
-        // set viewport & scissor rect
-        cmd_list->RSSetViewports(1, &vp);
-        cmd_list->RSSetScissorRects(1, &sr);
-
         // set heaps
         ID3D12DescriptorHeap* dhs[]{ cbv_heap.Get(), sampler_heap.Get() };
         cmd_list->SetDescriptorHeaps(_countof(dhs), dhs);
 
-        // set root sig
-        cmd_list->SetGraphicsRootSignature(root_sig.Get());
+        if (set_buildin_objs)
+        {
+            // set viewport & scissor rect
+            cmd_list->RSSetViewports(1, &vp);
+            cmd_list->RSSetScissorRects(1, &sr);
+
+            // set root sig
+            cmd_list->SetGraphicsRootSignature(root_sig.Get());
+        }
 
         return cmd_list.Get();
     }
@@ -370,82 +378,6 @@ namespace Rehenz
 
         // next
         NextCmdAlloc();
-
-        return true;
-    }
-
-    bool D3d12Device::ResizeDescriptorHeap(UINT _rtv_heap_size, UINT _dsv_heap_size, UINT _cbv_heap_size, UINT _sampler_heap_size)
-    {
-        if (!cmd_list_is_closed)
-            return false;
-
-        HRESULT hr = S_OK;
-
-        D3D12_DESCRIPTOR_HEAP_DESC dh_desc{};
-        if (_rtv_heap_size > 0)
-        {
-            if (device)
-            {
-                ComPtr<ID3D12DescriptorHeap> _rtv_heap;
-                dh_desc = D3d12Util::GetDescriptorHeapDesc(D3D12_DESCRIPTOR_HEAP_TYPE_RTV, D3D12_DESCRIPTOR_HEAP_FLAG_NONE, _rtv_heap_size);
-                hr = device->CreateDescriptorHeap(&dh_desc, IID_PPV_ARGS(_rtv_heap.GetAddressOf()));
-                if (FAILED(hr))
-                    return false;
-                if (rtv_heap)
-                    device->CopyDescriptorsSimple(min(rtv_heap_size, _rtv_heap_size), GetRtv(0),
-                        D3d12Util::GetCpuDescriptor(_rtv_heap.Get(), rtv_size, 0), D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
-                rtv_heap = _rtv_heap;
-            }
-            rtv_heap_size = _rtv_heap_size;
-        }
-        if (_dsv_heap_size > 0)
-        {
-            if (device)
-            {
-                ComPtr<ID3D12DescriptorHeap> _dsv_heap;
-                dh_desc = D3d12Util::GetDescriptorHeapDesc(D3D12_DESCRIPTOR_HEAP_TYPE_DSV, D3D12_DESCRIPTOR_HEAP_FLAG_NONE, _dsv_heap_size);
-                hr = device->CreateDescriptorHeap(&dh_desc, IID_PPV_ARGS(_dsv_heap.GetAddressOf()));
-                if (FAILED(hr))
-                    return false;
-                if (dsv_heap)
-                    device->CopyDescriptorsSimple(min(dsv_heap_size, _dsv_heap_size), GetRtv(0),
-                        D3d12Util::GetCpuDescriptor(_dsv_heap.Get(), dsv_size, 0), D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
-                dsv_heap = _dsv_heap;
-            }
-            dsv_heap_size = _dsv_heap_size;
-        }
-        if (_cbv_heap_size > 0)
-        {
-            if (device)
-            {
-                ComPtr<ID3D12DescriptorHeap> _cbv_heap;
-                dh_desc = D3d12Util::GetDescriptorHeapDesc(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE, _cbv_heap_size);
-                hr = device->CreateDescriptorHeap(&dh_desc, IID_PPV_ARGS(_cbv_heap.GetAddressOf()));
-                if (FAILED(hr))
-                    return false;
-                if (cbv_heap)
-                    device->CopyDescriptorsSimple(min(cbv_heap_size, _cbv_heap_size), GetCbv(0),
-                        D3d12Util::GetCpuDescriptor(_cbv_heap.Get(), cbv_size, 0), D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-                cbv_heap = _cbv_heap;
-            }
-            cbv_heap_size = _cbv_heap_size;
-        }
-        if (_sampler_heap_size > 0)
-        {
-            if (device)
-            {
-                ComPtr<ID3D12DescriptorHeap> _sampler_heap;
-                dh_desc = D3d12Util::GetDescriptorHeapDesc(D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER, D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE, _sampler_heap_size);
-                hr = device->CreateDescriptorHeap(&dh_desc, IID_PPV_ARGS(_sampler_heap.GetAddressOf()));
-                if (FAILED(hr))
-                    return false;
-                if (sampler_heap)
-                    device->CopyDescriptorsSimple(min(sampler_heap_size, _sampler_heap_size), GetSampler(0),
-                        D3d12Util::GetCpuDescriptor(_sampler_heap.Get(), sampler_size, 0), D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
-                sampler_heap = _sampler_heap;
-            }
-            sampler_heap_size = _sampler_heap_size;
-        }
 
         return true;
     }
