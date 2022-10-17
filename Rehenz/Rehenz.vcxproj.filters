@@ -117,6 +117,12 @@
     <ClCompile Include="d3d12resource.cpp">
       <Filter>source\d3d12</Filter>
     </ClCompile>
+    <ClCompile Include="d3d12pipeline.cpp">
+      <Filter>source\d3d12</Filter>
+    </ClCompile>
+    <ClCompile Include="d3d12object.cpp">
+      <Filter>source\d3d12</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="rehenz.h">
@@ -192,6 +198,12 @@
       <Filter>header\d3d12</Filter>
     </ClInclude>
     <ClInclude Include="d3d12resource.h">
+      <Filter>header\d3d12</Filter>
+    </ClInclude>
+    <ClInclude Include="d3d12pipeline.h">
+      <Filter>header\d3d12</Filter>
+    </ClInclude>
+    <ClInclude Include="d3d12object.h">
       <Filter>header\d3d12</Filter>
     </ClInclude>
   </ItemGroup>

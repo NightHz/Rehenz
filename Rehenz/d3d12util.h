@@ -8,6 +8,8 @@
 #include <d3dcompiler.h>
 #include "type.h"
 #include "math.h"
+#include "util.h"
+#include "mesh.h"
 
 namespace Rehenz
 {
@@ -267,6 +269,14 @@ namespace Rehenz
 
         // forbid value > current fense value
         static bool WaitFenceValue(ID3D12Fence1* fence, UINT64 value);
+
+        static std::vector<D3D12_INPUT_ELEMENT_DESC> GetRehenzMeshInputLayout();
+
+        // return (sizeof(Vertex), sizeof(UINT16))
+        static std::pair<size_t, size_t> GetRehenzMeshStructSize();
+
+        // return (vertex buffer, index buufer)
+        static std::pair<ComPtr<ID3DBlob>, ComPtr<ID3DBlob>> GetMeshBufferFromRehenzMesh(Mesh* mesh);
 
     };
 }

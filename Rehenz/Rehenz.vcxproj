@@ -137,6 +137,8 @@
   <ItemGroup>
     <ClCompile Include="color.cpp" />
     <ClCompile Include="d3d12device.cpp" />
+    <ClCompile Include="d3d12object.cpp" />
+    <ClCompile Include="d3d12pipeline.cpp" />
     <ClCompile Include="d3d12resource.cpp" />
     <ClCompile Include="d3d12util.cpp" />
     <ClCompile Include="image_reader.cpp" />
@@ -162,6 +164,8 @@
     <ClInclude Include="clipper.h" />
     <ClInclude Include="color.h" />
     <ClInclude Include="d3d12device.h" />
+    <ClInclude Include="d3d12object.h" />
+    <ClInclude Include="d3d12pipeline.h" />
     <ClInclude Include="d3d12resource.h" />
     <ClInclude Include="d3d12util.h" />
     <ClInclude Include="drawer.h" />

@@ -61,7 +61,9 @@ some code writed by NightHz
 **d3d12**
 
 - `d3d12device.h`: 定义 d3d12 设备
-- `d3d12resource.h`: 定义 d3d12 资源
+- `d3d12object.h`: 定义 d3d12 物件
+- `d3d12pipeline.h`: 封装 d3d12 管线组件
+- `d3d12resource.h`: 封装 d3d12 资源
 - `d3d12util.h`: d3d12 实用函数
 
 **game tech**

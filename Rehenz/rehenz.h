@@ -2,6 +2,8 @@
 #include "clipper.h"
 #include "color.h"
 #include "d3d12device.h"
+#include "d3d12object.h"
+#include "d3d12pipeline.h"
 #include "d3d12resource.h"
 #include "d3d12util.h"
 #include "drawer.h"

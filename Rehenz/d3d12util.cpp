@@ -82,4 +82,65 @@ namespace Rehenz
         return true;
     }
 
+    struct D3d12VertexFromRehenzVertex
+    {
+        XMFLOAT3 pos;
+        XMFLOAT3 normal;
+        XMFLOAT4 color;
+        XMFLOAT2 uv;
+        XMFLOAT2 uv2;
+    };
+
+    std::vector<D3D12_INPUT_ELEMENT_DESC> D3d12Util::GetRehenzMeshInputLayout()
+    {
+        std::vector<D3D12_INPUT_ELEMENT_DESC> il(5);
+        il[0] = { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+        il[1] = { "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+        il[2] = { "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 24, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+        il[3] = { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 40, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+        il[4] = { "TEXCOORD", 1, DXGI_FORMAT_R32G32_FLOAT, 0, 48, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+        return il;
+    }
+
+    std::pair<size_t, size_t> D3d12Util::GetRehenzMeshStructSize()
+    {
+        return std::make_pair(sizeof(D3d12VertexFromRehenzVertex), sizeof(UINT16));
+    }
+
+    std::pair<ComPtr<ID3DBlob>, ComPtr<ID3DBlob>> D3d12Util::GetMeshBufferFromRehenzMesh(Mesh* mesh)
+    {
+        HRESULT hr = S_OK;
+
+        using Vertex = D3d12VertexFromRehenzVertex;
+
+        // create vb & ib
+        ComPtr<ID3DBlob> vb, ib;
+        size_t vb_size = sizeof(Vertex) * mesh->VertexCount();
+        size_t ib_size = sizeof(UINT16) * mesh->IndexCount();
+        hr = D3DCreateBlob(vb_size, vb.GetAddressOf());
+        if (FAILED(hr))
+            return std::make_pair(nullptr, nullptr);
+        hr = D3DCreateBlob(ib_size, ib.GetAddressOf());
+        if (FAILED(hr))
+            return std::make_pair(nullptr, nullptr);
+
+        // copy data
+        Vertex* vb_data = reinterpret_cast<Vertex*>(vb->GetBufferPointer());
+        UINT16* ib_data = reinterpret_cast<UINT16*>(ib->GetBufferPointer());
+        const auto& vertices = mesh->GetVertices();
+        const auto& indices = mesh->GetTriangles();
+        for (size_t i = 0; i < mesh->VertexCount(); i++)
+        {
+            vb_data[i].pos = XmFloat3(vertices[i].p);
+            vb_data[i].normal = XmFloat3(vertices[i].n);
+            vb_data[i].color = XmFloat4(vertices[i].c);
+            vb_data[i].uv = XmFloat2(vertices[i].uv);
+            vb_data[i].uv2 = XmFloat2(vertices[i].uv2);
+        }
+        for (size_t i = 0; i < mesh->IndexCount(); i++)
+            ib_data[i] = static_cast<UINT16>(indices[i]);
+
+        return std::make_pair(vb, ib);
+    }
+
 }
