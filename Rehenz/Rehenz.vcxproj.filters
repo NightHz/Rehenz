@@ -49,6 +49,10 @@
     <Filter Include="source\d3d12">
       <UniqueIdentifier>{f4364b75-f83f-48a8-90b5-d8c988148dd7}</UniqueIdentifier>
     </Filter>
+    <Filter Include="shader">
+      <UniqueIdentifier>{29c2aa34-b703-465e-9109-69ae890c706c}</UniqueIdentifier>
+      <Extensions>hlsl;hlsli;fx;vs;ps;gs;hs;ds;cs;ts;glsl;vert;tesc;tese;geom;frag;comp</Extensions>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -209,5 +213,13 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\README.md" />
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="ps_color.hlsl">
+      <Filter>shader</Filter>
+    </FxCompile>
+    <FxCompile Include="vs_transform.hlsl">
+      <Filter>shader</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>
