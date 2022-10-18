@@ -2,7 +2,7 @@
 
 namespace Rehenz
 {
-	D3d12Buffer::D3d12Buffer(UINT _count, UINT _struct_size, D3D12_HEAP_TYPE _heap_type, ID3D12Device8* device, D3D12_RESOURCE_FLAGS flag, D3D12_RESOURCE_STATES state)
+	D3d12Buffer::D3d12Buffer(UINT _count, UINT _struct_size, D3D12_HEAP_TYPE _heap_type, ID3D12Device8* device, D3D12_RESOURCE_STATES state, D3D12_RESOURCE_FLAGS flag)
 	{
 		count = _count;
 		struct_size = _struct_size;

@@ -14,12 +14,14 @@ namespace Rehenz
 
     public:
         D3d12Buffer(UINT _count, UINT _struct_size, D3D12_HEAP_TYPE _heap_type, ID3D12Device8* device,
-            D3D12_RESOURCE_FLAGS flag = D3D12_RESOURCE_FLAG_NONE, D3D12_RESOURCE_STATES state = D3D12_RESOURCE_STATE_GENERIC_READ);
+            D3D12_RESOURCE_STATES state = D3D12_RESOURCE_STATE_GENERIC_READ, D3D12_RESOURCE_FLAGS flag = D3D12_RESOURCE_FLAG_NONE);
         D3d12Buffer(const D3d12Buffer&) = delete;
         D3d12Buffer& operator=(const D3d12Buffer&) = delete;
         ~D3d12Buffer();
 
         inline ID3D12Resource2* Get() { return buffer.Get(); }
+        inline UINT GetCount() { return count; }
+        inline UINT GetSize() { return buffer_size; }
         inline D3D12_GPU_VIRTUAL_ADDRESS GetGpuLocation(UINT i)
         {
             return buffer->GetGPUVirtualAddress() + i * static_cast<UINT64>(struct_size);
@@ -58,6 +60,22 @@ namespace Rehenz
             uav_desc.Buffer.CounterOffsetInBytes = 0;
             uav_desc.Buffer.Flags = D3D12_BUFFER_UAV_FLAG_NONE;
             return uav_desc;
+        }
+        inline D3D12_VERTEX_BUFFER_VIEW GetVbv()
+        {
+            D3D12_VERTEX_BUFFER_VIEW vbv{};
+            vbv.BufferLocation = GetGpuLocation(0);
+            vbv.SizeInBytes = buffer_size;
+            vbv.StrideInBytes = struct_size;
+            return vbv;
+        }
+        inline D3D12_INDEX_BUFFER_VIEW GetIbv()
+        {
+            D3D12_INDEX_BUFFER_VIEW ibv{};
+            ibv.BufferLocation = GetGpuLocation(0);
+            ibv.SizeInBytes = buffer_size;
+            ibv.Format = DXGI_FORMAT_R16_UINT;
+            return ibv;
         }
     };
 
