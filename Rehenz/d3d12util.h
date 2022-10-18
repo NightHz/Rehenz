@@ -265,7 +265,7 @@ namespace Rehenz
 
         static ComPtr<ID3DBlob> LoadShaderFile(const std::wstring& filename);
         // shader_type : vs hs ds gs ps cs
-        static ComPtr<ID3DBlob> CompileShaderFile(const std::wstring& filename, const std::string& shader_type, const std::unordered_map<std::string, bool>& macro);
+        static ComPtr<ID3DBlob> CompileShaderFile(const std::wstring& filename, const std::string& shader_type, const std::unordered_map<std::string, bool>& macro = {});
 
         // forbid value > current fense value
         static bool WaitFenceValue(ID3D12Fence1* fence, UINT64 value);
@@ -273,7 +273,7 @@ namespace Rehenz
         static std::vector<D3D12_INPUT_ELEMENT_DESC> GetRehenzMeshInputLayout();
 
         // return (sizeof(Vertex), sizeof(UINT16))
-        static std::pair<size_t, size_t> GetRehenzMeshStructSize();
+        static std::pair<UINT, UINT> GetRehenzMeshStructSize();
 
         // return (vertex buffer, index buufer)
         static std::pair<ComPtr<ID3DBlob>, ComPtr<ID3DBlob>> GetMeshBufferFromRehenzMesh(Mesh* mesh);

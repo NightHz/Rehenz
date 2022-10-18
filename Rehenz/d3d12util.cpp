@@ -102,9 +102,9 @@ namespace Rehenz
         return il;
     }
 
-    std::pair<size_t, size_t> D3d12Util::GetRehenzMeshStructSize()
+    std::pair<UINT, UINT> D3d12Util::GetRehenzMeshStructSize()
     {
-        return std::make_pair(sizeof(D3d12VertexFromRehenzVertex), sizeof(UINT16));
+        return std::make_pair(static_cast<UINT>(sizeof(D3d12VertexFromRehenzVertex)), static_cast<UINT>(sizeof(UINT16)));
     }
 
     std::pair<ComPtr<ID3DBlob>, ComPtr<ID3DBlob>> D3d12Util::GetMeshBufferFromRehenzMesh(Mesh* mesh)
