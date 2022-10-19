@@ -35,9 +35,13 @@ namespace Rehenz
 		{
 			return target != nullptr;
 		}
-		inline ID3D12Resource2* Get()
+		inline ID3D12Resource2* GetTarget()
 		{
 			return target->Get();
+		}
+		inline ID3D12Resource2* GetZbuffer()
+		{
+			return zbuffer->Get();
 		}
 
 		void ClearRenderTargets(D3d12Device* device, ID3D12GraphicsCommandList6* cmd_list);

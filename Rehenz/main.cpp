@@ -981,7 +981,7 @@ int main_d3d12_example()
 			cmd_list->DrawIndexedInstanced(cube->index_count, 1, 0, 0, 0);
 
 			// present
-			if (!device->ExecuteCommandAndPresent(target->Get(), target->msaa))
+			if (!device->ExecuteCommandAndPresent(target->GetTarget(), target->msaa))
 				return SafeReturn(1);
 
 			// refresh
