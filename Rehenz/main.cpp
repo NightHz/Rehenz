@@ -903,25 +903,32 @@ int main_d3d12_example()
 	if (!*cube)
 		return SafeReturn(1);
 
-	// create cb
+	// set cube and camera
 	Transform world;
 	Transform view;
 	Projection proj;
 	view.pos = Vector(2, 2, -3);
 	view.SetFront(-view.pos);
 	proj.aspect = static_cast<float>(width) / height;
-	auto cb = std::make_shared<D3d12Buffer>(1, D3d12Util::Align256(4 * sizeof(XMMATRIX)), D3D12_HEAP_TYPE_UPLOAD, device->Get());
-	if (!cb->Get())
+
+	// create cb
+	struct CBTransform
+	{
+		XMFLOAT4X4 world;
+		XMFLOAT4X4 view;
+		XMFLOAT4X4 proj;
+		XMFLOAT4X4 transform;
+	};
+	CBTransform transform{};
+	auto cb = std::make_shared<D3d12CBuffer<CBTransform>>(80, device.get());
+	if (!*cb)
 		return SafeReturn(1);
-	XMMATRIX* transform = nullptr;
-	hr = cb->Get()->Map(0, nullptr, reinterpret_cast<void**>(&transform));
-	if (FAILED(hr))
+	transform.world = XmFloat4x4(MatrixTranspose(world.GetTransformMatrix()));
+	transform.view = XmFloat4x4(MatrixTranspose(view.GetTransformMatrix()));
+	transform.proj = XmFloat4x4(MatrixTranspose(proj.GetTransformMatrix()));
+	transform.transform = XmFloat4x4(MatrixTranspose(world.GetTransformMatrix() * view.GetInverseTransformMatrix() * proj.GetTransformMatrix()));
+	if (!cb->FillCB(0, &transform, 1))
 		return SafeReturn(1);
-	transform[0] = XmMatrix(MatrixTranspose(world.GetTransformMatrix()));
-	transform[1] = XmMatrix(MatrixTranspose(view.GetTransformMatrix()));
-	transform[2] = XmMatrix(MatrixTranspose(proj.GetTransformMatrix()));
-	transform[3] = XmMatrix(MatrixTranspose(world.GetTransformMatrix() * view.GetInverseTransformMatrix() * proj.GetTransformMatrix()));
-	cb->Get()->Unmap(0, nullptr);
 
 	// create shader
 	auto vs = D3d12Util::CompileShaderFile(L"vs_transform.hlsl", "vs");
