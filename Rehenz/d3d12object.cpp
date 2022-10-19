@@ -56,4 +56,164 @@ namespace Rehenz
 			cmd_list->OMSetRenderTargets(1, &rtv, true, nullptr);
 	}
 
+	D3d12Mesh::D3d12Mesh(void* vertices, UINT _vertex_size, UINT _vertex_count, const std::vector<D3D12_INPUT_ELEMENT_DESC>* _input_layout, UINT16* indices, UINT _index_count,
+		D3D_PRIMITIVE_TOPOLOGY _topology, D3d12Device* device, ID3D12GraphicsCommandList6* cmd_list)
+		: vertex_size(_vertex_size), vertex_count(_vertex_count), vb_size(_vertex_size* _vertex_count),
+		input_layout(_input_layout ? *_input_layout : std::vector<D3D12_INPUT_ELEMENT_DESC>{}),
+		have_index_buffer(indices ? true : false), index_size(sizeof(UINT16)), index_count(_index_count), ib_size(_index_count * sizeof(UINT16)), topology(_topology)
+	{
+		HRESULT hr = S_OK;
+		void* data = nullptr;
+		D3D12_RESOURCE_BARRIER rc_barr{};
+
+		// create vb
+		vb_upload = std::make_shared<D3d12Buffer>(1, vb_size, D3D12_HEAP_TYPE_UPLOAD, device->Get());
+		if (!vb_upload->Get())
+		{
+			vb = nullptr;
+			return;
+		}
+		hr = vb_upload->Get()->Map(0, nullptr, &data);
+		if (FAILED(hr))
+		{
+			vb = nullptr;
+			return;
+		}
+		::memcpy(data, vertices, vb_size);
+		vb_upload->Get()->Unmap(0, nullptr);
+		vb = std::make_shared<D3d12Buffer>(vertex_count, vertex_size, D3D12_HEAP_TYPE_DEFAULT, device->Get(), D3D12_RESOURCE_STATE_COPY_DEST);
+		if (!vb->Get())
+		{
+			vb = nullptr;
+			return;
+		}
+		cmd_list->CopyBufferRegion(vb->Get(), 0, vb_upload->Get(), 0, vb_size);
+		rc_barr = D3d12Util::GetTransitionStruct(vb->Get(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER);
+		cmd_list->ResourceBarrier(1, &rc_barr);
+
+		if (have_index_buffer)
+		{
+			// create ib
+			ib_upload = std::make_shared<D3d12Buffer>(1, ib_size, D3D12_HEAP_TYPE_UPLOAD, device->Get());
+			if (!ib_upload->Get())
+			{
+				vb = nullptr;
+				return;
+			}
+			hr = ib_upload->Get()->Map(0, nullptr, &data);
+			if (FAILED(hr))
+			{
+				vb = nullptr;
+				return;
+			}
+			::memcpy(data, indices, ib_size);
+			ib_upload->Get()->Unmap(0, nullptr);
+			ib = std::make_shared<D3d12Buffer>(index_count, index_size, D3D12_HEAP_TYPE_DEFAULT, device->Get(), D3D12_RESOURCE_STATE_COPY_DEST);
+			if (!ib->Get())
+			{
+				vb = nullptr;
+				return;
+			}
+			cmd_list->CopyBufferRegion(ib->Get(), 0, ib_upload->Get(), 0, ib_size);
+			rc_barr = D3d12Util::GetTransitionStruct(ib->Get(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_INDEX_BUFFER);
+			cmd_list->ResourceBarrier(1, &rc_barr);
+		}
+	}
+
+	D3d12Mesh::D3d12Mesh(Mesh* mesh, D3d12Device* device, ID3D12GraphicsCommandList6* cmd_list)
+		: vertex_size(D3d12Util::GetRehenzMeshStructSize().first), vertex_count(static_cast<UINT>(mesh->VertexCount())), vb_size(vertex_size* vertex_count),
+		input_layout(D3d12Util::GetRehenzMeshInputLayout()), have_index_buffer(true),
+		index_size(D3d12Util::GetRehenzMeshStructSize().second), index_count(static_cast<UINT>(mesh->IndexCount())), ib_size(index_size* index_count),
+		topology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST)
+	{
+		HRESULT hr = S_OK;
+		void* data = nullptr;
+		D3D12_RESOURCE_BARRIER rc_barr{};
+
+		// get mesh buffer
+		auto mesh1 = D3d12Util::GetMeshBufferFromRehenzMesh(mesh);
+		if (!mesh1.first)
+		{
+			vb = nullptr;
+			return;
+		}
+
+		// create vb
+		vb_upload = std::make_shared<D3d12Buffer>(1, vb_size, D3D12_HEAP_TYPE_UPLOAD, device->Get());
+		if (!vb_upload->Get())
+		{
+			vb = nullptr;
+			return;
+		}
+		hr = vb_upload->Get()->Map(0, nullptr, &data);
+		if (FAILED(hr))
+		{
+			vb = nullptr;
+			return;
+		}
+		::memcpy(data, mesh1.first->GetBufferPointer(), vb_size);
+		vb_upload->Get()->Unmap(0, nullptr);
+		vb = std::make_shared<D3d12Buffer>(vertex_count, vertex_size, D3D12_HEAP_TYPE_DEFAULT, device->Get(), D3D12_RESOURCE_STATE_COPY_DEST);
+		if (!vb->Get())
+		{
+			vb = nullptr;
+			return;
+		}
+		cmd_list->CopyBufferRegion(vb->Get(), 0, vb_upload->Get(), 0, vb_size);
+		rc_barr = D3d12Util::GetTransitionStruct(vb->Get(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER);
+		cmd_list->ResourceBarrier(1, &rc_barr);
+
+		if (have_index_buffer)
+		{
+			// create ib
+			ib_upload = std::make_shared<D3d12Buffer>(1, ib_size, D3D12_HEAP_TYPE_UPLOAD, device->Get());
+			if (!ib_upload->Get())
+			{
+				vb = nullptr;
+				return;
+			}
+			hr = ib_upload->Get()->Map(0, nullptr, &data);
+			if (FAILED(hr))
+			{
+				vb = nullptr;
+				return;
+			}
+			::memcpy(data, mesh1.second->GetBufferPointer(), ib_size);
+			ib_upload->Get()->Unmap(0, nullptr);
+			ib = std::make_shared<D3d12Buffer>(index_count, index_size, D3D12_HEAP_TYPE_DEFAULT, device->Get(), D3D12_RESOURCE_STATE_COPY_DEST);
+			if (!ib->Get())
+			{
+				vb = nullptr;
+				return;
+			}
+			cmd_list->CopyBufferRegion(ib->Get(), 0, ib_upload->Get(), 0, ib_size);
+			rc_barr = D3d12Util::GetTransitionStruct(ib->Get(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_INDEX_BUFFER);
+			cmd_list->ResourceBarrier(1, &rc_barr);
+		}
+	}
+
+	D3d12Mesh::~D3d12Mesh()
+	{
+	}
+
+	void D3d12Mesh::CleanUp()
+	{
+		vb_upload = nullptr;
+		ib_upload = nullptr;
+	}
+
+	void D3d12Mesh::SetIA(ID3D12GraphicsCommandList6* cmd_list)
+	{
+		auto vbv = vb->GetVbv();
+		cmd_list->IASetVertexBuffers(0, 1, &vbv);
+		cmd_list->IASetPrimitiveTopology(topology);
+		if (have_index_buffer)
+		{
+			auto ibv = ib->GetIbv();
+			cmd_list->IASetIndexBuffer(&ibv);
+		}
+		else
+			cmd_list->IASetIndexBuffer(nullptr);
+	}
+
 }

@@ -43,4 +43,49 @@ namespace Rehenz
 		void ClearRenderTargets(D3d12Device* device, ID3D12GraphicsCommandList6* cmd_list);
 		void SetRenderTargets(D3d12Device* device, ID3D12GraphicsCommandList6* cmd_list);
 	};
+
+	class D3d12Mesh
+	{
+	private:
+		std::shared_ptr<D3d12Buffer> vb, ib;
+		std::shared_ptr<D3d12Buffer> vb_upload, ib_upload;
+
+	public:
+		const UINT vertex_size;
+		const UINT vertex_count;
+		const UINT vb_size;
+		const std::vector<D3D12_INPUT_ELEMENT_DESC> input_layout;
+		const bool have_index_buffer;
+		const UINT index_size;
+		const UINT index_count;
+		const UINT ib_size;
+		const D3D_PRIMITIVE_TOPOLOGY topology;
+
+	public:
+		D3d12Mesh(void* vertices, UINT _vertex_size, UINT _vertex_count, const std::vector<D3D12_INPUT_ELEMENT_DESC>* _input_layout, UINT16* indices, UINT _index_count,
+			D3D_PRIMITIVE_TOPOLOGY _topology, D3d12Device* device, ID3D12GraphicsCommandList6* cmd_list);
+		D3d12Mesh(void* vertices, UINT _vertex_size, UINT _vertex_count, UINT16* indices, UINT _index_count, D3d12Device* device, ID3D12GraphicsCommandList6* cmd_list)
+			: D3d12Mesh(vertices, _vertex_size, _vertex_count, nullptr, indices, _index_count, D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST, device, cmd_list) {}
+		D3d12Mesh(Mesh* mesh, D3d12Device* device, ID3D12GraphicsCommandList6* cmd_list);
+		D3d12Mesh(const D3d12Mesh&) = delete;
+		D3d12Mesh& operator=(const D3d12Mesh&) = delete;
+		~D3d12Mesh();
+
+		inline operator bool()
+		{
+			return vb != nullptr;
+		}
+		inline ID3D12Resource2* GetVB()
+		{
+			return vb->Get();
+		}
+		inline ID3D12Resource2* GetIB()
+		{
+			return ib->Get();
+		}
+
+		void CleanUp();
+
+		void SetIA(ID3D12GraphicsCommandList6* cmd_list);
+	};
 }

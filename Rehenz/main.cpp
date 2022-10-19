@@ -890,7 +890,7 @@ int main_d3d12_example()
 	D3D12_CLEAR_VALUE clear_value{};
 	D3D12_RESOURCE_BARRIER rc_barr[4]{};
 	HRESULT hr = S_OK;
-	void* data = nullptr;
+	std::shared_ptr<Mesh> mesh0;
 
 	// create target
 	auto target = std::make_shared<D3d12RenderTarget>(width, height, device->GetScFormat(), true, true, Color::yellow_green_o, 0, 0, device.get());
@@ -898,44 +898,10 @@ int main_d3d12_example()
 		return SafeReturn(1);
 
 	// create mesh
-	auto mesh0 = CreateCubeMeshColorful();
-	auto mesh = D3d12Util::GetMeshBufferFromRehenzMesh(mesh0.get());
-	UINT vb_size = static_cast<UINT>(mesh.first->GetBufferSize());
-	UINT ib_size = static_cast<UINT>(mesh.second->GetBufferSize());
-	auto il = D3d12Util::GetRehenzMeshInputLayout();
-	auto size = D3d12Util::GetRehenzMeshStructSize();
-
-	// create vb
-	auto vb_upload = std::make_shared<D3d12Buffer>(1, vb_size, D3D12_HEAP_TYPE_UPLOAD, device->Get());
-	if (!vb_upload->Get())
+	mesh0 = CreateCubeMeshColorful();
+	auto cube = std::make_shared<D3d12Mesh>(mesh0.get(), device.get(), cmd_list);
+	if (!*cube)
 		return SafeReturn(1);
-	hr = vb_upload->Get()->Map(0, nullptr, &data);
-	if (FAILED(hr))
-		return SafeReturn(1);
-	::memcpy(data, mesh.first->GetBufferPointer(), mesh.first->GetBufferSize());
-	vb_upload->Get()->Unmap(0, nullptr);
-	auto vb = std::make_shared<D3d12Buffer>(vb_size / size.first, size.first, D3D12_HEAP_TYPE_DEFAULT, device->Get(), D3D12_RESOURCE_STATE_COPY_DEST);
-	if (!vb->Get())
-		return SafeReturn(1);
-	cmd_list->CopyBufferRegion(vb->Get(), 0, vb_upload->Get(), 0, vb_size);
-	rc_barr[0] = D3d12Util::GetTransitionStruct(vb->Get(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER);
-	cmd_list->ResourceBarrier(1, rc_barr);
-
-	// create ib
-	auto ib_upload = std::make_shared<D3d12Buffer>(1, ib_size, D3D12_HEAP_TYPE_UPLOAD, device->Get());
-	if (!ib_upload->Get())
-		return SafeReturn(1);
-	hr = ib_upload->Get()->Map(0, nullptr, &data);
-	if (FAILED(hr))
-		return SafeReturn(1);
-	::memcpy(data, mesh.second->GetBufferPointer(), mesh.second->GetBufferSize());
-	ib_upload->Get()->Unmap(0, nullptr);
-	auto ib = std::make_shared<D3d12Buffer>(ib_size / size.second, size.second, D3D12_HEAP_TYPE_DEFAULT, device->Get(), D3D12_RESOURCE_STATE_COPY_DEST);
-	if (!ib->Get())
-		return SafeReturn(1);
-	cmd_list->CopyBufferRegion(ib->Get(), 0, ib_upload->Get(), 0, ib_size);
-	rc_barr[0] = D3d12Util::GetTransitionStruct(ib->Get(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_INDEX_BUFFER);
-	cmd_list->ResourceBarrier(1, rc_barr);
 
 	// create cb
 	Transform world;
@@ -969,8 +935,8 @@ int main_d3d12_example()
 	D3d12GPSOCreator psc;
 	psc.SetRSig(device->GetRSig());
 	psc.SetShader(vs.Get(), ps.Get());
-	psc.SetIA(il);
-	psc.SetRenderTargets(true);
+	psc.SetIA(cube->input_layout);
+	psc.SetRenderTargets(target->msaa);
 	auto pso = psc.CreatePSO(device->Get());
 	if (!pso)
 		return SafeReturn(1);
@@ -980,6 +946,9 @@ int main_d3d12_example()
 		return SafeReturn(1);
 	if (!device->FlushGpu())
 		return SafeReturn(1);
+
+	// clean up
+	cube->CleanUp();
 
 	cout << "press Q to exit" << endl;
 	while (window->CheckWindowState())
@@ -1003,17 +972,13 @@ int main_d3d12_example()
 			cmd_list->SetPipelineState(pso.Get());
 
 			// set IA
-			vbv = vb->GetVbv();
-			ibv = ib->GetIbv();
-			cmd_list->IASetVertexBuffers(0, 1, &vbv);
-			cmd_list->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-			cmd_list->IASetIndexBuffer(&ibv);
+			cube->SetIA(cmd_list);
 
 			// set root parameter
 			device->SetRSigCbvFast(cb->GetGpuLocation(0));
 
 			// draw
-			cmd_list->DrawIndexedInstanced(ib->GetCount(), 1, 0, 0, 0);
+			cmd_list->DrawIndexedInstanced(cube->index_count, 1, 0, 0, 0);
 
 			// present
 			if (!device->ExecuteCommandAndPresent(target->Get(), target->msaa))
