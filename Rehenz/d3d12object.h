@@ -98,7 +98,7 @@ namespace Rehenz
 	{
 	private:
 		std::shared_ptr<D3d12Buffer> cb;
-		BYTE* data = nullptr;
+		BYTE* data;
 
 	public:
 		using CBStruct = T;
@@ -218,19 +218,20 @@ namespace Rehenz
 	{
 		if (data == nullptr)
 		{
-			D3D12_RANGE range{ 0,struct_size * cb_struct_count };
-			HRESULT hr = cb->Get()->Map(0, &range, reinterpret_cast<void**>(&data));
+			D3D12_RANGE range1{ 0,0 };
+			HRESULT hr = cb->Get()->Map(0, &range1, reinterpret_cast<void**>(&data));
 			if (FAILED(hr))
 				return false;
 			for (UINT j = 0; j < cb_struct_count; j++, i++)
-				*reinterpret_cast<CBStruct*>(data + i * struct_count) = cb_struct[j];
-			cb->Get()->Unmap(0, &range);
+				*reinterpret_cast<CBStruct*>(data + i * struct_size) = cb_struct[j];
+			D3D12_RANGE range2{ struct_size * i,struct_size * (i + cb_struct_count) };
+			cb->Get()->Unmap(0, &range2);
 			data = nullptr;
 		}
 		else
 		{
 			for (UINT j = 0; j < cb_struct_count; j++, i++)
-				*reinterpret_cast<CBStruct*>(data + i * struct_count) = cb_struct[j];
+				*reinterpret_cast<CBStruct*>(data + i * struct_size) = cb_struct[j];
 		}
 		return true;
 	}

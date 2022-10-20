@@ -872,6 +872,9 @@ int main_d3d12_example()
 	auto window = std::make_unique<SimpleWindowWithFC>(GetModuleHandle(nullptr), width, height, title);
 	if (!window->CheckWindowState())
 		return 1;
+	Mouse mouse;
+	FpsCounterS fps_counter;
+	fps_counter.LockFps(0);
 
 	cout << "create d3d12 device ..." << endl;
 	auto device = std::make_unique<D3d12Device>();
@@ -910,6 +913,10 @@ int main_d3d12_example()
 	view.pos = Vector(2, 2, -3);
 	view.SetFront(-view.pos);
 	proj.aspect = static_cast<float>(width) / height;
+	UINT cb_i = 0;
+	auto get_current_cb_i = [&cb_i]() { return cb_i; };
+	auto next_cb_i = [&cb_i]() { cb_i = 1 - cb_i; };
+	auto get_render_cb_i = [&cb_i, &next_cb_i]() { UINT i = cb_i; next_cb_i(); return i; };
 
 	// create cb
 	struct CBTransform
@@ -927,7 +934,7 @@ int main_d3d12_example()
 	transform.view = XmFloat4x4(MatrixTranspose(view.GetTransformMatrix()));
 	transform.proj = XmFloat4x4(MatrixTranspose(proj.GetTransformMatrix()));
 	transform.transform = XmFloat4x4(MatrixTranspose(world.GetTransformMatrix() * view.GetInverseTransformMatrix() * proj.GetTransformMatrix()));
-	if (!cb->FillCB(0, &transform, 1))
+	if (!cb->FillCB(get_current_cb_i(), &transform, 1))
 		return SafeReturn(1);
 
 	// create shader
@@ -960,6 +967,49 @@ int main_d3d12_example()
 	cout << "press Q to exit" << endl;
 	while (window->CheckWindowState())
 	{
+		// update
+		mouse.Present();
+		fps_counter.Present();
+		float dt = fps_counter.GetLastDeltatime2();
+
+		float cam_move_dis = 5 * dt;
+		float cam_rotate_angle_eu = 0.003f;
+		if (KeyIsDown('W'))      view.pos += cam_move_dis * view.GetFrontInGround();
+		else if (KeyIsDown('S')) view.pos -= cam_move_dis * view.GetFrontInGround();
+		if (KeyIsDown('A'))      view.pos -= cam_move_dis * view.GetRightInGround();
+		else if (KeyIsDown('D')) view.pos += cam_move_dis * view.GetRightInGround();
+		if (KeyIsDown(VK_SPACE)) view.pos.y += cam_move_dis;
+		else if (KeyIsDown(VK_LSHIFT)) view.pos.y -= cam_move_dis;
+		if (KeyIsDown(VK_MBUTTON))
+		{
+			view.axes.pitch += cam_rotate_angle_eu * mouse.GetMoveY();
+			view.axes.yaw += cam_rotate_angle_eu * mouse.GetMoveX();
+			mouse.SetToPrev();
+		}
+
+		float obj_move_dis = 4 * dt;
+		float obj_rotate_angle = 3 * dt;
+		if (KeyIsDown('I'))      world.axes.pitch += obj_rotate_angle;
+		else if (KeyIsDown('K')) world.axes.pitch -= obj_rotate_angle;
+		if (KeyIsDown('J'))      world.axes.yaw += obj_rotate_angle;
+		else if (KeyIsDown('L')) world.axes.yaw -= obj_rotate_angle;
+		if (KeyIsDown('F'))      world.pos.x -= obj_move_dis;
+		else if (KeyIsDown('H')) world.pos.x += obj_move_dis;
+		if (KeyIsDown('T'))      world.pos.y += obj_move_dis;
+		else if (KeyIsDown('G')) world.pos.y -= obj_move_dis;
+		if (KeyIsDown('R'))      world.pos.z -= obj_move_dis;
+		else if (KeyIsDown('Y')) world.pos.z += obj_move_dis;
+
+		if (KeyIsDown('Z'))      proj.parallel_projection = false;
+		else if (KeyIsDown('X')) proj.parallel_projection = true;
+
+		transform.world = XmFloat4x4(MatrixTranspose(world.GetTransformMatrix()));
+		transform.view = XmFloat4x4(MatrixTranspose(view.GetTransformMatrix()));
+		transform.proj = XmFloat4x4(MatrixTranspose(proj.GetTransformMatrix()));
+		transform.transform = XmFloat4x4(MatrixTranspose(world.GetTransformMatrix() * view.GetInverseTransformMatrix() * proj.GetTransformMatrix()));
+		if (!cb->FillCB(get_current_cb_i(), &transform, 1))
+			return SafeReturn(1);
+
 		// render
 		if (device->CheckCmdAllocator())
 		{
@@ -982,7 +1032,7 @@ int main_d3d12_example()
 			cube->SetIA(cmd_list);
 
 			// set root parameter
-			device->SetRSigCbvFast(cb->GetGpuLocation(0));
+			device->SetRSigCbvFast(cb->GetGpuLocation(get_render_cb_i()));
 
 			// draw
 			cmd_list->DrawIndexedInstanced(cube->index_count, 1, 0, 0, 0);
