@@ -216,4 +216,75 @@ namespace Rehenz
 			cmd_list->IASetIndexBuffer(nullptr);
 	}
 
+	D3d12CBufferBase::D3d12CBufferBase(UINT _struct_size, UINT _struct_count, bool _have_cbv, UINT _cbv_start, bool _have_srv, UINT _srv, D3d12Device* device)
+		: struct_size(_struct_size), struct_align_size(D3d12Util::Align256(_struct_size)), struct_count(_struct_count), cb_size(struct_align_size* struct_count),
+		have_cbv(_have_cbv), cbv_start(_cbv_start), have_srv(_have_srv), srv(_srv)
+	{
+		// create cb
+		cb = std::make_shared<D3d12Buffer>(struct_count, struct_align_size, D3D12_HEAP_TYPE_UPLOAD, device->Get());
+		if (!cb->Get())
+		{
+			cb = nullptr;
+			return;
+		}
+
+		// create cbv & srv
+		if (have_cbv)
+		{
+			D3D12_CONSTANT_BUFFER_VIEW_DESC cbv_desc{};
+			for (UINT i = 0; i < struct_count; i++)
+			{
+				cbv_desc = cb->GetCbvDesc(i);
+				device->Get()->CreateConstantBufferView(&cbv_desc, device->GetCbv(cbv_start + i));
+			}
+		}
+		if (have_srv)
+		{
+			auto srv_desc = cb->GetSrvDesc();
+			device->Get()->CreateShaderResourceView(cb->Get(), &srv_desc, device->GetSrv(srv));
+		}
+
+		data = nullptr;
+	}
+
+	D3d12CBufferBase::~D3d12CBufferBase()
+	{
+	}
+
+	bool D3d12CBufferBase::MapAll()
+	{
+		HRESULT hr = cb->Get()->Map(0, nullptr, reinterpret_cast<void**>(&data));
+		if (FAILED(hr))
+			return false;
+		return true;
+	}
+
+	void D3d12CBufferBase::UnmapAll()
+	{
+		cb->Get()->Unmap(0, nullptr);
+		data = nullptr;
+	}
+
+	bool D3d12CBufferBase::FillCB(UINT i, BYTE* cb_struct, UINT cb_struct_count)
+	{
+		if (data == nullptr)
+		{
+			D3D12_RANGE range1{ 0,0 };
+			HRESULT hr = cb->Get()->Map(0, &range1, reinterpret_cast<void**>(&data));
+			if (FAILED(hr))
+				return false;
+			for (UINT j = 0; j < cb_struct_count; j++, i++)
+				::memcpy(data + i * struct_align_size, cb_struct + j * struct_size, struct_size);
+			D3D12_RANGE range2{ struct_size * i,struct_size * (i + cb_struct_count) };
+			cb->Get()->Unmap(0, &range2);
+			data = nullptr;
+		}
+		else
+		{
+			for (UINT j = 0; j < cb_struct_count; j++, i++)
+				::memcpy(data + i * struct_align_size, cb_struct + j * struct_size, struct_size);
+		}
+		return true;
+	}
+
 }
