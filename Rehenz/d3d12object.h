@@ -104,13 +104,9 @@ namespace Rehenz
 		const UINT struct_align_size;
 		const UINT struct_count;
 		const UINT cb_size;
-		const bool have_cbv;
-		const UINT cbv_start;
-		const bool have_srv;
-		const UINT srv;
 
 	public:
-		D3d12CBufferBase(UINT _struct_size, UINT _struct_count, bool _have_cbv, UINT _cbv_start, bool _have_srv, UINT _srv, D3d12Device* device);
+		D3d12CBufferBase(UINT _struct_size, UINT _struct_count, D3d12Device* device);
 		D3d12CBufferBase(const D3d12CBufferBase&) = delete;
 		D3d12CBufferBase& operator=(const D3d12CBufferBase&) = delete;
 		~D3d12CBufferBase();
@@ -141,14 +137,8 @@ namespace Rehenz
 		using CBStruct = T;
 
 	public:
-		inline D3d12CBuffer(UINT _struct_count, bool _have_cbv, UINT _cbv_start, bool _have_srv, UINT _srv, D3d12Device* device)
-			: D3d12CBufferBase(sizeof(CBStruct), _struct_count, _have_cbv, _cbv_start, _have_srv, _srv, device) {}
 		inline D3d12CBuffer(UINT _struct_count, D3d12Device* device)
-			: D3d12CBuffer(_struct_count, false, 0, false, 0, device) {}
-		inline D3d12CBuffer(UINT _struct_count, UINT _cbv_start, D3d12Device* device)
-			: D3d12CBuffer(_struct_count, true, _cbv_start, false, 0, device) {}
-		inline D3d12CBuffer(UINT _struct_count, UINT _cbv_start, UINT _srv, D3d12Device* device)
-			: D3d12CBuffer(_struct_count, true, _cbv_start, true, _srv, device) {}
+			: D3d12CBufferBase(sizeof(CBStruct), _struct_count, device) {}
 		D3d12CBuffer(const D3d12CBuffer&) = delete;
 		D3d12CBuffer& operator=(const D3d12CBuffer&) = delete;
 		inline ~D3d12CBuffer() {}
