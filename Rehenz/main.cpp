@@ -894,6 +894,9 @@ int main_d3d12_example()
 	D3D12_RESOURCE_BARRIER rc_barr[4]{};
 	HRESULT hr = S_OK;
 	std::shared_ptr<Mesh> mesh0;
+	D3D12_SHADER_RESOURCE_VIEW_DESC srv_desc{};
+	D3D12_RANGE range{};
+	void* data = nullptr;
 
 	// create target
 	auto target = std::make_shared<D3d12RenderTarget>(width, height, device->GetScFormat(), true, true, Color::yellow_green_o, 0, 0, device.get());
@@ -905,40 +908,79 @@ int main_d3d12_example()
 	auto cube = std::make_shared<D3d12Mesh>(mesh0.get(), device.get(), cmd_list);
 	if (!*cube)
 		return SafeReturn(1);
+	mesh0 = CreateMeshFromObjFile("assets/teapot.obj");
+	if (!mesh0)
+		return SafeReturn(1);
+	auto teapot = std::make_shared<D3d12Mesh>(mesh0.get(), device.get(), cmd_list);
+	if (!*teapot)
+		return SafeReturn(1);
+	mesh0 = nullptr;
 
-	// set cube and camera
-	Transform world;
+	// set camera
 	Transform view;
 	Projection proj;
 	view.pos = Vector(2, 2, -3);
 	view.SetFront(-view.pos);
 	proj.aspect = static_cast<float>(width) / height;
+
+	// create cb
+	struct CBFrame
+	{
+		XMFLOAT4X4 view;
+		XMFLOAT4X4 inv_view;
+		XMFLOAT4X4 proj;
+	};
+	auto cb = std::make_shared<D3d12CBuffer<CBFrame>>(2, device.get());
+	if (!*cb)
+		return SafeReturn(1);
 	UINT cb_i = 0;
 	auto get_current_cb_i = [&cb_i]() { return cb_i; };
 	auto next_cb_i = [&cb_i]() { cb_i = 1 - cb_i; };
 	auto get_render_cb_i = [&cb_i, &next_cb_i]() { UINT i = cb_i; next_cb_i(); return i; };
+	CBFrame cbframe{};
+	cbframe.view = XmFloat4x4(MatrixTranspose(view.GetInverseTransformMatrix()));
+	cbframe.inv_view = XmFloat4x4(MatrixTranspose(view.GetTransformMatrix()));
+	cbframe.proj = XmFloat4x4(MatrixTranspose(proj.GetTransformMatrix()));
+	if (!cb->FillCB(get_current_cb_i(), &cbframe, 1))
+		return SafeReturn(1);
 
-	// create cb
-	struct CBTransform
+	// create buffer_obj
+	struct CBObj
 	{
 		XMFLOAT4X4 world;
-		XMFLOAT4X4 view;
-		XMFLOAT4X4 proj;
-		XMFLOAT4X4 transform;
+		XMFLOAT4X4 inv_world;
 	};
-	CBTransform transform{};
-	auto cb = std::make_shared<D3d12CBuffer<CBTransform>>(80, device.get());
-	if (!*cb)
+	const UINT instance_count = 10;
+	auto buffer_obj = std::make_shared<D3d12Buffer>(instance_count, static_cast<UINT>(sizeof(CBObj)), D3D12_HEAP_TYPE_UPLOAD, device->Get());
+	if (!buffer_obj->Get())
 		return SafeReturn(1);
-	transform.world = XmFloat4x4(MatrixTranspose(world.GetTransformMatrix()));
-	transform.view = XmFloat4x4(MatrixTranspose(view.GetTransformMatrix()));
-	transform.proj = XmFloat4x4(MatrixTranspose(proj.GetTransformMatrix()));
-	transform.transform = XmFloat4x4(MatrixTranspose(world.GetTransformMatrix() * view.GetInverseTransformMatrix() * proj.GetTransformMatrix()));
-	if (!cb->FillCB(get_current_cb_i(), &transform, 1))
+	UINT buffer_obj_srv = 0;
+	srv_desc = buffer_obj->GetSrvDesc(0, instance_count);
+	device->Get()->CreateShaderResourceView(buffer_obj->Get(), &srv_desc, device->GetSrv(buffer_obj_srv));
+	Transform obj_transform;
+	CBObj buffer_obj_structs[instance_count]{};
+	int i = 0;
+	for (float x = -2; x <= 2; x += 4)
+	{
+		for (float z = -2; z <= 2; z += 1, i++)
+		{
+			obj_transform.pos.x = x;
+			obj_transform.pos.z = z;
+			obj_transform.SetFront(-obj_transform.pos);
+			obj_transform.scale = Vector(0.2f, 0.2f, 0.2f);
+			buffer_obj_structs[i].world = XmFloat4x4(MatrixTranspose(obj_transform.GetTransformMatrix()));
+			buffer_obj_structs[i].inv_world = XmFloat4x4(MatrixTranspose(obj_transform.GetInverseTransformMatrix()));
+		}
+	}
+	range.Begin = 0; range.End = 0;
+	hr = buffer_obj->Get()->Map(0, &range, &data);
+	if (FAILED(hr))
 		return SafeReturn(1);
+	::memcpy(data, buffer_obj_structs, instance_count * sizeof(CBObj));
+	buffer_obj->Get()->Unmap(0, &range);
 
 	// create shader
-	auto vs = D3d12Util::CompileShaderFile(L"vs_transform.hlsl", "vs");
+	auto vs = D3d12Util::CompileShaderFile(L"vs_transform_all.hlsl", "vs");
 	if (!vs)
 		return SafeReturn(1);
 	auto ps = D3d12Util::CompileShaderFile(L"ps_color.hlsl", "ps");
@@ -987,7 +1029,7 @@ int main_d3d12_example()
 			mouse.SetToPrev();
 		}
 
-		float obj_move_dis = 4 * dt;
+		/*float obj_move_dis = 4 * dt;
 		float obj_rotate_angle = 3 * dt;
 		if (KeyIsDown('I'))      world.axes.pitch += obj_rotate_angle;
 		else if (KeyIsDown('K')) world.axes.pitch -= obj_rotate_angle;
@@ -998,16 +1040,15 @@ int main_d3d12_example()
 		if (KeyIsDown('T'))      world.pos.y += obj_move_dis;
 		else if (KeyIsDown('G')) world.pos.y -= obj_move_dis;
 		if (KeyIsDown('R'))      world.pos.z -= obj_move_dis;
-		else if (KeyIsDown('Y')) world.pos.z += obj_move_dis;
+		else if (KeyIsDown('Y')) world.pos.z += obj_move_dis;*/
 
 		if (KeyIsDown('Z'))      proj.parallel_projection = false;
 		else if (KeyIsDown('X')) proj.parallel_projection = true;
 
-		transform.world = XmFloat4x4(MatrixTranspose(world.GetTransformMatrix()));
-		transform.view = XmFloat4x4(MatrixTranspose(view.GetTransformMatrix()));
-		transform.proj = XmFloat4x4(MatrixTranspose(proj.GetTransformMatrix()));
-		transform.transform = XmFloat4x4(MatrixTranspose(world.GetTransformMatrix() * view.GetInverseTransformMatrix() * proj.GetTransformMatrix()));
-		if (!cb->FillCB(get_current_cb_i(), &transform, 1))
+		cbframe.view = XmFloat4x4(MatrixTranspose(view.GetInverseTransformMatrix()));
+		cbframe.inv_view = XmFloat4x4(MatrixTranspose(view.GetTransformMatrix()));
+		cbframe.proj = XmFloat4x4(MatrixTranspose(proj.GetTransformMatrix()));
+		if (!cb->FillCB(get_current_cb_i(), &cbframe, 1))
 			return SafeReturn(1);
 
 		// render
@@ -1029,13 +1070,14 @@ int main_d3d12_example()
 			cmd_list->SetPipelineState(pso.Get());
 
 			// set IA
-			cube->SetIA(cmd_list);
+			teapot->SetIA(cmd_list);
 
 			// set root parameter
 			device->SetRSigCbvFast(cb->GetGpuLocation(get_render_cb_i()));
+			device->SetRSigSrv(device->GetSrvGpu(buffer_obj_srv));
 
 			// draw
-			cmd_list->DrawIndexedInstanced(cube->index_count, 1, 0, 0, 0);
+			cmd_list->DrawIndexedInstanced(teapot->index_count, instance_count, 0, 0, 0);
 
 			// present
 			if (!device->ExecuteCommandAndPresent(target->GetTarget(), target->msaa))
