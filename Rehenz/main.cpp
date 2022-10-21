@@ -930,18 +930,15 @@ int main_d3d12_example()
 		XMFLOAT4X4 inv_view;
 		XMFLOAT4X4 proj;
 	};
+	IndexLoop cb_i{ 0,1 };
 	auto cb = std::make_shared<D3d12UploadBuffer<CBFrame>>(true, 2, device.get());
 	if (!*cb)
 		return SafeReturn(1);
-	UINT cb_i = 0;
-	auto get_current_cb_i = [&cb_i]() { return cb_i; };
-	auto next_cb_i = [&cb_i]() { cb_i = 1 - cb_i; };
-	auto get_render_cb_i = [&cb_i, &next_cb_i]() { UINT i = cb_i; next_cb_i(); return i; };
 	CBFrame cbframe{};
 	cbframe.view = XmFloat4x4(MatrixTranspose(view.GetInverseTransformMatrix()));
 	cbframe.inv_view = XmFloat4x4(MatrixTranspose(view.GetTransformMatrix()));
 	cbframe.proj = XmFloat4x4(MatrixTranspose(proj.GetTransformMatrix()));
-	if (!cb->UploadData(get_current_cb_i(), &cbframe, 1))
+	if (!cb->UploadData(cb_i.GetCurrentIndex(), &cbframe, 1))
 		return SafeReturn(1);
 
 	// create obj_tfs
@@ -1044,7 +1041,7 @@ int main_d3d12_example()
 		cbframe.view = XmFloat4x4(MatrixTranspose(view.GetInverseTransformMatrix()));
 		cbframe.inv_view = XmFloat4x4(MatrixTranspose(view.GetTransformMatrix()));
 		cbframe.proj = XmFloat4x4(MatrixTranspose(proj.GetTransformMatrix()));
-		if (!cb->UploadData(get_current_cb_i(), &cbframe, 1))
+		if (!cb->UploadData(cb_i.GetCurrentIndex(), &cbframe, 1))
 			return SafeReturn(1);
 
 		// render
@@ -1069,7 +1066,7 @@ int main_d3d12_example()
 			teapot->SetIA(cmd_list);
 
 			// set root parameter
-			device->SetRSigCbvFast(cb->GetBufferObj()->GetGpuLocation(get_render_cb_i()));
+			device->SetRSigCbvFast(cb->GetBufferObj()->GetGpuLocation(cb_i.UseCurrentIndex()));
 			device->SetRSigSrv(device->GetSrvGpu(obj_tfs_srv));
 
 			// draw

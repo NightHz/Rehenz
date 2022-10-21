@@ -279,4 +279,56 @@ namespace Rehenz
         static std::pair<ComPtr<ID3DBlob>, ComPtr<ID3DBlob>> GetMeshBufferFromRehenzMesh(Mesh* mesh);
 
     };
+
+    class IndexLoop
+    {
+    private:
+        bool always_dirty;
+        bool dirty;
+        int i;
+        std::vector<UINT> indices;
+
+        inline int PrevIndex() { return (i + static_cast<int>(indices.size()) - 1) % static_cast<int>(indices.size()); }
+        inline int NextIndex() { return (i + 1) % static_cast<int>(indices.size()); }
+
+    public:
+        inline IndexLoop(std::initializer_list<UINT> il, bool _always_dirty = true) : indices{ il }
+        {
+            always_dirty = _always_dirty;
+            dirty = always_dirty;
+            i = 0;
+            if (indices.size() == 0)
+                indices.push_back(0);
+        }
+        inline IndexLoop(std::vector<UINT> _indices, bool _always_dirty = true) : indices(std::move(_indices))
+        {
+            always_dirty = _always_dirty;
+            dirty = always_dirty;
+            i = 0;
+            if (indices.size() == 0)
+                indices.push_back(0);
+        }
+        inline ~IndexLoop() {}
+
+        inline void SetDirty()
+        {
+            dirty = true;
+        }
+        inline UINT GetCurrentIndex()
+        {
+            return indices[i];
+        }
+        inline UINT UseCurrentIndex()
+        {
+            if (dirty)
+            {
+                int ii = indices[i];
+                i = NextIndex();
+                dirty = always_dirty;
+                return ii;
+            }
+            else
+                return PrevIndex();
+        }
+    };
 }
