@@ -19,6 +19,7 @@ struct VSOutput
     float4 posH : SV_POSITION;
     float3 posW : POSITION;
     float4 color : COLOR;
+    float3 normW : NORMAL;
     float2 uv : TEXCOORD;
 };
 
@@ -28,6 +29,7 @@ VSOutput main(VSInput input)
     output.posH = mul(float4(input.posL, 1), transform);
     output.posW = mul(float4(input.posL, 1), world).xyz;
     output.color = input.color;
+    output.normW = float3(0, 1, 0);
     output.uv = input.uv;
     return output;
 }

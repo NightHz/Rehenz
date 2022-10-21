@@ -3,6 +3,10 @@ struct CBFrame
     matrix view;
     matrix inv_view;
     matrix proj;
+    float3 light_intensity;
+    float _pad1;
+    float3 light_direction;
+    float _pad2;
 };
 
 cbuffer CBFrame : register(b0)
@@ -31,6 +35,7 @@ struct VSOutput
     float4 posH : SV_POSITION;
     float3 posW : POSITION;
     float4 color : COLOR;
+    float3 normW : NORMAL;
     float2 uv : TEXCOORD;
 };
 
@@ -41,6 +46,9 @@ VSOutput main(VSInput input, uint id : SV_InstanceID)
     vector posV = mul(float4(output.posW, 1), frame_info.view);
     output.posH = mul(posV, frame_info.proj);
     output.color = input.color;
+    matrix inv_world = obj_infos[id].inv_world;
+    float3x3 normal_world = transpose(float3x3(inv_world[0].xyz, inv_world[1].xyz, inv_world[2].xyz));
+    output.normW = normalize(mul(input.normL, normal_world));
     output.uv = input.uv;
     return output;
 }

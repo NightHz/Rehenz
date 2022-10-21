@@ -896,7 +896,6 @@ int main_d3d12_example()
 	std::shared_ptr<Mesh> mesh0;
 	D3D12_SHADER_RESOURCE_VIEW_DESC srv_desc{};
 	D3D12_RANGE range{};
-	void* data = nullptr;
 
 	// create target
 	auto target = std::make_shared<D3d12RenderTarget>(width, height, device->GetScFormat(), true, true, Color::yellow_green_o, 0, 0, device.get());
@@ -929,6 +928,10 @@ int main_d3d12_example()
 		XMFLOAT4X4 view;
 		XMFLOAT4X4 inv_view;
 		XMFLOAT4X4 proj;
+		XMFLOAT3 light_intensity;
+		float _pad1;
+		XMFLOAT3 light_direction;
+		float _pad2;
 	};
 	IndexLoop cb_i{ 0,1 };
 	auto cb = std::make_shared<D3d12UploadBuffer<CBFrame>>(true, 2, device.get());
@@ -938,6 +941,11 @@ int main_d3d12_example()
 	cbframe.view = XmFloat4x4(MatrixTranspose(view.GetInverseTransformMatrix()));
 	cbframe.inv_view = XmFloat4x4(MatrixTranspose(view.GetTransformMatrix()));
 	cbframe.proj = XmFloat4x4(MatrixTranspose(proj.GetTransformMatrix()));
+	Transform light;
+	light.axes.pitch = pi_div2 * 0.8f;
+	light.scale = Vector(0.8f, 0.8f, 0.8f);
+	cbframe.light_intensity = XmFloat3(light.scale);
+	cbframe.light_direction = XmFloat3(light.GetFront());
 	if (!cb->UploadData(cb_i.GetCurrentIndex(), &cbframe, 1))
 		return SafeReturn(1);
 
@@ -957,14 +965,14 @@ int main_d3d12_example()
 	Transform obj_tf;
 	CBObj cbobjs[instance_count]{};
 	int i = 0;
-	for (float x = -2; x <= 2; x += 4)
+	for (float x = -1; x <= 1; x += 2)
 	{
 		for (float z = -2; z <= 2; z += 1, i++)
 		{
 			obj_tf.pos.x = x;
 			obj_tf.pos.z = z;
 			obj_tf.SetFront(-obj_tf.pos);
-			obj_tf.scale = Vector(0.2f, 0.2f, 0.2f);
+			obj_tf.scale = Vector(0.35f, 0.45f, 0.35f);
 			cbobjs[i].world = XmFloat4x4(MatrixTranspose(obj_tf.GetTransformMatrix()));
 			cbobjs[i].inv_world = XmFloat4x4(MatrixTranspose(obj_tf.GetInverseTransformMatrix()));
 		}
@@ -976,7 +984,7 @@ int main_d3d12_example()
 	auto vs = D3d12Util::CompileShaderFile(L"vs_transform_all.hlsl", "vs");
 	if (!vs)
 		return SafeReturn(1);
-	auto ps = D3d12Util::CompileShaderFile(L"ps_color.hlsl", "ps");
+	auto ps = D3d12Util::CompileShaderFile(L"ps_light.hlsl", "ps");
 	if (!ps)
 		return SafeReturn(1);
 
@@ -1041,6 +1049,8 @@ int main_d3d12_example()
 		cbframe.view = XmFloat4x4(MatrixTranspose(view.GetInverseTransformMatrix()));
 		cbframe.inv_view = XmFloat4x4(MatrixTranspose(view.GetTransformMatrix()));
 		cbframe.proj = XmFloat4x4(MatrixTranspose(proj.GetTransformMatrix()));
+		cbframe.light_intensity = XmFloat3(light.scale);
+		cbframe.light_direction = XmFloat3(light.GetFront());
 		if (!cb->UploadData(cb_i.GetCurrentIndex(), &cbframe, 1))
 			return SafeReturn(1);
 

@@ -3,6 +3,7 @@ struct PSInput
     float4 posH : SV_POSITION;
     float3 posW : POSITION;
     float4 color : COLOR;
+    float3 normW : NORMAL;
     float2 uv : TEXCOORD;
 };
 

@@ -213,6 +213,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\README.md" />
+    <None Include="blinn_phong.hlsli">
+      <Filter>shader</Filter>
+    </None>
+    <None Include="samplers.hlsli">
+      <Filter>shader</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="ps_color.hlsl">
@@ -222,6 +228,9 @@
       <Filter>shader</Filter>
     </FxCompile>
     <FxCompile Include="vs_transform_all.hlsl">
+      <Filter>shader</Filter>
+    </FxCompile>
+    <FxCompile Include="ps_light.hlsl">
       <Filter>shader</Filter>
     </FxCompile>
   </ItemGroup>
