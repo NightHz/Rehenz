@@ -51,7 +51,11 @@ namespace Rehenz
 		if (r == 0)
 			axes.yaw = 0;
 		else
-			axes.yaw = std::asinf(front.x / r);
+		{
+			axes.yaw = std::acos(front.z / r);
+			if (front.x < 0)
+				axes.yaw = pi_mul2 - axes.yaw;
+		}
 		if (front.y == 0)
 			axes.pitch = 0;
 		else if (r == 0)
