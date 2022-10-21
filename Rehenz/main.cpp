@@ -930,7 +930,7 @@ int main_d3d12_example()
 		XMFLOAT4X4 inv_view;
 		XMFLOAT4X4 proj;
 	};
-	auto cb = std::make_shared<D3d12CBuffer<CBFrame>>(2, device.get());
+	auto cb = std::make_shared<D3d12UploadBuffer<CBFrame>>(true, 2, device.get());
 	if (!*cb)
 		return SafeReturn(1);
 	UINT cb_i = 0;
@@ -1073,7 +1073,7 @@ int main_d3d12_example()
 			teapot->SetIA(cmd_list);
 
 			// set root parameter
-			device->SetRSigCbvFast(cb->GetGpuLocation(get_render_cb_i()));
+			device->SetRSigCbvFast(cb->GetBufferObj()->GetGpuLocation(get_render_cb_i()));
 			device->SetRSigSrv(device->GetSrvGpu(buffer_obj_srv));
 
 			// draw

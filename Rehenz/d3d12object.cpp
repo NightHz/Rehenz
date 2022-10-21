@@ -216,56 +216,58 @@ namespace Rehenz
 			cmd_list->IASetIndexBuffer(nullptr);
 	}
 
-	D3d12CBufferBase::D3d12CBufferBase(UINT _struct_size, UINT _struct_count, D3d12Device* device)
-		: struct_size(_struct_size), struct_align_size(D3d12Util::Align256(_struct_size)), struct_count(_struct_count), cb_size(struct_align_size* struct_count)
+	D3d12UploadBufferBase::D3d12UploadBufferBase(UINT _struct_size, bool _as_cbuffer, UINT _struct_count, D3d12Device* device)
+		: struct_size(_struct_size), as_cbuffer(_as_cbuffer), struct_align_size(_as_cbuffer ? D3d12Util::Align256(_struct_size) : _struct_size),
+		struct_count(_struct_count), buffer_size(struct_align_size* struct_count)
 	{
-		// create cb
-		cb = std::make_shared<D3d12Buffer>(struct_count, struct_align_size, D3D12_HEAP_TYPE_UPLOAD, device->Get());
-		if (!cb->Get())
+		// create buffer
+		buffer = std::make_shared<D3d12Buffer>(struct_count, struct_align_size, D3D12_HEAP_TYPE_UPLOAD, device->Get());
+		if (!buffer->Get())
 		{
-			cb = nullptr;
+			buffer = nullptr;
 			return;
 		}
 
+		// reset data ptr
 		data = nullptr;
 	}
 
-	D3d12CBufferBase::~D3d12CBufferBase()
+	D3d12UploadBufferBase::~D3d12UploadBufferBase()
 	{
 	}
 
-	bool D3d12CBufferBase::MapAll()
+	bool D3d12UploadBufferBase::MapAll()
 	{
-		HRESULT hr = cb->Get()->Map(0, nullptr, reinterpret_cast<void**>(&data));
+		HRESULT hr = buffer->Get()->Map(0, nullptr, reinterpret_cast<void**>(&data));
 		if (FAILED(hr))
 			return false;
 		return true;
 	}
 
-	void D3d12CBufferBase::UnmapAll()
+	void D3d12UploadBufferBase::UnmapAll()
 	{
-		cb->Get()->Unmap(0, nullptr);
+		buffer->Get()->Unmap(0, nullptr);
 		data = nullptr;
 	}
 
-	bool D3d12CBufferBase::FillCB(UINT i, BYTE* cb_struct, UINT cb_struct_count)
+	bool D3d12UploadBufferBase::FillCB(UINT i, BYTE* struct_ptr, UINT _struct_count)
 	{
 		if (data == nullptr)
 		{
 			D3D12_RANGE range1{ 0,0 };
-			HRESULT hr = cb->Get()->Map(0, &range1, reinterpret_cast<void**>(&data));
+			HRESULT hr = buffer->Get()->Map(0, &range1, reinterpret_cast<void**>(&data));
 			if (FAILED(hr))
 				return false;
-			for (UINT j = 0, k = i; j < cb_struct_count; j++, k++)
-				::memcpy(data + k * struct_align_size, cb_struct + j * struct_size, struct_size);
-			D3D12_RANGE range2{ struct_align_size * i,struct_align_size * (i + cb_struct_count) };
-			cb->Get()->Unmap(0, &range2);
+			for (UINT j = 0, k = i; j < _struct_count; j++, k++)
+				::memcpy(data + k * struct_align_size, struct_ptr + j * struct_size, struct_size);
+			D3D12_RANGE range2{ struct_align_size * i,struct_align_size * (i + _struct_count) };
+			buffer->Get()->Unmap(0, &range2);
 			data = nullptr;
 		}
 		else
 		{
-			for (UINT j = 0, k = i; j < cb_struct_count; j++, k++)
-				::memcpy(data + k * struct_align_size, cb_struct + j * struct_size, struct_size);
+			for (UINT j = 0, k = i; j < _struct_count; j++, k++)
+				::memcpy(data + k * struct_align_size, struct_ptr + j * struct_size, struct_size);
 		}
 		return true;
 	}

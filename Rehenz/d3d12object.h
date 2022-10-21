@@ -93,59 +93,59 @@ namespace Rehenz
 		void SetIA(ID3D12GraphicsCommandList6* cmd_list);
 	};
 
-	class D3d12CBufferBase
+	class D3d12UploadBufferBase
 	{
 	private:
-		std::shared_ptr<D3d12Buffer> cb;
+		std::shared_ptr<D3d12Buffer> buffer;
 		BYTE* data;
 
 	public:
 		const UINT struct_size;
+		const bool as_cbuffer;
 		const UINT struct_align_size;
 		const UINT struct_count;
-		const UINT cb_size;
+		const UINT buffer_size;
 
 	public:
-		D3d12CBufferBase(UINT _struct_size, UINT _struct_count, D3d12Device* device);
-		D3d12CBufferBase(const D3d12CBufferBase&) = delete;
-		D3d12CBufferBase& operator=(const D3d12CBufferBase&) = delete;
-		~D3d12CBufferBase();
+		D3d12UploadBufferBase(UINT _struct_size, bool _as_cbuffer, UINT _struct_count, D3d12Device* device);
+		D3d12UploadBufferBase(const D3d12UploadBufferBase&) = delete;
+		D3d12UploadBufferBase& operator=(const D3d12UploadBufferBase&) = delete;
+		~D3d12UploadBufferBase();
 
 		inline operator bool()
 		{
-			return cb != nullptr;
+			return buffer != nullptr;
 		}
-		inline ID3D12Resource2* GetCB()
+		inline ID3D12Resource2* GetBuffer()
 		{
-			return cb->Get();
+			return buffer->Get();
+		}
+		inline D3d12Buffer* GetBufferObj()
+		{
+			return buffer.get();
 		}
 
 		bool MapAll();
 		void UnmapAll();
-		bool FillCB(UINT i, BYTE* cb_struct, UINT cb_struct_count);
-
-		inline D3D12_GPU_VIRTUAL_ADDRESS GetGpuLocation(UINT i)
-		{
-			return cb->GetGpuLocation(i);
-		}
+		bool FillCB(UINT i, BYTE* struct_ptr, UINT _struct_count);
 	};
 
 	template<typename T>
-	class D3d12CBuffer : public D3d12CBufferBase
+	class D3d12UploadBuffer : public D3d12UploadBufferBase
 	{
 	public:
-		using CBStruct = T;
+		using StructType = T;
 
 	public:
-		inline D3d12CBuffer(UINT _struct_count, D3d12Device* device)
-			: D3d12CBufferBase(sizeof(CBStruct), _struct_count, device) {}
-		D3d12CBuffer(const D3d12CBuffer&) = delete;
-		D3d12CBuffer& operator=(const D3d12CBuffer&) = delete;
-		inline ~D3d12CBuffer() {}
+		inline D3d12UploadBuffer(bool _as_cbuffer, UINT _struct_count, D3d12Device* device)
+			: D3d12UploadBufferBase(sizeof(StructType), _as_cbuffer, _struct_count, device) {}
+		D3d12UploadBuffer(const D3d12UploadBuffer&) = delete;
+		D3d12UploadBuffer& operator=(const D3d12UploadBuffer&) = delete;
+		inline ~D3d12UploadBuffer() {}
 
-		inline bool FillCB(UINT i, CBStruct* cb_struct, UINT cb_struct_count)
+		inline bool FillCB(UINT i, StructType* struct_ptr, UINT _struct_count)
 		{
-			return D3d12CBufferBase::FillCB(i, reinterpret_cast<BYTE*>(cb_struct), cb_struct_count);
+			return D3d12UploadBufferBase::FillCB(i, reinterpret_cast<BYTE*>(struct_ptr), _struct_count);
 		}
 	};
 }
