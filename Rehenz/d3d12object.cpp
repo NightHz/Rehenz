@@ -250,7 +250,7 @@ namespace Rehenz
 		data = nullptr;
 	}
 
-	bool D3d12UploadBufferBase::FillCB(UINT i, BYTE* struct_ptr, UINT _struct_count)
+	bool D3d12UploadBufferBase::UploadData(UINT i, BYTE* struct_ptr, UINT _struct_count)
 	{
 		if (data == nullptr)
 		{

@@ -127,7 +127,7 @@ namespace Rehenz
 
 		bool MapAll();
 		void UnmapAll();
-		bool FillCB(UINT i, BYTE* struct_ptr, UINT _struct_count);
+		bool UploadData(UINT i, BYTE* struct_ptr, UINT _struct_count);
 	};
 
 	template<typename T>
@@ -143,9 +143,9 @@ namespace Rehenz
 		D3d12UploadBuffer& operator=(const D3d12UploadBuffer&) = delete;
 		inline ~D3d12UploadBuffer() {}
 
-		inline bool FillCB(UINT i, StructType* struct_ptr, UINT _struct_count)
+		inline bool UploadData(UINT i, StructType* struct_ptr, UINT _struct_count)
 		{
-			return D3d12UploadBufferBase::FillCB(i, reinterpret_cast<BYTE*>(struct_ptr), _struct_count);
+			return D3d12UploadBufferBase::UploadData(i, reinterpret_cast<BYTE*>(struct_ptr), _struct_count);
 		}
 	};
 }

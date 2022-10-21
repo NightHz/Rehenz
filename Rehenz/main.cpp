@@ -941,43 +941,39 @@ int main_d3d12_example()
 	cbframe.view = XmFloat4x4(MatrixTranspose(view.GetInverseTransformMatrix()));
 	cbframe.inv_view = XmFloat4x4(MatrixTranspose(view.GetTransformMatrix()));
 	cbframe.proj = XmFloat4x4(MatrixTranspose(proj.GetTransformMatrix()));
-	if (!cb->FillCB(get_current_cb_i(), &cbframe, 1))
+	if (!cb->UploadData(get_current_cb_i(), &cbframe, 1))
 		return SafeReturn(1);
 
-	// create buffer_obj
+	// create obj_tfs
 	struct CBObj
 	{
 		XMFLOAT4X4 world;
 		XMFLOAT4X4 inv_world;
 	};
 	const UINT instance_count = 10;
-	auto buffer_obj = std::make_shared<D3d12Buffer>(instance_count, static_cast<UINT>(sizeof(CBObj)), D3D12_HEAP_TYPE_UPLOAD, device->Get());
-	if (!buffer_obj->Get())
+	const UINT obj_tfs_srv = 0;
+	auto obj_tfs = std::make_shared<D3d12UploadBuffer<CBObj>>(false, instance_count, device.get());
+	if (!*obj_tfs)
 		return SafeReturn(1);
-	UINT buffer_obj_srv = 0;
-	srv_desc = buffer_obj->GetSrvDesc(0, instance_count);
-	device->Get()->CreateShaderResourceView(buffer_obj->Get(), &srv_desc, device->GetSrv(buffer_obj_srv));
-	Transform obj_transform;
-	CBObj buffer_obj_structs[instance_count]{};
+	srv_desc = obj_tfs->GetBufferObj()->GetSrvDesc(0, instance_count);
+	device->Get()->CreateShaderResourceView(obj_tfs->GetBuffer(), &srv_desc, device->GetSrv(obj_tfs_srv));
+	Transform obj_tf;
+	CBObj cbobjs[instance_count]{};
 	int i = 0;
 	for (float x = -2; x <= 2; x += 4)
 	{
 		for (float z = -2; z <= 2; z += 1, i++)
 		{
-			obj_transform.pos.x = x;
-			obj_transform.pos.z = z;
-			obj_transform.SetFront(-obj_transform.pos);
-			obj_transform.scale = Vector(0.2f, 0.2f, 0.2f);
-			buffer_obj_structs[i].world = XmFloat4x4(MatrixTranspose(obj_transform.GetTransformMatrix()));
-			buffer_obj_structs[i].inv_world = XmFloat4x4(MatrixTranspose(obj_transform.GetInverseTransformMatrix()));
+			obj_tf.pos.x = x;
+			obj_tf.pos.z = z;
+			obj_tf.SetFront(-obj_tf.pos);
+			obj_tf.scale = Vector(0.2f, 0.2f, 0.2f);
+			cbobjs[i].world = XmFloat4x4(MatrixTranspose(obj_tf.GetTransformMatrix()));
+			cbobjs[i].inv_world = XmFloat4x4(MatrixTranspose(obj_tf.GetInverseTransformMatrix()));
 		}
 	}
-	range.Begin = 0; range.End = 0;
-	hr = buffer_obj->Get()->Map(0, &range, &data);
-	if (FAILED(hr))
+	if (!obj_tfs->UploadData(0, cbobjs, instance_count))
 		return SafeReturn(1);
-	::memcpy(data, buffer_obj_structs, instance_count * sizeof(CBObj));
-	buffer_obj->Get()->Unmap(0, &range);
 
 	// create shader
 	auto vs = D3d12Util::CompileShaderFile(L"vs_transform_all.hlsl", "vs");
@@ -1048,7 +1044,7 @@ int main_d3d12_example()
 		cbframe.view = XmFloat4x4(MatrixTranspose(view.GetInverseTransformMatrix()));
 		cbframe.inv_view = XmFloat4x4(MatrixTranspose(view.GetTransformMatrix()));
 		cbframe.proj = XmFloat4x4(MatrixTranspose(proj.GetTransformMatrix()));
-		if (!cb->FillCB(get_current_cb_i(), &cbframe, 1))
+		if (!cb->UploadData(get_current_cb_i(), &cbframe, 1))
 			return SafeReturn(1);
 
 		// render
@@ -1074,7 +1070,7 @@ int main_d3d12_example()
 
 			// set root parameter
 			device->SetRSigCbvFast(cb->GetBufferObj()->GetGpuLocation(get_render_cb_i()));
-			device->SetRSigSrv(device->GetSrvGpu(buffer_obj_srv));
+			device->SetRSigSrv(device->GetSrvGpu(obj_tfs_srv));
 
 			// draw
 			cmd_list->DrawIndexedInstanced(teapot->index_count, instance_count, 0, 0, 0);
