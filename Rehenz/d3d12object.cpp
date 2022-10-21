@@ -256,16 +256,16 @@ namespace Rehenz
 			HRESULT hr = cb->Get()->Map(0, &range1, reinterpret_cast<void**>(&data));
 			if (FAILED(hr))
 				return false;
-			for (UINT j = 0; j < cb_struct_count; j++, i++)
-				::memcpy(data + i * struct_align_size, cb_struct + j * struct_size, struct_size);
-			D3D12_RANGE range2{ struct_size * i,struct_size * (i + cb_struct_count) };
+			for (UINT j = 0, k = i; j < cb_struct_count; j++, k++)
+				::memcpy(data + k * struct_align_size, cb_struct + j * struct_size, struct_size);
+			D3D12_RANGE range2{ struct_align_size * i,struct_align_size * (i + cb_struct_count) };
 			cb->Get()->Unmap(0, &range2);
 			data = nullptr;
 		}
 		else
 		{
-			for (UINT j = 0; j < cb_struct_count; j++, i++)
-				::memcpy(data + i * struct_align_size, cb_struct + j * struct_size, struct_size);
+			for (UINT j = 0, k = i; j < cb_struct_count; j++, k++)
+				::memcpy(data + k * struct_align_size, cb_struct + j * struct_size, struct_size);
 		}
 		return true;
 	}
