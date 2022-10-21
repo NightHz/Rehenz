@@ -24,4 +24,19 @@ namespace Rehenz
 
         ComPtr<ID3D12PipelineState> CreatePSO(ID3D12Device8* device);
     };
+
+    class D3d12CPSOCreator
+    {
+    public:
+        D3D12_COMPUTE_PIPELINE_STATE_DESC pso_desc;
+
+    public:
+        D3d12CPSOCreator();
+        ~D3d12CPSOCreator();
+
+        void SetRSig(ID3D12RootSignature* rs);
+        void SetShader(ID3DBlob* cs);
+
+        ComPtr<ID3D12PipelineState> CreatePSO(ID3D12Device8* device);
+    };
 }

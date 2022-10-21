@@ -56,6 +56,46 @@ namespace Rehenz
 			cmd_list->OMSetRenderTargets(1, &rtv, true, nullptr);
 	}
 
+	void D3d12RenderTarget::CopyTarget(ID3D12Resource2* dst, D3D12_RESOURCE_STATES dst_start, D3D12_RESOURCE_STATES dst_end, ID3D12GraphicsCommandList6* cmd_list)
+	{
+		if (!msaa)
+		{
+			D3D12_RESOURCE_BARRIER rc_barr1[]{
+				D3d12Util::GetTransitionStruct(target->Get(),
+				D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_COPY_SOURCE),
+				D3d12Util::GetTransitionStruct(dst,
+				dst_start, D3D12_RESOURCE_STATE_COPY_DEST)
+			};
+			cmd_list->ResourceBarrier(_countof(rc_barr1), rc_barr1);
+			cmd_list->CopyResource(dst, target->Get());
+			D3D12_RESOURCE_BARRIER rc_barr2[]{
+				D3d12Util::GetTransitionStruct(target->Get(),
+				D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_RENDER_TARGET),
+				D3d12Util::GetTransitionStruct(dst,
+				D3D12_RESOURCE_STATE_COPY_DEST, dst_end)
+			};
+			cmd_list->ResourceBarrier(_countof(rc_barr2), rc_barr2);
+		}
+		else
+		{
+			D3D12_RESOURCE_BARRIER rc_barr1[]{
+				D3d12Util::GetTransitionStruct(target->Get(),
+				D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_RESOLVE_SOURCE),
+				D3d12Util::GetTransitionStruct(dst,
+				dst_start, D3D12_RESOURCE_STATE_RESOLVE_DEST)
+			};
+			cmd_list->ResourceBarrier(_countof(rc_barr1), rc_barr1);
+			cmd_list->ResolveSubresource(dst, 0, target->Get(), 0, format);
+			D3D12_RESOURCE_BARRIER rc_barr2[]{
+				D3d12Util::GetTransitionStruct(target->Get(),
+				D3D12_RESOURCE_STATE_RESOLVE_SOURCE, D3D12_RESOURCE_STATE_RENDER_TARGET),
+				D3d12Util::GetTransitionStruct(dst,
+				D3D12_RESOURCE_STATE_RESOLVE_DEST, dst_end)
+			};
+			cmd_list->ResourceBarrier(_countof(rc_barr2), rc_barr2);
+		}
+	}
+
 	D3d12Mesh::D3d12Mesh(void* vertices, UINT _vertex_size, UINT _vertex_count, const std::vector<D3D12_INPUT_ELEMENT_DESC>* _input_layout, UINT16* indices, UINT _index_count,
 		D3D_PRIMITIVE_TOPOLOGY _topology, D3d12Device* device, ID3D12GraphicsCommandList6* cmd_list)
 		: vertex_size(_vertex_size), vertex_count(_vertex_count), vb_size(_vertex_size* _vertex_count),

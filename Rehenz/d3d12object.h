@@ -46,6 +46,7 @@ namespace Rehenz
 
 		void ClearRenderTargets(D3d12Device* device, ID3D12GraphicsCommandList6* cmd_list);
 		void SetRenderTargets(D3d12Device* device, ID3D12GraphicsCommandList6* cmd_list);
+		void CopyTarget(ID3D12Resource2* dst, D3D12_RESOURCE_STATES dst_start, D3D12_RESOURCE_STATES dst_end, ID3D12GraphicsCommandList6* cmd_list);
 	};
 
 	class D3d12Mesh

@@ -306,7 +306,7 @@ namespace Rehenz
         return true;
     }
 
-    bool D3d12Device::ExecuteCommandAndPresent(ID3D12Resource2* image, bool msaa)
+    bool D3d12Device::ExecuteCommandAndPresent(ID3D12Resource2* image, bool msaa, D3D12_RESOURCE_STATES image_start, D3D12_RESOURCE_STATES image_end)
     {
         if (!device)
             return false;
@@ -320,7 +320,7 @@ namespace Rehenz
             {
                 D3D12_RESOURCE_BARRIER rc_barr1[]{
                     D3d12Util::GetTransitionStruct(image,
-                    D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_COPY_SOURCE),
+                    image_start, D3D12_RESOURCE_STATE_COPY_SOURCE),
                     D3d12Util::GetTransitionStruct(CurrentScBuffer(),
                     D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_COPY_DEST)
                 };
@@ -328,7 +328,7 @@ namespace Rehenz
                 cmd_list->CopyResource(CurrentScBuffer(), image);
                 D3D12_RESOURCE_BARRIER rc_barr2[]{
                     D3d12Util::GetTransitionStruct(image,
-                    D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_RENDER_TARGET),
+                    D3D12_RESOURCE_STATE_COPY_SOURCE, image_end),
                     D3d12Util::GetTransitionStruct(CurrentScBuffer(),
                     D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_PRESENT)
                 };
@@ -338,7 +338,7 @@ namespace Rehenz
             {
                 D3D12_RESOURCE_BARRIER rc_barr1[]{
                     D3d12Util::GetTransitionStruct(image,
-                    D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_RESOLVE_SOURCE),
+                    image_start, D3D12_RESOURCE_STATE_RESOLVE_SOURCE),
                     D3d12Util::GetTransitionStruct(CurrentScBuffer(),
                     D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RESOLVE_DEST)
                 };
@@ -346,7 +346,7 @@ namespace Rehenz
                 cmd_list->ResolveSubresource(CurrentScBuffer(), 0, image, 0, sc_format);
                 D3D12_RESOURCE_BARRIER rc_barr2[]{
                     D3d12Util::GetTransitionStruct(image,
-                    D3D12_RESOURCE_STATE_RESOLVE_SOURCE, D3D12_RESOURCE_STATE_RENDER_TARGET),
+                    D3D12_RESOURCE_STATE_RESOLVE_SOURCE, image_end),
                     D3d12Util::GetTransitionStruct(CurrentScBuffer(),
                     D3D12_RESOURCE_STATE_RESOLVE_DEST, D3D12_RESOURCE_STATE_PRESENT)
                 };

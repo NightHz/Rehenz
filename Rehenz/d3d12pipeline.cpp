@@ -155,4 +155,45 @@ namespace Rehenz
             return nullptr;
         return pso;
     }
+
+    D3d12CPSOCreator::D3d12CPSOCreator() : pso_desc{}
+    {
+        // root signature
+        pso_desc.pRootSignature = nullptr;
+
+        // shader
+        pso_desc.CS.pShaderBytecode = nullptr;
+        pso_desc.CS.BytecodeLength = 0;
+
+        // other
+        pso_desc.NodeMask = 0;
+        pso_desc.CachedPSO.pCachedBlob = nullptr;
+        pso_desc.CachedPSO.CachedBlobSizeInBytes = 0;
+        pso_desc.Flags = D3D12_PIPELINE_STATE_FLAG_NONE;
+    }
+
+    D3d12CPSOCreator::~D3d12CPSOCreator()
+    {
+    }
+
+    void D3d12CPSOCreator::SetRSig(ID3D12RootSignature* rs)
+    {
+        pso_desc.pRootSignature = rs;
+    }
+
+    void D3d12CPSOCreator::SetShader(ID3DBlob* cs)
+    {
+        pso_desc.CS.pShaderBytecode = (cs ? cs->GetBufferPointer() : nullptr);
+        pso_desc.CS.BytecodeLength = (cs ? cs->GetBufferSize() : 0);
+    }
+
+    ComPtr<ID3D12PipelineState> D3d12CPSOCreator::CreatePSO(ID3D12Device8* device)
+    {
+        ComPtr<ID3D12PipelineState> pso;
+        HRESULT hr = device->CreateComputePipelineState(&pso_desc, IID_PPV_ARGS(pso.GetAddressOf()));
+        if (FAILED(hr))
+            return nullptr;
+        return pso;
+    }
+
 }
