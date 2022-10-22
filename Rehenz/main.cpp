@@ -895,7 +895,7 @@ int main_d3d12_example()
 	HRESULT hr = S_OK;
 	std::shared_ptr<Mesh> mesh0;
 	D3D12_SHADER_RESOURCE_VIEW_DESC srv_desc{};
-	D3D12_RANGE range{};
+	D3D12_UNORDERED_ACCESS_VIEW_DESC uav_desc{};
 
 	// create target
 	auto target = std::make_shared<D3d12RenderTarget>(width, height, device->GetScFormat(), true, true, Color::yellow_green_o, 0, 0, device.get());
@@ -998,6 +998,61 @@ int main_d3d12_example()
 	if (!pso)
 		return SafeReturn(1);
 
+	// create cb2
+	struct CBBlur
+	{
+		float ws[11];
+		float _pad1;
+	};
+	int blur_count = 4;
+	auto cb2 = std::make_shared<D3d12UploadBuffer<CBBlur>>(true, 1, device.get());
+	if (!*cb2)
+		return SafeReturn(1);
+	CBBlur cbblur{ 0,0,0,0.0545f,0.2442f,0.4026f,0.2442f,0.0545f,0,0,0 };
+	if (!cb2->UploadData(0, &cbblur, 1))
+		return SafeReturn(1);
+
+	// create textures
+	const int blur_tex1_srv = 1;
+	const int blur_tex2_srv = 2;
+	const int blur_tex1_uav = 3;
+	const int blur_tex2_uav = 4;
+	rc_desc = D3d12Util::GetTexture2dRcDesc(width, height, 1, DXGI_FORMAT_B8G8R8A8_UNORM, 1, false, D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS);
+	auto blur_tex1 = std::make_shared<D3d12Texture>(rc_desc, D3D12_HEAP_TYPE_DEFAULT, device->Get(), D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
+	if (!blur_tex1->Get())
+		return SafeReturn(1);
+	auto blur_tex2 = std::make_shared<D3d12Texture>(rc_desc, D3D12_HEAP_TYPE_DEFAULT, device->Get(), D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
+	if (!blur_tex2->Get())
+		return SafeReturn(1);
+	srv_desc = blur_tex1->GetSrvDesc();
+	device->Get()->CreateShaderResourceView(blur_tex1->Get(), &srv_desc, device->GetSrv(blur_tex1_srv));
+	srv_desc = blur_tex2->GetSrvDesc();
+	device->Get()->CreateShaderResourceView(blur_tex2->Get(), &srv_desc, device->GetSrv(blur_tex2_srv));
+	uav_desc = blur_tex1->GetUavDesc();
+	device->Get()->CreateUnorderedAccessView(blur_tex1->Get(), nullptr, &uav_desc, device->GetUav(blur_tex1_uav));
+	uav_desc = blur_tex2->GetUavDesc();
+	device->Get()->CreateUnorderedAccessView(blur_tex2->Get(), nullptr, &uav_desc, device->GetUav(blur_tex2_uav));
+
+	// create compute shader
+	auto cs1 = D3d12Util::CompileShaderFile(L"cs_blur_x.hlsl", "cs");
+	if (!cs1)
+		return SafeReturn(1);
+	auto cs2 = D3d12Util::CompileShaderFile(L"cs_blur_y.hlsl", "cs");
+	if (!cs2)
+		return SafeReturn(1);
+
+	// create compute pso
+	D3d12CPSOCreator cpsc;
+	cpsc.SetRSig(device->GetRSig());
+	cpsc.SetShader(cs1.Get());
+	auto cpso1 = cpsc.CreatePSO(device->Get());
+	if (!cpso1)
+		return SafeReturn(1);
+	cpsc.SetShader(cs2.Get());
+	auto cpso2 = cpsc.CreatePSO(device->Get());
+	if (!cpso2)
+		return SafeReturn(1);
+
 	// finish
 	if (!device->ExecuteCommand())
 		return SafeReturn(1);
@@ -1046,6 +1101,9 @@ int main_d3d12_example()
 		if (KeyIsDown('Z'))      proj.parallel_projection = false;
 		else if (KeyIsDown('X')) proj.parallel_projection = true;
 
+		if (KeyIsDown(VK_ADD))           blur_count = Min(blur_count + 1, 4);
+		else if (KeyIsDown(VK_SUBTRACT)) blur_count = Max(blur_count - 1, 0);
+
 		cbframe.view = XmFloat4x4(MatrixTranspose(view.GetInverseTransformMatrix()));
 		cbframe.inv_view = XmFloat4x4(MatrixTranspose(view.GetTransformMatrix()));
 		cbframe.proj = XmFloat4x4(MatrixTranspose(proj.GetTransformMatrix()));
@@ -1082,8 +1140,32 @@ int main_d3d12_example()
 			// draw
 			cmd_list->DrawIndexedInstanced(teapot->index_count, instance_count, 0, 0, 0);
 
+			// blur
+			target->CopyTarget(blur_tex1->Get(), D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS, cmd_list);
+			cmd_list->SetComputeRootSignature(device->GetRSig());
+			cmd_list->SetComputeRootConstantBufferView(0, cb2->GetBufferObj()->GetGpuLocation(0));
+			for (int j = 0; j < blur_count; j++)
+			{
+				// x
+				rc_barr[0] = D3d12Util::GetTransitionStruct(blur_tex1->Get(), D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
+				rc_barr[1] = D3d12Util::GetTransitionStruct(blur_tex2->Get(), D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+				cmd_list->ResourceBarrier(2, rc_barr);
+				cmd_list->SetPipelineState(cpso1.Get());
+				cmd_list->SetComputeRootDescriptorTable(2, device->GetSrvGpu(blur_tex1_srv));
+				cmd_list->SetComputeRootDescriptorTable(3, device->GetUavGpu(blur_tex2_uav));
+				cmd_list->Dispatch((width + 255) / 256, height, 1);
+				// y
+				rc_barr[0] = D3d12Util::GetTransitionStruct(blur_tex1->Get(), D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+				rc_barr[1] = D3d12Util::GetTransitionStruct(blur_tex2->Get(), D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
+				cmd_list->ResourceBarrier(2, rc_barr);
+				cmd_list->SetPipelineState(cpso2.Get());
+				cmd_list->SetComputeRootDescriptorTable(2, device->GetSrvGpu(blur_tex2_srv));
+				cmd_list->SetComputeRootDescriptorTable(3, device->GetUavGpu(blur_tex1_uav));
+				cmd_list->Dispatch(width, (height + 255) / 256, 1);
+			}
+
 			// present
-			if (!device->ExecuteCommandAndPresent(target->GetTarget(), target->msaa))
+			if (!device->ExecuteCommandAndPresent(blur_tex1->Get(), false, D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE))
 				return SafeReturn(1);
 
 			// refresh

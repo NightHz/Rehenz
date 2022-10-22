@@ -34,7 +34,9 @@ void main(uint3 dt_id : SV_DispatchThreadID, uint3 gt_id : SV_GroupThreadID)
     // cache [0,R)
     if (gt_id.x < R)
     {
-        uint x = max(dt_id.x - R, 0);
+        uint x = 0;
+        if (dt_id.x >= R)
+            x = dt_id.x - R;
         cache[gt_id.x] = tex_in[uint2(x, dt_id.y)];
     }
     // cache [N+R,N+2*R)
