@@ -159,7 +159,7 @@ h = 两倍欧氏距离（在此例中效果最好，且路径正确）
 
 ### d3d12
 
-|绘制多个实例||
+|绘制多个实例|计算着色器实现模糊|
 |:-:|:-:|
-|![](img/d3d12_multi_instance.png)||
+|![](img/d3d12_multi_instance.png)|![](img/d3d12_blur.png)|
 
