@@ -86,6 +86,7 @@ namespace Rehenz
         UINT height;
         UINT16 mip_levels;
         DXGI_FORMAT format;
+        UINT16 array_size;
         D3D12_HEAP_TYPE heap_type;
         ComPtr<ID3D12Resource2> texture;
 
@@ -113,6 +114,31 @@ namespace Rehenz
             srv_desc.Texture2D.ResourceMinLODClamp = 0;
             return srv_desc;
         }
+        inline D3D12_SHADER_RESOURCE_VIEW_DESC GetSrvDescForArray()
+        {
+            D3D12_SHADER_RESOURCE_VIEW_DESC srv_desc{};
+            srv_desc.Format = format;
+            srv_desc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2DARRAY;
+            srv_desc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+            srv_desc.Texture2DArray.MostDetailedMip = 0;
+            srv_desc.Texture2DArray.MipLevels = mip_levels;
+            srv_desc.Texture2DArray.FirstArraySlice = 0;
+            srv_desc.Texture2DArray.ArraySize = array_size;
+            srv_desc.Texture2DArray.PlaneSlice = 0;
+            srv_desc.Texture2DArray.ResourceMinLODClamp = 0;
+            return srv_desc;
+        }
+        inline D3D12_SHADER_RESOURCE_VIEW_DESC GetSrvDescForCube()
+        {
+            D3D12_SHADER_RESOURCE_VIEW_DESC srv_desc{};
+            srv_desc.Format = format;
+            srv_desc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURECUBE;
+            srv_desc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+            srv_desc.TextureCube.MostDetailedMip = 0;
+            srv_desc.TextureCube.MipLevels = mip_levels;
+            srv_desc.TextureCube.ResourceMinLODClamp = 0;
+            return srv_desc;
+        }
         inline D3D12_UNORDERED_ACCESS_VIEW_DESC GetUavDesc()
         {
             D3D12_UNORDERED_ACCESS_VIEW_DESC uav_desc{};
@@ -121,6 +147,17 @@ namespace Rehenz
             uav_desc.Texture2D.MipSlice = 0;
             uav_desc.Texture2D.PlaneSlice = 0;
             return uav_desc;
+        }
+        inline D3D12_RENDER_TARGET_VIEW_DESC GetRtvDescForArray(UINT i, UINT count)
+        {
+            D3D12_RENDER_TARGET_VIEW_DESC rtv_desc{};
+            rtv_desc.Format = format;
+            rtv_desc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2DARRAY;
+            rtv_desc.Texture2DArray.MipSlice = 0;
+            rtv_desc.Texture2DArray.FirstArraySlice = i;
+            rtv_desc.Texture2DArray.ArraySize = count;
+            rtv_desc.Texture2DArray.PlaneSlice = 0;
+            return rtv_desc;
         }
     };
 }

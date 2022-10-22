@@ -29,6 +29,7 @@ namespace Rehenz
 		height = rc_desc.Height;
 		mip_levels = rc_desc.MipLevels;
 		format = rc_desc.Format;
+		array_size = rc_desc.DepthOrArraySize;
 		heap_type = _heap_type;
 
 		auto heap_prop = D3d12Util::GetHeapProperties(heap_type);

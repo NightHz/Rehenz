@@ -2,13 +2,13 @@
 
 namespace Rehenz
 {
-	D3d12RenderTarget::D3d12RenderTarget(UINT _width, UINT _height, DXGI_FORMAT _format, bool _msaa, bool _have_zbuffer,
+	D3d12RenderTarget::D3d12RenderTarget(UINT _width, UINT _height, DXGI_FORMAT _format, bool _msaa, UINT16 _target_count, bool _have_zbuffer,
 		Color _target_bgc, UINT _target_rtv, UINT _zbuffer_dsv, D3d12Device* device)
-		: width(_width), height(_height), format(_format), msaa(_msaa), have_zbuffer(_have_zbuffer),
+		: width(_width), height(_height), format(_format), msaa(_msaa), multi_target(target_count > 1), target_count(_target_count), have_zbuffer(_have_zbuffer),
 		target_bgc(_target_bgc), target_rtv(_target_rtv), zbuffer_dsv(_zbuffer_dsv)
 	{
 		// create target
-		auto rc_desc = D3d12Util::GetTexture2dRcDesc(width, height, 1, format, 1, msaa, D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET);
+		auto rc_desc = D3d12Util::GetTexture2dRcDesc(width, height, 1, format, target_count, msaa, D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET);
 		auto clear_value = D3d12Util::GetTexture2dClearStruct(format, target_bgc.v);
 		target = std::make_shared<D3d12Texture>(rc_desc, D3D12_HEAP_TYPE_DEFAULT, device->Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, &clear_value);
 		if (!target->Get())
@@ -21,7 +21,7 @@ namespace Rehenz
 		// create zbuffer
 		if (have_zbuffer)
 		{
-			rc_desc = D3d12Util::GetTexture2dRcDesc(width, height, 1, DXGI_FORMAT_D24_UNORM_S8_UINT, 1, msaa, D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL);
+			rc_desc = D3d12Util::GetTexture2dRcDesc(width, height, 1, DXGI_FORMAT_D24_UNORM_S8_UINT, target_count, msaa, D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL);
 			clear_value = D3d12Util::GetDepthStencilClearStruct(DXGI_FORMAT_D24_UNORM_S8_UINT, 1, 0);
 			zbuffer = std::make_shared<D3d12Texture>(rc_desc, D3D12_HEAP_TYPE_DEFAULT, device->Get(), D3D12_RESOURCE_STATE_DEPTH_WRITE, &clear_value);
 			if (!zbuffer->Get())
@@ -33,6 +33,20 @@ namespace Rehenz
 		}
 		else
 			zbuffer = nullptr;
+
+		// set viewport
+		vp.TopLeftX = 0;
+		vp.TopLeftY = 0;
+		vp.Width = static_cast<float>(width);
+		vp.Height = static_cast<float>(height);
+		vp.MinDepth = 0;
+		vp.MaxDepth = 1;
+
+		// set scissor rect
+		sr.left = 0;
+		sr.right = width;
+		sr.top = 0;
+		sr.bottom = height;
 	}
 
 	D3d12RenderTarget::~D3d12RenderTarget()
@@ -54,6 +68,12 @@ namespace Rehenz
 			cmd_list->OMSetRenderTargets(1, &rtv, true, &dsv);
 		else
 			cmd_list->OMSetRenderTargets(1, &rtv, true, nullptr);
+	}
+
+	void D3d12RenderTarget::SetRS(ID3D12GraphicsCommandList6* cmd_list)
+	{
+		cmd_list->RSSetViewports(1, &vp);
+		cmd_list->RSSetScissorRects(1, &sr);
 	}
 
 	void D3d12RenderTarget::CopyTarget(ID3D12Resource2* dst, D3D12_RESOURCE_STATES dst_start, D3D12_RESOURCE_STATES dst_end, ID3D12GraphicsCommandList6* cmd_list)
