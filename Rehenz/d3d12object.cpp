@@ -332,4 +332,76 @@ namespace Rehenz
 		return true;
 	}
 
+	D3d12DefaultTexture::D3d12DefaultTexture(void* image, UINT _pixel_size, UINT _width, UINT _height, UINT _count, DXGI_FORMAT _format,
+		D3D12_RESOURCE_STATES _state, D3d12Device* device, ID3D12GraphicsCommandList6* cmd_list)
+		: pixel_size(_pixel_size), width(_width), height(_height), count(_count), format(_format), rc_init_state(_state)
+	{
+		HRESULT hr = S_OK;
+
+		// create upload
+		UINT image_pitch = width * pixel_size;
+		UINT upload_pitch = D3d12Util::Align(image_pitch, D3D12_TEXTURE_DATA_PITCH_ALIGNMENT);
+		UINT upload_page = upload_pitch * height;
+		UINT upload_size = upload_page * count;
+		UINT pitch_count = height * count;
+		upload = std::make_shared<D3d12Buffer>(1, upload_size, D3D12_HEAP_TYPE_UPLOAD, device->Get());
+		if (!upload->Get())
+		{
+			texture = nullptr;
+			return;
+		}
+
+		// copy from image
+		void* data = nullptr;
+		hr = upload->Get()->Map(0, nullptr, &data);
+		if (FAILED(hr))
+		{
+			texture = nullptr;
+			return;
+		}
+		for (UINT i = 0; i < pitch_count; i++)
+		{
+			void* dst = static_cast<BYTE*>(data) + i * upload_pitch;
+			void* src = static_cast<BYTE*>(image) + i * image_pitch;
+			::memcpy(dst, src, image_pitch);
+		}
+		upload->Get()->Unmap(0, nullptr);
+
+		// create texture
+		auto rc_desc = D3d12Util::GetTexture2dRcDesc(width, height, 1, format, static_cast<UINT16>(count));
+		texture = std::make_shared<D3d12Texture>(rc_desc, D3D12_HEAP_TYPE_DEFAULT, device->Get(), D3D12_RESOURCE_STATE_COPY_DEST);
+		if (!texture->Get())
+		{
+			texture = nullptr;
+			return;
+		}
+
+		// copy from upload
+		D3D12_TEXTURE_COPY_LOCATION dst_loc{}, src_loc{};
+		for (UINT i = 0; i < count; i++)
+		{
+			dst_loc.pResource = texture->Get();
+			dst_loc.Type = D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX;
+			dst_loc.SubresourceIndex = i;
+			src_loc.pResource = upload->Get();
+			src_loc.Type = D3D12_TEXTURE_COPY_TYPE_PLACED_FOOTPRINT;
+			src_loc.PlacedFootprint.Offset = static_cast<UINT64>(i) * upload_page;
+			src_loc.PlacedFootprint.Footprint.Format = format;
+			src_loc.PlacedFootprint.Footprint.Width = width;
+			src_loc.PlacedFootprint.Footprint.Height = height;
+			src_loc.PlacedFootprint.Footprint.Depth = 1;
+			src_loc.PlacedFootprint.Footprint.RowPitch = upload_pitch;
+			cmd_list->CopyTextureRegion(&dst_loc, 0, 0, 0, &src_loc, nullptr);
+		}
+		if (rc_init_state != D3D12_RESOURCE_STATE_COPY_DEST)
+		{
+			auto rc_barr = D3d12Util::GetTransitionStruct(texture->Get(), D3D12_RESOURCE_STATE_COPY_DEST, rc_init_state);
+			cmd_list->ResourceBarrier(1, &rc_barr);
+		}
+	}
+
+	D3d12DefaultTexture::~D3d12DefaultTexture()
+	{
+	}
+
 }

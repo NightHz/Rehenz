@@ -890,9 +890,7 @@ int main_d3d12_example()
 
 	cout << "setup resource ..." << endl;
 	D3D12_RESOURCE_DESC rc_desc{};
-	D3D12_CLEAR_VALUE clear_value{};
 	D3D12_RESOURCE_BARRIER rc_barr[4]{};
-	HRESULT hr = S_OK;
 	std::shared_ptr<Mesh> mesh0;
 	D3D12_SHADER_RESOURCE_VIEW_DESC srv_desc{};
 	D3D12_UNORDERED_ACCESS_VIEW_DESC uav_desc{};
@@ -1118,8 +1116,6 @@ int main_d3d12_example()
 			cmd_list = device->ResetCommand();
 			if (!cmd_list)
 				return SafeReturn(1);
-			D3D12_VERTEX_BUFFER_VIEW vbv{};
-			D3D12_INDEX_BUFFER_VIEW ibv{};
 
 			// clear
 			target->ClearRenderTargets(device.get(), cmd_list);
@@ -1181,6 +1177,92 @@ int main_d3d12_example()
 	return SafeReturn(0);
 }
 
+int main_d3d12_show_image_example()
+{
+	cout << endl << "create window ..." << endl;
+	const std::string title = "d3d12 show image example";
+	const int width = 800;
+	const int height = 600;
+	auto window = std::make_unique<SimpleWindowWithFC>(GetModuleHandle(nullptr), width, height, title);
+	if (!window->CheckWindowState())
+		return 1;
+	Mouse mouse;
+	FpsCounterS fps_counter;
+	fps_counter.LockFps(0);
+
+	cout << "create d3d12 device ..." << endl;
+	auto device = std::make_unique<D3d12Device>();
+	auto SafeReturn = [&device](int return_v)
+	{
+		if (device)
+			device->FlushGpu();
+		return return_v;
+	};
+	auto cmd_list = device->Create(window.get());
+	if (!cmd_list)
+		return SafeReturn(1);
+
+	cout << "setup resource ..." << endl;
+	uint image_width, image_height;
+	auto image = LoadImageFile(L"assets/NightHz.jpg", image_width, image_height);
+	if (image == nullptr)
+	{
+		cout << "load image error" << endl;
+		return SafeReturn(1);
+	}
+	auto image2 = std::make_unique<uint[]>(static_cast<size_t>(width) * height);
+	for (int y = 0; y < height; y++)
+	{
+		for (int x = 0; x < width; x++)
+		{
+			int i2 = y * width + x;
+			int i = (image_height * y / height) * image_width + image_width * x / width;
+			image2[i2] = image[i];
+		}
+	}
+	auto tex = std::make_shared<D3d12DefaultTexture>(image2.get(), width, height, device.get(), cmd_list);
+	if (!*tex)
+		return SafeReturn(1);
+	// finish
+	if (!device->ExecuteCommand())
+		return SafeReturn(1);
+	if (!device->FlushGpu())
+		return SafeReturn(1);
+
+	cout << "press Q to exit" << endl;
+	while (window->CheckWindowState())
+	{
+		// update
+		mouse.Present();
+		fps_counter.Present();
+		float dt = fps_counter.GetLastDeltatime2(); (dt);
+
+		// render
+		if (device->CheckCmdAllocator())
+		{
+			cmd_list = device->ResetCommand();
+			if (!cmd_list)
+				return SafeReturn(1);
+
+			// present
+			if (!device->ExecuteCommandAndPresent(tex->GetTexture(), false, tex->rc_init_state, tex->rc_init_state))
+				return SafeReturn(1);
+
+			// refresh
+			window->Present();
+		}
+		else
+			Sleep(1);
+
+		// msg
+		SimpleMessageProcess();
+		// exit
+		if (KeyIsDown('Q'))
+			break;
+	}
+	return SafeReturn(0);
+}
+
 int main()
 {
 	cout << "Hello~ Rehenz~" << endl;
@@ -1195,5 +1277,6 @@ int main()
 	//return main_drawer_test_triangle();
 	//return main_drawerf_test_triangle();
 	//return main_image_reader_test();
-	return main_d3d12_example();
+	//return main_d3d12_example();
+	return main_d3d12_show_image_example();
 }

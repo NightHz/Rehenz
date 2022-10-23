@@ -149,13 +149,49 @@ namespace Rehenz
 	public:
 		inline D3d12UploadBuffer(bool _as_cbuffer, UINT _struct_count, D3d12Device* device)
 			: D3d12UploadBufferBase(sizeof(StructType), _as_cbuffer, _struct_count, device) {}
-		D3d12UploadBuffer(const D3d12UploadBuffer&) = delete;
-		D3d12UploadBuffer& operator=(const D3d12UploadBuffer&) = delete;
 		inline ~D3d12UploadBuffer() {}
 
 		inline bool UploadData(UINT i, StructType* struct_ptr, UINT _struct_count)
 		{
 			return D3d12UploadBufferBase::UploadData(i, reinterpret_cast<BYTE*>(struct_ptr), _struct_count);
+		}
+	};
+
+	class D3d12DefaultTexture
+	{
+	private:
+		std::shared_ptr<D3d12Texture> texture;
+		std::shared_ptr<D3d12Buffer> upload;
+
+	public:
+		const UINT pixel_size;
+		const UINT width;
+		const UINT height;
+		const UINT count;
+		const DXGI_FORMAT format;
+		const D3D12_RESOURCE_STATES rc_init_state;
+
+	public:
+		D3d12DefaultTexture(void* image, UINT _pixel_size, UINT _width, UINT _height, UINT _count, DXGI_FORMAT _format,
+			D3D12_RESOURCE_STATES _state, D3d12Device* device, ID3D12GraphicsCommandList6* cmd_list);
+		D3d12DefaultTexture(void* image, UINT _width, UINT _height, D3d12Device* device, ID3D12GraphicsCommandList6* cmd_list)
+			: D3d12DefaultTexture(image, 4, _width, _height, 1, DXGI_FORMAT_B8G8R8A8_UNORM,
+				D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE | D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, device, cmd_list) {}
+		D3d12DefaultTexture(const D3d12DefaultTexture&) = delete;
+		D3d12DefaultTexture& operator=(const D3d12DefaultTexture&) = delete;
+		~D3d12DefaultTexture();
+
+		inline operator bool()
+		{
+			return texture != nullptr;
+		}
+		inline ID3D12Resource2* GetTexture()
+		{
+			return texture->Get();
+		}
+		inline D3d12Texture* GetTextureObj()
+		{
+			return texture.get();
 		}
 	};
 }
