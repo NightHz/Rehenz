@@ -11,6 +11,7 @@ namespace Rehenz
     public:
         D3d12GPSOCreator();
         ~D3d12GPSOCreator();
+        void Reset();
 
         void SetRSig(ID3D12RootSignature* rs);
         void SetShader(ID3DBlob* vs, ID3DBlob* ps, ID3DBlob* ds = nullptr, ID3DBlob* hs = nullptr, ID3DBlob* gs = nullptr);
@@ -33,6 +34,7 @@ namespace Rehenz
     public:
         D3d12CPSOCreator();
         ~D3d12CPSOCreator();
+        void Reset();
 
         void SetRSig(ID3D12RootSignature* rs);
         void SetShader(ID3DBlob* cs);

@@ -4,6 +4,15 @@ namespace Rehenz
 {
     D3d12GPSOCreator::D3d12GPSOCreator() : pso_desc{}
     {
+        Reset();
+    }
+
+    D3d12GPSOCreator::~D3d12GPSOCreator()
+    {
+    }
+
+    void D3d12GPSOCreator::Reset()
+    {
         // root signature
         pso_desc.pRootSignature = nullptr;
 
@@ -90,10 +99,6 @@ namespace Rehenz
         pso_desc.Flags = D3D12_PIPELINE_STATE_FLAG_NONE;
     }
 
-    D3d12GPSOCreator::~D3d12GPSOCreator()
-    {
-    }
-
     void D3d12GPSOCreator::SetRSig(ID3D12RootSignature* rs)
     {
         pso_desc.pRootSignature = rs;
@@ -158,6 +163,15 @@ namespace Rehenz
 
     D3d12CPSOCreator::D3d12CPSOCreator() : pso_desc{}
     {
+        Reset();
+    }
+
+    D3d12CPSOCreator::~D3d12CPSOCreator()
+    {
+    }
+
+    void D3d12CPSOCreator::Reset()
+    {
         // root signature
         pso_desc.pRootSignature = nullptr;
 
@@ -170,10 +184,6 @@ namespace Rehenz
         pso_desc.CachedPSO.pCachedBlob = nullptr;
         pso_desc.CachedPSO.CachedBlobSizeInBytes = 0;
         pso_desc.Flags = D3D12_PIPELINE_STATE_FLAG_NONE;
-    }
-
-    D3d12CPSOCreator::~D3d12CPSOCreator()
-    {
     }
 
     void D3d12CPSOCreator::SetRSig(ID3D12RootSignature* rs)
