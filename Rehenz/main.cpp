@@ -1263,6 +1263,223 @@ int main_d3d12_show_image_example()
 	return SafeReturn(0);
 }
 
+int main_d3d12_cubemap_example()
+{
+	cout << endl << "create window ..." << endl;
+	const std::string title = "d3d12 cubemap example";
+	const int width = 800;
+	const int height = 600;
+	auto window = std::make_unique<SimpleWindowWithFC>(GetModuleHandle(nullptr), width, height, title);
+	if (!window->CheckWindowState())
+		return 1;
+	Mouse mouse;
+	FpsCounterS fps_counter;
+	fps_counter.LockFps(0);
+
+	cout << "create d3d12 device ..." << endl;
+	auto device = std::make_unique<D3d12Device>();
+	auto SafeReturn = [&device](int return_v)
+	{
+		if (device)
+			device->FlushGpu();
+		return return_v;
+	};
+	auto cmd_list = device->Create(window.get());
+	if (!cmd_list)
+		return SafeReturn(1);
+
+	cout << "setup resource ..." << endl;
+	std::shared_ptr<Mesh> mesh0;
+	std::unique_ptr<uint[]> image, image2;
+	D3d12GPSOCreator psc;
+	D3D12_RESOURCE_BARRIER rc_barr[4]{};
+	D3D12_RESOURCE_DESC rc_desc{};
+	D3D12_SHADER_RESOURCE_VIEW_DESC srv_desc{};
+	D3D12_UNORDERED_ACCESS_VIEW_DESC uav_desc{};
+
+	// create target
+	auto target = std::make_shared<D3d12RenderTarget>(width, height, device->GetScFormat(), true, true, Color::yellow_green_o, 0, 0, device.get());
+	if (!*target)
+		return SafeReturn(1);
+
+	// create mesh
+	mesh0 = CreateCubeMesh();
+	auto cube = std::make_shared<D3d12Mesh>(mesh0.get(), device.get(), cmd_list);
+	if (!*cube)
+		return SafeReturn(1);
+	mesh0 = CreateSphereMesh();
+	auto sphere = std::make_shared<D3d12Mesh>(mesh0.get(), device.get(), cmd_list);
+	if (!*sphere)
+		return SafeReturn(1);
+	mesh0 = nullptr;
+
+	// set camera
+	Transform view;
+	Projection proj;
+	view.pos = Vector(2, 2, -3);
+	view.SetFront(-view.pos);
+	proj.aspect = static_cast<float>(width) / height;
+
+	// set light
+	Transform light;
+	light.axes.pitch = pi_div2 * 0.8f;
+	light.scale = Vector(0.8f, 0.8f, 0.8f);
+
+	// create cb
+	struct CBFrame
+	{
+		XMFLOAT4X4 view;
+		XMFLOAT4X4 inv_view;
+		XMFLOAT4X4 proj;
+		XMFLOAT3 light_intensity;
+		float _pad1;
+		XMFLOAT3 light_direction;
+		float _pad2;
+	};
+	IndexLoop cb_i{ 0,1 };
+	auto cb = std::make_shared<D3d12UploadBuffer<CBFrame>>(true, 2, device.get());
+	if (!*cb)
+		return SafeReturn(1);
+	CBFrame cbframe{};
+	cbframe.view = XmFloat4x4(MatrixTranspose(view.GetInverseTransformMatrix()));
+	cbframe.inv_view = XmFloat4x4(MatrixTranspose(view.GetTransformMatrix()));
+	cbframe.proj = XmFloat4x4(MatrixTranspose(proj.GetTransformMatrix()));
+	cbframe.light_intensity = XmFloat3(light.scale);
+	cbframe.light_direction = XmFloat3(light.GetFront());
+	if (!cb->UploadData(cb_i.GetCurrentIndex(), &cbframe, 1))
+		return SafeReturn(1);
+
+	// create skybox texture
+	uint skybox_width, skybox_height;
+	image = LoadImageFile(L"assets/skybox.png", skybox_width, skybox_height);
+	if (image == nullptr)
+	{
+		cout << "load assets/skybox.png error" << endl;
+		return SafeReturn(1);
+	}
+	skybox_width /= 4;
+	skybox_height /= 3;
+	image2 = std::make_unique<uint[]>(static_cast<size_t>(skybox_width) * skybox_height * 6);
+	for (const auto& ixy : std::vector<std::vector<int>>{ {0,2,1},{1,0,1},{2,1,0},{3,1,2},{4,1,1},{5,3,1} })
+	{
+		uint* src = image.get() + ixy[2] * skybox_width * skybox_height * 4 + ixy[1] * skybox_width;
+		uint* dst = image2.get() + ixy[0] * skybox_width * skybox_height;
+		for (uint y = 0; y < skybox_height; y++)
+		{
+			for (uint x = 0; x < skybox_width; x++)
+			{
+				int src_i = y * skybox_width * 4 + x;
+				int dst_i = y * skybox_width + x;
+				dst[dst_i] = src[src_i];
+			}
+		}
+	}
+	UINT skybox_srv = 0;
+	auto skybox = std::make_shared<D3d12DefaultTexture>(image2.get(), 4, skybox_width, skybox_height, 6, DXGI_FORMAT_B8G8R8A8_UNORM,
+		D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, device.get(), cmd_list);
+	if (!*skybox)
+		return SafeReturn(1);
+	srv_desc = skybox->GetTextureObj()->GetSrvDescForCube();
+	device->Get()->CreateShaderResourceView(skybox->GetTexture(), &srv_desc, device->GetSrv(skybox_srv));
+
+	// create shader
+	auto vs_skybox = D3d12Util::CompileShaderFile(L"vs_skybox.hlsl", "vs");
+	if (!vs_skybox)
+		return SafeReturn(1);
+	auto ps_skybox = D3d12Util::CompileShaderFile(L"ps_skybox.hlsl", "ps");
+	if (!ps_skybox)
+		return SafeReturn(1);
+
+	// create pso
+	psc.Reset();
+	psc.SetRSig(device->GetRSig());
+	psc.SetShader(vs_skybox.Get(), ps_skybox.Get());
+	psc.SetIA(cube->input_layout);
+	psc.pso_desc.RasterizerState.CullMode = D3D12_CULL_MODE_NONE;
+	psc.SetRenderTargets(target->msaa);
+	auto pso_skybox = psc.CreatePSO(device->Get());
+	if (!pso_skybox)
+		return SafeReturn(1);
+
+	// finish
+	if (!device->ExecuteCommand())
+		return SafeReturn(1);
+	if (!device->FlushGpu())
+		return SafeReturn(1);
+
+	cout << "press Q to exit" << endl;
+	while (window->CheckWindowState())
+	{
+		// update
+		mouse.Present();
+		fps_counter.Present();
+		float dt = fps_counter.GetLastDeltatime2();
+
+		float cam_move_dis = 5 * dt;
+		float cam_rotate_angle_eu = 0.003f;
+		if (KeyIsDown('W'))      view.pos += cam_move_dis * view.GetFrontInGround();
+		else if (KeyIsDown('S')) view.pos -= cam_move_dis * view.GetFrontInGround();
+		if (KeyIsDown('A'))      view.pos -= cam_move_dis * view.GetRightInGround();
+		else if (KeyIsDown('D')) view.pos += cam_move_dis * view.GetRightInGround();
+		if (KeyIsDown(VK_SPACE)) view.pos.y += cam_move_dis;
+		else if (KeyIsDown(VK_LSHIFT)) view.pos.y -= cam_move_dis;
+		if (KeyIsDown(VK_MBUTTON))
+		{
+			view.axes.pitch += cam_rotate_angle_eu * mouse.GetMoveY();
+			view.axes.yaw += cam_rotate_angle_eu * mouse.GetMoveX();
+			mouse.SetToPrev();
+		}
+
+		if (KeyIsDown('Z'))      proj.parallel_projection = false;
+		else if (KeyIsDown('X')) proj.parallel_projection = true;
+
+		cbframe.view = XmFloat4x4(MatrixTranspose(view.GetInverseTransformMatrix()));
+		cbframe.inv_view = XmFloat4x4(MatrixTranspose(view.GetTransformMatrix()));
+		cbframe.proj = XmFloat4x4(MatrixTranspose(proj.GetTransformMatrix()));
+		cbframe.light_intensity = XmFloat3(light.scale);
+		cbframe.light_direction = XmFloat3(light.GetFront());
+		if (!cb->UploadData(cb_i.GetCurrentIndex(), &cbframe, 1))
+			return SafeReturn(1);
+
+		// render
+		if (device->CheckCmdAllocator())
+		{
+			cmd_list = device->ResetCommand();
+			if (!cmd_list)
+				return SafeReturn(1);
+
+			// clear
+			target->ClearRenderTargets(device.get(), cmd_list);
+
+			// common
+			target->SetRenderTargets(device.get(), cmd_list);
+			device->SetRSigCbvFast(cb->GetBufferObj()->GetGpuLocation(cb_i.UseCurrentIndex()));
+
+			// skybox
+			cmd_list->SetPipelineState(pso_skybox.Get());
+			sphere->SetIA(cmd_list);
+			device->SetRSigSrv(device->GetSrvGpu(skybox_srv));
+			cmd_list->DrawIndexedInstanced(sphere->index_count, 1, 0, 0, 0);
+
+			// present
+			if (!device->ExecuteCommandAndPresent(target->GetTarget(), target->msaa))
+				return SafeReturn(1);
+
+			// refresh
+			window->Present();
+		}
+		else
+			Sleep(1);
+
+		// msg
+		SimpleMessageProcess();
+		// exit
+		if (KeyIsDown('Q'))
+			break;
+	}
+	return SafeReturn(0);
+}
+
 int main()
 {
 	cout << "Hello~ Rehenz~" << endl;
@@ -1278,5 +1495,6 @@ int main()
 	//return main_drawerf_test_triangle();
 	//return main_image_reader_test();
 	//return main_d3d12_example();
-	return main_d3d12_show_image_example();
+	//return main_d3d12_show_image_example();
+	return main_d3d12_cubemap_example();
 }

@@ -3,10 +3,6 @@ struct CBFrame
     matrix view;
     matrix inv_view;
     matrix proj;
-    float3 light_intensity;
-    float _pad1;
-    float3 light_direction;
-    float _pad2;
 };
 
 cbuffer CBFrame : register(b0)
