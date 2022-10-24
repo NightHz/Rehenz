@@ -76,7 +76,8 @@ namespace Rehenz
 		cmd_list->RSSetScissorRects(1, &sr);
 	}
 
-	void D3d12RenderTarget::CopyTarget(ID3D12Resource2* dst, D3D12_RESOURCE_STATES dst_start, D3D12_RESOURCE_STATES dst_end, ID3D12GraphicsCommandList6* cmd_list)
+	void D3d12RenderTarget::CopyTarget(UINT target_i, ID3D12Resource2* dst, UINT dst_subrc, D3D12_RESOURCE_STATES dst_start,
+		D3D12_RESOURCE_STATES dst_end, ID3D12GraphicsCommandList6* cmd_list)
 	{
 		if (!msaa)
 		{
@@ -87,7 +88,14 @@ namespace Rehenz
 				dst_start, D3D12_RESOURCE_STATE_COPY_DEST)
 			};
 			cmd_list->ResourceBarrier(_countof(rc_barr1), rc_barr1);
-			cmd_list->CopyResource(dst, target->Get());
+			D3D12_TEXTURE_COPY_LOCATION dst_loc{}, src_loc{};
+			dst_loc.pResource = dst;
+			dst_loc.Type = D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX;
+			dst_loc.SubresourceIndex = dst_subrc;
+			src_loc.pResource = target->Get();
+			src_loc.Type = D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX;
+			src_loc.SubresourceIndex = target_i;
+			cmd_list->CopyTextureRegion(&dst_loc, 0, 0, 0, &src_loc, nullptr);
 			D3D12_RESOURCE_BARRIER rc_barr2[]{
 				D3d12Util::GetTransitionStruct(target->Get(),
 				D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_RENDER_TARGET),
@@ -105,7 +113,7 @@ namespace Rehenz
 				dst_start, D3D12_RESOURCE_STATE_RESOLVE_DEST)
 			};
 			cmd_list->ResourceBarrier(_countof(rc_barr1), rc_barr1);
-			cmd_list->ResolveSubresource(dst, 0, target->Get(), 0, format);
+			cmd_list->ResolveSubresource(dst, dst_subrc, target->Get(), target_i, format);
 			D3D12_RESOURCE_BARRIER rc_barr2[]{
 				D3d12Util::GetTransitionStruct(target->Get(),
 				D3D12_RESOURCE_STATE_RESOLVE_SOURCE, D3D12_RESOURCE_STATE_RENDER_TARGET),

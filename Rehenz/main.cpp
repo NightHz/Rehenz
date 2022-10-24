@@ -1137,7 +1137,7 @@ int main_d3d12_example()
 			cmd_list->DrawIndexedInstanced(teapot->index_count, instance_count, 0, 0, 0);
 
 			// blur
-			target->CopyTarget(blur_tex1->Get(), D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS, cmd_list);
+			target->CopyTarget(0, blur_tex1->Get(), 0, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS, cmd_list);
 			cmd_list->SetComputeRootSignature(device->GetRSig());
 			cmd_list->SetComputeRootConstantBufferView(0, cb2->GetBufferObj()->GetGpuLocation(0));
 			for (int j = 0; j < blur_count; j++)

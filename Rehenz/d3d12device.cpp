@@ -306,7 +306,8 @@ namespace Rehenz
         return true;
     }
 
-    bool D3d12Device::ExecuteCommandAndPresent(ID3D12Resource2* image, bool msaa, D3D12_RESOURCE_STATES image_start, D3D12_RESOURCE_STATES image_end)
+    bool D3d12Device::ExecuteCommandAndPresent(ID3D12Resource2* image, bool msaa, UINT image_subrc,
+        D3D12_RESOURCE_STATES image_start, D3D12_RESOURCE_STATES image_end)
     {
         if (!device)
             return false;
@@ -325,7 +326,14 @@ namespace Rehenz
                     D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_COPY_DEST)
                 };
                 cmd_list->ResourceBarrier(_countof(rc_barr1), rc_barr1);
-                cmd_list->CopyResource(CurrentScBuffer(), image);
+                D3D12_TEXTURE_COPY_LOCATION dst_loc{}, src_loc{};
+                dst_loc.pResource = CurrentScBuffer();
+                dst_loc.Type = D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX;
+                dst_loc.SubresourceIndex = 0;
+                src_loc.pResource = image;
+                src_loc.Type = D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX;
+                src_loc.SubresourceIndex = image_subrc;
+                cmd_list->CopyTextureRegion(&dst_loc, 0, 0, 0, &src_loc, nullptr);
                 D3D12_RESOURCE_BARRIER rc_barr2[]{
                     D3d12Util::GetTransitionStruct(image,
                     D3D12_RESOURCE_STATE_COPY_SOURCE, image_end),
@@ -343,7 +351,7 @@ namespace Rehenz
                     D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RESOLVE_DEST)
                 };
                 cmd_list->ResourceBarrier(_countof(rc_barr1), rc_barr1);
-                cmd_list->ResolveSubresource(CurrentScBuffer(), 0, image, 0, sc_format);
+                cmd_list->ResolveSubresource(CurrentScBuffer(), 0, image, image_subrc, sc_format);
                 D3D12_RESOURCE_BARRIER rc_barr2[]{
                     D3d12Util::GetTransitionStruct(image,
                     D3D12_RESOURCE_STATE_RESOLVE_SOURCE, image_end),

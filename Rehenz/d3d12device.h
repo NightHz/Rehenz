@@ -81,9 +81,14 @@ namespace Rehenz
         // submit command list to queue
         bool ExecuteCommand();
         // submit command list to queue and present
-        bool ExecuteCommandAndPresent(ID3D12Resource2* image, bool msaa,
+        bool ExecuteCommandAndPresent(ID3D12Resource2* image, bool msaa, UINT image_subrc,
+            D3D12_RESOURCE_STATES image_start, D3D12_RESOURCE_STATES image_end);
+        inline bool ExecuteCommandAndPresent(ID3D12Resource2* image, bool msaa,
             D3D12_RESOURCE_STATES image_start = D3D12_RESOURCE_STATE_RENDER_TARGET,
-            D3D12_RESOURCE_STATES image_end = D3D12_RESOURCE_STATE_RENDER_TARGET);
+            D3D12_RESOURCE_STATES image_end = D3D12_RESOURCE_STATE_RENDER_TARGET)
+        {
+            return ExecuteCommandAndPresent(image, msaa, 0, image_start, image_end);
+        }
 
         // get swap chain format
         inline DXGI_FORMAT GetScFormat() { return sc_format; }
