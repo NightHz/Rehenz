@@ -36,6 +36,7 @@ struct VSOutput
 {
     float4 posH : SV_POSITION;
     float3 posW : POSITION;
+    float3 posL : POSITION1;
     float4 color : COLOR;
     float3 normW : NORMAL;
     float2 uv : TEXCOORD;
@@ -44,6 +45,7 @@ struct VSOutput
 VSOutput main(VSInput input, uint id : SV_InstanceID)
 {
     VSOutput output;
+    output.posL = input.posL;
     output.posW = mul(float4(input.posL, 1), obj_infos[id].world).xyz;
     vector posV = mul(float4(output.posW, 1), frame_info.view);
     output.posH = mul(posV, frame_info.proj);
