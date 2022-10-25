@@ -254,5 +254,8 @@
     <FxCompile Include="ps_reflection.hlsl">
       <Filter>shader</Filter>
     </FxCompile>
+    <FxCompile Include="ps_refraction.hlsl">
+      <Filter>shader</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>

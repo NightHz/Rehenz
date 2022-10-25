@@ -1343,8 +1343,8 @@ int main_d3d12_cubemap_example()
 		XMFLOAT4X4 inv_world;
 		XMFLOAT4 color;
 	};
-	IndexLoop cb_i{ 0,1,2,3,4,5 };
-	auto cb = std::make_shared<D3d12UploadBuffer<CBFrame>>(true, 6, device.get());
+	IndexLoop cb_i{ 0,1,2,3,4,5,6,7,8,9 };
+	auto cb = std::make_shared<D3d12UploadBuffer<CBFrame>>(true, 10, device.get());
 	if (!*cb)
 		return SafeReturn(1);
 	CBFrame cbframe{};
@@ -1493,12 +1493,23 @@ int main_d3d12_cubemap_example()
 	srv_desc = reflection_cubemap->GetTargetObj()->GetSrvDescForCube();
 	device->Get()->CreateShaderResourceView(reflection_cubemap->GetTarget(), &srv_desc, device->GetSrv(reflection_cubemap_srv));
 
+	// create refraction cubemap
+	const UINT refraction_cubemap_srv = 3;
+	auto refraction_cubemap = std::make_shared<D3d12RenderTarget>(256, 256, DXGI_FORMAT_B8G8R8A8_UNORM, false, static_cast<UINT16>(6), true, Color::black, 2, 2, device.get());
+	if (!*refraction_cubemap)
+		return SafeReturn(1);
+	srv_desc = refraction_cubemap->GetTargetObj()->GetSrvDescForCube();
+	device->Get()->CreateShaderResourceView(refraction_cubemap->GetTarget(), &srv_desc, device->GetSrv(refraction_cubemap_srv));
+
 	// create shader
 	auto vs_transform_one = D3d12Util::CompileShaderFile(L"vs_transform_one.hlsl", "vs");
 	if (!vs_transform_one)
 		return SafeReturn(1);
 	auto ps_reflection = D3d12Util::CompileShaderFile(L"ps_reflection.hlsl", "ps");
 	if (!ps_reflection)
+		return SafeReturn(1);
+	auto ps_refraction = D3d12Util::CompileShaderFile(L"ps_refraction.hlsl", "ps");
+	if (!ps_refraction)
 		return SafeReturn(1);
 
 	// create pso
@@ -1507,8 +1518,12 @@ int main_d3d12_cubemap_example()
 	psc.SetShader(vs_transform_one.Get(), ps_reflection.Get());
 	psc.SetIA(cube->input_layout);
 	psc.SetRenderTargets(target->msaa);
-	auto pso_sphere = psc.CreatePSO(device->Get());
-	if (!pso_sphere)
+	auto pso_reflection = psc.CreatePSO(device->Get());
+	if (!pso_reflection)
+		return SafeReturn(1);
+	psc.SetShader(vs_transform_one.Get(), ps_refraction.Get());
+	auto pso_refraction = psc.CreatePSO(device->Get());
+	if (!pso_refraction)
 		return SafeReturn(1);
 
 	// finish
@@ -1556,6 +1571,7 @@ int main_d3d12_cubemap_example()
 			// clear
 			target->ClearRenderTargets(device.get(), cmd_list);
 			reflection_cubemap->ClearRenderTargets(device.get(), cmd_list);
+			refraction_cubemap->ClearRenderTargets(device.get(), cmd_list);
 
 			// render reflection cubemap
 			reflection_cubemap->SetRenderTargets(device.get(), cmd_list);
@@ -1563,6 +1579,25 @@ int main_d3d12_cubemap_example()
 			cbframe.view = XmFloat4x4(MatrixTranspose(reflection_sphere.GetInverseTransformMatrix()));
 			cbframe.inv_view = XmFloat4x4(MatrixTranspose(reflection_sphere.GetTransformMatrix()));
 			cbframe.proj = XmFloat4x4(MatrixTranspose(reflection_proj.GetTransformMatrix()));
+			if (!cb->UploadData(cb_i.GetCurrentIndex(), &cbframe, 1))
+				return SafeReturn(1);
+			device->SetRSigCbvFast(cb->GetBufferObj()->GetGpuLocation(cb_i.UseCurrentIndex()));
+			// cubes
+			cmd_list->SetPipelineState(pso_cubes6.Get());
+			cube->SetIA(cmd_list);
+			device->SetRSigSrv(device->GetSrvGpu(cube_tfs_srv));
+			cmd_list->DrawIndexedInstanced(cube->index_count, cube_tfs_count, 0, 0, 0);
+			// skybox
+			cmd_list->SetPipelineState(pso_skybox6.Get());
+			sphere->SetIA(cmd_list);
+			device->SetRSigSrv(device->GetSrvGpu(skybox_srv));
+			cmd_list->DrawIndexedInstanced(sphere->index_count, 1, 0, 0, 0);
+
+			// render refraction cubemap
+			refraction_cubemap->SetRenderTargets(device.get(), cmd_list);
+			refraction_cubemap->SetRS(cmd_list);
+			cbframe.view = XmFloat4x4(MatrixTranspose(refraction_sphere.GetInverseTransformMatrix()));
+			cbframe.inv_view = XmFloat4x4(MatrixTranspose(refraction_sphere.GetTransformMatrix()));
 			if (!cb->UploadData(cb_i.GetCurrentIndex(), &cbframe, 1))
 				return SafeReturn(1);
 			device->SetRSigCbvFast(cb->GetBufferObj()->GetGpuLocation(cb_i.UseCurrentIndex()));
@@ -1600,7 +1635,7 @@ int main_d3d12_cubemap_example()
 			cmd_list->DrawIndexedInstanced(cube->index_count, cube_tfs_count, 0, 0, 0);
 
 			// reflection sphere
-			cmd_list->SetPipelineState(pso_sphere.Get());
+			cmd_list->SetPipelineState(pso_reflection.Get());
 			sphere->SetIA(cmd_list);
 			cbframe.world = XmFloat4x4(MatrixTranspose(reflection_sphere.GetTransformMatrix()));
 			cbframe.inv_world = XmFloat4x4(MatrixTranspose(reflection_sphere.GetInverseTransformMatrix()));
@@ -1613,6 +1648,22 @@ int main_d3d12_cubemap_example()
 			device->SetRSigSrv(device->GetSrvGpu(reflection_cubemap_srv));
 			cmd_list->DrawIndexedInstanced(sphere->index_count, 1, 0, 0, 0);
 			rc_barr[0] = D3d12Util::GetTransitionStruct(reflection_cubemap->GetTarget(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_RENDER_TARGET);
+			cmd_list->ResourceBarrier(1, rc_barr);
+
+			// refraction sphere
+			cmd_list->SetPipelineState(pso_refraction.Get());
+			sphere->SetIA(cmd_list);
+			cbframe.world = XmFloat4x4(MatrixTranspose(refraction_sphere.GetTransformMatrix()));
+			cbframe.inv_world = XmFloat4x4(MatrixTranspose(refraction_sphere.GetInverseTransformMatrix()));
+			cbframe.color = XmFloat4(refraction_sphere_color);
+			if (!cb->UploadData(cb_i.GetCurrentIndex(), &cbframe, 1))
+				return SafeReturn(1);
+			device->SetRSigCbvFast(cb->GetBufferObj()->GetGpuLocation(cb_i.UseCurrentIndex()));
+			rc_barr[0] = D3d12Util::GetTransitionStruct(refraction_cubemap->GetTarget(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+			cmd_list->ResourceBarrier(1, rc_barr);
+			device->SetRSigSrv(device->GetSrvGpu(refraction_cubemap_srv));
+			cmd_list->DrawIndexedInstanced(sphere->index_count, 1, 0, 0, 0);
+			rc_barr[0] = D3d12Util::GetTransitionStruct(refraction_cubemap->GetTarget(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_RENDER_TARGET);
 			cmd_list->ResourceBarrier(1, rc_barr);
 
 			// present
