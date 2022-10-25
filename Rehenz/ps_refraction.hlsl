@@ -29,7 +29,7 @@ float4 main(PSInput input) : SV_TARGET
     float3 eye_pos = mul(float4(0, 0, 0, 1), frame_info.inv_view).xyz;
     float3 L = eye_pos - input.posW;
     float3 R = refract(-L, input.normW, 0.95f);
-    float4 output = float4(saturate(input.color.xyz * 0.9f), 1) * envmap.Sample(samp_linear, R);
+    float4 output = float4(saturate(input.color.xyz * 0.9f * envmap.Sample(samp_linear, R).xyz), 1);
 
     return output;
 }

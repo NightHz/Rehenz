@@ -1310,7 +1310,7 @@ int main_d3d12_cubemap_example()
 	auto cube = std::make_shared<D3d12Mesh>(mesh0.get(), device.get(), cmd_list);
 	if (!*cube)
 		return SafeReturn(1);
-	mesh0 = CreateSphereMesh();
+	mesh0 = CreateSphereMesh(50);
 	auto sphere = std::make_shared<D3d12Mesh>(mesh0.get(), device.get(), cmd_list);
 	if (!*sphere)
 		return SafeReturn(1);
@@ -1553,6 +1553,22 @@ int main_d3d12_cubemap_example()
 			view.axes.pitch += cam_rotate_angle_eu * mouse.GetMoveY();
 			view.axes.yaw += cam_rotate_angle_eu * mouse.GetMoveX();
 			mouse.SetToPrev();
+		}
+		if (KeyIsDown(VK_F1))
+		{
+			view.axes.yaw += 0.3f * dt;
+		}
+		else if (KeyIsDown(VK_F2))
+		{
+			view.axes.yaw += 1.2f * dt;
+			float d = VectorLength(view.pos - reflection_sphere.pos);
+			view.pos = reflection_sphere.pos - d * view.GetFront();
+		}
+		else if (KeyIsDown(VK_F3))
+		{
+			view.axes.yaw += 1.2f * dt;
+			float d = VectorLength(view.pos - refraction_sphere.pos);
+			view.pos = refraction_sphere.pos - d * view.GetFront();
 		}
 
 		if (KeyIsDown('Z'))      proj.parallel_projection = false;
