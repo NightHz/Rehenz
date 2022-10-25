@@ -51,6 +51,14 @@ namespace Rehenz
 		{
 			return zbuffer->Get();
 		}
+		inline D3d12Texture* GetTargetObj()
+		{
+			return target.get();
+		}
+		inline D3d12Texture* GetZbufferObj()
+		{
+			return zbuffer.get();
+		}
 
 		void ClearRenderTargets(D3d12Device* device, ID3D12GraphicsCommandList6* cmd_list);
 		void SetRenderTargets(D3d12Device* device, ID3D12GraphicsCommandList6* cmd_list);
@@ -97,6 +105,14 @@ namespace Rehenz
 		inline ID3D12Resource2* GetIB()
 		{
 			return ib->Get();
+		}
+		inline D3d12Buffer* GetVBObj()
+		{
+			return vb.get();
+		}
+		inline D3d12Buffer* GetIBObj()
+		{
+			return ib.get();
 		}
 
 		void CleanUp();
