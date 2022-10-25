@@ -88,6 +88,8 @@ namespace Rehenz
         // render target
         pso_desc.NumRenderTargets = 1;
         pso_desc.RTVFormats[0] = DXGI_FORMAT_B8G8R8A8_UNORM;
+        for (UINT i = 1; i < 8; i++)
+            pso_desc.RTVFormats[i] = DXGI_FORMAT_UNKNOWN;
         pso_desc.DSVFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
         pso_desc.SampleDesc.Count = 1;
         pso_desc.SampleDesc.Quality = 0;
@@ -147,6 +149,8 @@ namespace Rehenz
         pso_desc.NumRenderTargets = count;
         for (UINT i = 0; i < count; i++)
             pso_desc.RTVFormats[i] = format;
+        for (UINT i = count; i < 8; i++)
+            pso_desc.RTVFormats[i] = DXGI_FORMAT_UNKNOWN;
         pso_desc.DSVFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
         pso_desc.SampleDesc.Count = (msaa ? 4 : 1);
         pso_desc.SampleDesc.Quality = 0;
