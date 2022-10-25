@@ -170,8 +170,11 @@ int main_surface_dx8_and_render_soft_example()
 		else if (KeyIsDown('4')) camera.render_mode = Camera::RenderMode::Shader,
 			camera.vertex_shader = DefaultVertexShader, camera.pixel_shader = TexturePixelShader;
 		else if (KeyIsDown('5')) camera.render_mode = Camera::RenderMode::Shader,
+			camera.vertex_shader = DefaultVertexShader, camera.pixel_shader = Shader::ps_light;
 		else if (KeyIsDown('6')) camera.render_mode = Camera::RenderMode::Shader,
+			camera.vertex_shader = Shader::vs_light, camera.pixel_shader = Shader::ps_color;
 		else if (KeyIsDown('7')) camera.render_mode = Camera::RenderMode::Shader,
+			camera.vertex_shader = Shader::vs_light, camera.pixel_shader = Shader::ps_tex;
 
 		float cam_move_dis = 5 * dt;
 		float cam_rotate_angle = 0.3f * dt;

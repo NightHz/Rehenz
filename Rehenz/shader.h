@@ -7,10 +7,12 @@ namespace Rehenz
 	extern PixelShader DefaultPixelShader;
 	extern PixelShader TexturePixelShader;
 
-	extern VertexShader vs_transform;
-	extern PixelShader ps_color;
-	extern PixelShader ps_tex, ps_tex2;
-	extern VertexShader vs_light;
-	extern PixelShader ps_light;
-
+	namespace Shader
+	{
+		extern VertexShader vs_transform;
+		extern PixelShader ps_color;
+		extern PixelShader ps_tex, ps_tex2;
+		extern VertexShader vs_light;
+		extern PixelShader ps_light;
+	}
 }

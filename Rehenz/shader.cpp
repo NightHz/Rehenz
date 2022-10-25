@@ -25,11 +25,11 @@ namespace Rehenz
 		return ColorSaturate(c);
 	};
 
-	VertexShader vs_transform = DefaultVertexShader;
+	VertexShader Shader::vs_transform = DefaultVertexShader;
 
-	PixelShader ps_color = DefaultPixelShader;
+	PixelShader Shader::ps_color = DefaultPixelShader;
 
-	PixelShader ps_tex = [](const PixelShaderData& data, const Vertex& v0)->Color
+	PixelShader Shader::ps_tex = [](const PixelShaderData& data, const Vertex& v0)->Color
 	{
 		Color c = v0.c;
 		if (data.texture != nullptr)
@@ -37,7 +37,7 @@ namespace Rehenz
 		return ColorSaturate(c);
 	};
 
-	PixelShader ps_tex2 = [](const PixelShaderData& data, const Vertex& v0)->Color
+	PixelShader Shader::ps_tex2 = [](const PixelShaderData& data, const Vertex& v0)->Color
 	{
 		Color c(0.1f, 0.1f, 0.1f);
 		if (data.texture2 != nullptr)
@@ -45,7 +45,7 @@ namespace Rehenz
 		return ColorSaturate(c);
 	};
 
-	VertexShader vs_light = [](const VertexShaderData& data, const Vertex& v0)->Vertex
+	VertexShader Shader::vs_light = [](const VertexShaderData& data, const Vertex& v0)->Vertex
 	{
 		static const Color ambient = Color::white * 0.2f;
 		static const Color diffuse = Color::white * 1.0f;
@@ -66,7 +66,7 @@ namespace Rehenz
 		return v;
 	};
 
-	PixelShader ps_light = [](const PixelShaderData& data, const Vertex& v0)->Color
+	PixelShader Shader::ps_light = [](const PixelShaderData& data, const Vertex& v0)->Color
 	{
 		static const Color ambient = Color::white * 0.2f;
 		static const Color diffuse = Color::white * 1.0f;
