@@ -163,3 +163,11 @@ h = 两倍欧氏距离（在此例中效果最好，且路径正确）
 |:-:|:-:|
 |![](img/d3d12_multi_instance.png)|![](img/d3d12_blur.png)|
 
+|天空盒|天空盒|
+|:-:|:-:|
+|![](img/d312_cubemap_scene.png)|![](img/d312_cubemap_scene.gif)|
+
+|反射球|折射球|
+|:-:|:-:|
+|![](img/d312_cubemap_reflection.gif)|![](img/d312_cubemap_refraction.gif)|
+
