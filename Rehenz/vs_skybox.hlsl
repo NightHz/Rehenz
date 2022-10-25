@@ -21,7 +21,7 @@ struct VSInput
 struct VSOutput
 {
     float4 posH : SV_POSITION;
-    float3 posL : POSITION;
+    float3 at : POSITION;
 };
 
 VSOutput main(VSInput input)
@@ -29,9 +29,9 @@ VSOutput main(VSInput input)
     float3 eye_pos = mul(float4(0, 0, 0, 1), frame_info.inv_view).xyz;
 
     VSOutput output;
-    float3 posW = input.posL * 10 + eye_pos;
+    float3 posW = input.posL * 45 + eye_pos;
     vector posV = mul(float4(posW, 1), frame_info.view);
     output.posH = mul(posV, frame_info.proj);
-    output.posL = input.posL;
+    output.at = input.posL + eye_pos * 0.01f;
     return output;
 }

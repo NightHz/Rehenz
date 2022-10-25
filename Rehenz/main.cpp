@@ -170,11 +170,8 @@ int main_surface_dx8_and_render_soft_example()
 		else if (KeyIsDown('4')) camera.render_mode = Camera::RenderMode::Shader,
 			camera.vertex_shader = DefaultVertexShader, camera.pixel_shader = TexturePixelShader;
 		else if (KeyIsDown('5')) camera.render_mode = Camera::RenderMode::Shader,
-			camera.vertex_shader = DefaultVertexShader, camera.pixel_shader = ps_light;
 		else if (KeyIsDown('6')) camera.render_mode = Camera::RenderMode::Shader,
-			camera.vertex_shader = vs_light, camera.pixel_shader = ps_color;
 		else if (KeyIsDown('7')) camera.render_mode = Camera::RenderMode::Shader,
-			camera.vertex_shader = vs_light, camera.pixel_shader = ps_tex;
 
 		float cam_move_dis = 5 * dt;
 		float cam_rotate_angle = 0.3f * dt;
@@ -952,6 +949,9 @@ int main_d3d12_example()
 	{
 		XMFLOAT4X4 world;
 		XMFLOAT4X4 inv_world;
+		XMFLOAT4X4 _keep1;
+		XMFLOAT4X4 _keep2;
+		XMFLOAT4X4 _keep3;
 	};
 	const UINT instance_count = 10;
 	const UINT obj_tfs_srv = 0;
@@ -1316,13 +1316,14 @@ int main_d3d12_cubemap_example()
 	// set camera
 	Transform view;
 	Projection proj;
-	view.pos = Vector(2, 2, -3);
+	view.pos = Vector(4, 7, -11);
 	view.SetFront(-view.pos);
 	proj.aspect = static_cast<float>(width) / height;
 
 	// set light
 	Transform light;
-	light.axes.pitch = pi_div2 * 0.8f;
+	light.axes.pitch = pi_div2 * 0.7f;
+	light.axes.yaw = pi_div2 * -0.7f;
 	light.scale = Vector(0.8f, 0.8f, 0.8f);
 
 	// create cb
@@ -1374,7 +1375,7 @@ int main_d3d12_cubemap_example()
 			}
 		}
 	}
-	UINT skybox_srv = 0;
+	const UINT skybox_srv = 0;
 	auto skybox = std::make_shared<D3d12DefaultTexture>(image2.get(), 4, skybox_width, skybox_height, 6, DXGI_FORMAT_B8G8R8A8_UNORM,
 		D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, device.get(), cmd_list);
 	if (!*skybox)
@@ -1399,6 +1400,59 @@ int main_d3d12_cubemap_example()
 	psc.SetRenderTargets(target->msaa);
 	auto pso_skybox = psc.CreatePSO(device->Get());
 	if (!pso_skybox)
+		return SafeReturn(1);
+
+	// create cube_tfs
+	struct BCubeTf
+	{
+		XMFLOAT4X4 world;
+		XMFLOAT4X4 inv_world;
+		XMFLOAT4 color;
+		XMFLOAT4 _keep1;
+		XMFLOAT4 _keep2;
+		XMFLOAT4 _keep3;
+		XMFLOAT4X4 _keep4;
+		XMFLOAT4X4 _keep5;
+	};
+	const UINT cube_tfs_count = 6;
+	const UINT cube_tfs_srv = 1;
+	auto cube_tfs = std::make_shared<D3d12UploadBuffer<BCubeTf>>(false, cube_tfs_count, device.get());
+	if (!*cube_tfs)
+		return SafeReturn(1);
+	srv_desc = cube_tfs->GetBufferObj()->GetSrvDesc(0, cube_tfs_count);
+	device->Get()->CreateShaderResourceView(cube_tfs->GetBuffer(), &srv_desc, device->GetSrv(cube_tfs_srv));
+	BCubeTf bcube_tfs[cube_tfs_count]{};
+	const std::vector<Vector> cube_scale{ Vector(8,0.2f,8),  Vector(0.2f,1.5f,5), Vector(0.5f,0.5f,0.5f), Vector(0.5f,0.5f,0.5f),  Vector(0.5f,0.5f,0.5f),   Vector(0.5f,0.5f,0.5f) };
+	const std::vector<Vector> cube_pos{   Vector(0,-0.5f,0), Vector(0,1.5f,0),    Vector(5.5f,0.5f,5.5f), Vector(-5.5f,0.5f,5.5f), Vector(-5.5f,0.5f,-5.5f), Vector(5.5f,0.5f,-5.5f) };
+	const std::vector<Color> cube_color{ Color::green_l, Color::red_l, Color::purple_l, Color::purple_l, Color::purple_l, Color::purple_l };
+	for (int i = 0; i < cube_tfs_count; i++)
+	{
+		Transform transform;
+		transform.pos = cube_pos[i];
+		transform.scale = cube_scale[i];
+		bcube_tfs[i].world = XmFloat4x4(MatrixTranspose(transform.GetTransformMatrix()));
+		bcube_tfs[i].inv_world = XmFloat4x4(MatrixTranspose(transform.GetInverseTransformMatrix()));
+		bcube_tfs[i].color = XmFloat4(cube_color[i]);
+	}
+	if (!cube_tfs->UploadData(0, bcube_tfs, cube_tfs_count))
+		return SafeReturn(1);
+
+	// create shader
+	auto vs_transform_all = D3d12Util::CompileShaderFile(L"vs_transform_all.hlsl", "vs");
+	if (!vs_transform_all)
+		return SafeReturn(1);
+	auto ps_light = D3d12Util::CompileShaderFile(L"ps_light.hlsl", "ps");
+	if (!ps_light)
+		return SafeReturn(1);
+
+	// create pso
+	psc.Reset();
+	psc.SetRSig(device->GetRSig());
+	psc.SetShader(vs_transform_all.Get(), ps_light.Get());
+	psc.SetIA(cube->input_layout);
+	psc.SetRenderTargets(target->msaa);
+	auto pso_cubes = psc.CreatePSO(device->Get());
+	if (!pso_cubes)
 		return SafeReturn(1);
 
 	// finish
@@ -1460,6 +1514,12 @@ int main_d3d12_cubemap_example()
 			sphere->SetIA(cmd_list);
 			device->SetRSigSrv(device->GetSrvGpu(skybox_srv));
 			cmd_list->DrawIndexedInstanced(sphere->index_count, 1, 0, 0, 0);
+
+			// cubes
+			cmd_list->SetPipelineState(pso_cubes.Get());
+			cube->SetIA(cmd_list);
+			device->SetRSigSrv(device->GetSrvGpu(cube_tfs_srv));
+			cmd_list->DrawIndexedInstanced(cube->index_count, cube_tfs_count, 0, 0, 0);
 
 			// present
 			if (!device->ExecuteCommandAndPresent(target->GetTarget(), target->msaa))

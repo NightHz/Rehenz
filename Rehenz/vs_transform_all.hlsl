@@ -14,6 +14,12 @@ struct CBObj
 {
     matrix world;
     matrix inv_world;
+    float4 color;
+    float4 _keep1;
+    float4 _keep2;
+    float4 _keep3;
+    matrix _keep4;
+    matrix _keep5;
 };
 
 StructuredBuffer<CBObj> obj_infos : register(t0);
@@ -41,7 +47,7 @@ VSOutput main(VSInput input, uint id : SV_InstanceID)
     output.posW = mul(float4(input.posL, 1), obj_infos[id].world).xyz;
     vector posV = mul(float4(output.posW, 1), frame_info.view);
     output.posH = mul(posV, frame_info.proj);
-    output.color = input.color;
+    output.color = input.color * obj_infos[id].color;
     matrix inv_world = obj_infos[id].inv_world;
     float3x3 normal_world = transpose(float3x3(inv_world[0].xyz, inv_world[1].xyz, inv_world[2].xyz));
     output.normW = normalize(mul(input.normL, normal_world));
