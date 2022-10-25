@@ -245,5 +245,14 @@
     <FxCompile Include="ps_skybox.hlsl">
       <Filter>shader</Filter>
     </FxCompile>
+    <FxCompile Include="vs_transform_one.hlsl">
+      <Filter>shader</Filter>
+    </FxCompile>
+    <FxCompile Include="gs_envmap.hlsl">
+      <Filter>shader</Filter>
+    </FxCompile>
+    <FxCompile Include="ps_reflection.hlsl">
+      <Filter>shader</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>
