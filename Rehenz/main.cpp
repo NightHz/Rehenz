@@ -1296,9 +1296,7 @@ int main_d3d12_cubemap_example()
 	std::unique_ptr<uint[]> image, image2;
 	D3d12GPSOCreator psc;
 	D3D12_RESOURCE_BARRIER rc_barr[4]{};
-	D3D12_RESOURCE_DESC rc_desc{};
 	D3D12_SHADER_RESOURCE_VIEW_DESC srv_desc{};
-	D3D12_UNORDERED_ACCESS_VIEW_DESC uav_desc{};
 
 	// create target
 	auto target = std::make_shared<D3d12RenderTarget>(width, height, device->GetScFormat(), true, true, Color::yellow_green_o, 0, 0, device.get());
@@ -1701,6 +1699,225 @@ int main_d3d12_cubemap_example()
 	return SafeReturn(0);
 }
 
+int main_d3d12_shadow_example()
+{
+	cout << endl << "create window ..." << endl;
+	const std::string title = "d3d12 shadow example";
+	const int width = 800;
+	const int height = 600;
+	auto window = std::make_unique<SimpleWindowWithFC>(GetModuleHandle(nullptr), width, height, title);
+	if (!window->CheckWindowState())
+		return 1;
+	Mouse mouse;
+	FpsCounterS fps_counter;
+	fps_counter.LockFps(0);
+
+	cout << "create d3d12 device ..." << endl;
+	auto device = std::make_unique<D3d12Device>();
+	auto SafeReturn = [&device](int return_v)
+	{
+		if (device)
+			device->FlushGpu();
+		return return_v;
+	};
+	auto cmd_list = device->Create(window.get());
+	if (!cmd_list)
+		return SafeReturn(1);
+
+	cout << "setup resource ..." << endl;
+	std::shared_ptr<Mesh> mesh0;
+	D3d12GPSOCreator psc;
+	D3D12_RESOURCE_BARRIER rc_barr[4]{};
+	D3D12_SHADER_RESOURCE_VIEW_DESC srv_desc{};
+
+	// create target
+	auto target = std::make_shared<D3d12RenderTarget>(width, height, device->GetScFormat(), true, true, Color::yellow_green_o, 0, 0, device.get());
+	if (!*target)
+		return SafeReturn(1);
+
+	// create mesh
+	mesh0 = CreateCubeMesh();
+	auto cube = std::make_shared<D3d12Mesh>(mesh0.get(), device.get(), cmd_list);
+	if (!*cube)
+		return SafeReturn(1);
+	mesh0 = nullptr;
+
+	// set camera
+	Transform view;
+	Projection proj;
+	view.pos = Vector(4, 7, -11);
+	view.SetFront(-view.pos);
+	proj.aspect = static_cast<float>(width) / height;
+
+	// set light
+	Transform light;
+	light.axes.pitch = pi_div2 * 0.7f;
+	light.axes.yaw = pi_div2 * -0.7f;
+	light.scale = Vector(0.8f, 0.8f, 0.8f);
+
+	// create cb
+	struct CBFrame
+	{
+		XMFLOAT4X4 view;
+		XMFLOAT4X4 inv_view;
+		XMFLOAT4X4 proj;
+		XMFLOAT3 light_intensity;
+		float _pad1;
+		XMFLOAT3 light_direction;
+		float _pad2;
+	};
+	IndexLoop cb_i{ 0,1,2,3,4,5,6,7,8,9 };
+	auto cb = std::make_shared<D3d12UploadBuffer<CBFrame>>(true, 10, device.get());
+	if (!*cb)
+		return SafeReturn(1);
+	CBFrame cbframe{};
+	cbframe.view = XmFloat4x4(MatrixTranspose(view.GetInverseTransformMatrix()));
+	cbframe.inv_view = XmFloat4x4(MatrixTranspose(view.GetTransformMatrix()));
+	cbframe.proj = XmFloat4x4(MatrixTranspose(proj.GetTransformMatrix()));
+	cbframe.light_intensity = XmFloat3(light.scale);
+	cbframe.light_direction = XmFloat3(light.GetFront());
+	if (!cb->UploadData(cb_i.GetCurrentIndex(), &cbframe, 1))
+		return SafeReturn(1);
+
+	// create cube_infos
+	struct BObjInfo
+	{
+		XMFLOAT4X4 world;
+		XMFLOAT4X4 inv_world;
+		XMFLOAT4 color;
+		XMFLOAT4 _keep1;
+		XMFLOAT4 _keep2;
+		XMFLOAT4 _keep3;
+		XMFLOAT4X4 _keep4;
+		XMFLOAT4X4 _keep5;
+	};
+	const UINT cube_infos_count = 6;
+	const UINT cube_infos_srv = 1;
+	auto cube_infos = std::make_shared<D3d12UploadBuffer<BObjInfo>>(false, cube_infos_count, device.get());
+	if (!*cube_infos)
+		return SafeReturn(1);
+	srv_desc = cube_infos->GetBufferObj()->GetSrvDesc(0, cube_infos_count);
+	device->Get()->CreateShaderResourceView(cube_infos->GetBuffer(), &srv_desc, device->GetSrv(cube_infos_srv));
+	BObjInfo bcube_infos[cube_infos_count]{};
+	const std::vector<Vector> cube_scale{ Vector(20,0.2f,20), Vector(0.5f,1.5f,0.5f), Vector(0.5f,1.5f,0.5f), Vector(0.5f,1.5f,0.5f),  Vector(0.5f,1.5f,0.5f),   Vector(0.5f,1.5f,0.5f) };
+	const std::vector<Vector> cube_pos{ Vector(0,-0.2f,0),    Vector(0,1.5f,0),       Vector(5.5f,1.5f,3.5f), Vector(-5.5f,1.5f,3.5f), Vector(-5.5f,1.5f,-3.5f), Vector(5.5f,1.5f,-3.5f) };
+	const std::vector<Color> cube_color{ Color::green_l, Color::red_l, Color::purple_l, Color::orange_l, Color::pink_l, Color::yellow_l };
+	for (int i = 0; i < cube_infos_count; i++)
+	{
+		Transform transform;
+		transform.pos = cube_pos[i];
+		transform.scale = cube_scale[i];
+		bcube_infos[i].world = XmFloat4x4(MatrixTranspose(transform.GetTransformMatrix()));
+		bcube_infos[i].inv_world = XmFloat4x4(MatrixTranspose(transform.GetInverseTransformMatrix()));
+		bcube_infos[i].color = XmFloat4(cube_color[i]);
+	}
+	if (!cube_infos->UploadData(0, bcube_infos, cube_infos_count))
+		return SafeReturn(1);
+
+	// create shader
+	auto vs_transform_all = D3d12Util::CompileShaderFile(L"vs_transform_all.hlsl", "vs");
+	if (!vs_transform_all)
+		return SafeReturn(1);
+	auto ps_light = D3d12Util::CompileShaderFile(L"ps_light.hlsl", "ps");
+	if (!ps_light)
+		return SafeReturn(1);
+
+	// create pso
+	psc.Reset();
+	psc.SetRSig(device->GetRSig());
+	psc.SetShader(vs_transform_all.Get(), ps_light.Get());
+	psc.SetIA(cube->input_layout);
+	psc.SetRenderTargets(target->msaa);
+	auto pso_cubes = psc.CreatePSO(device->Get());
+	if (!pso_cubes)
+		return SafeReturn(1);
+
+	// finish
+	if (!device->ExecuteCommand())
+		return SafeReturn(1);
+	if (!device->FlushGpu())
+		return SafeReturn(1);
+
+	cout << "press Q to exit" << endl;
+	while (window->CheckWindowState())
+	{
+		// update
+		mouse.Present();
+		fps_counter.Present();
+		float dt = fps_counter.GetLastDeltatime2();
+
+		float cam_move_dis = 5 * dt;
+		float cam_rotate_angle_eu = 0.003f;
+		if (KeyIsDown('W'))      view.pos += cam_move_dis * view.GetFrontInGround();
+		else if (KeyIsDown('S')) view.pos -= cam_move_dis * view.GetFrontInGround();
+		if (KeyIsDown('A'))      view.pos -= cam_move_dis * view.GetRightInGround();
+		else if (KeyIsDown('D')) view.pos += cam_move_dis * view.GetRightInGround();
+		if (KeyIsDown(VK_SPACE)) view.pos.y += cam_move_dis;
+		else if (KeyIsDown(VK_LSHIFT)) view.pos.y -= cam_move_dis;
+		if (KeyIsDown(VK_MBUTTON))
+		{
+			view.axes.pitch += cam_rotate_angle_eu * mouse.GetMoveY();
+			view.axes.yaw += cam_rotate_angle_eu * mouse.GetMoveX();
+			mouse.SetToPrev();
+		}
+
+		if (KeyIsDown('Z'))      proj.parallel_projection = false;
+		else if (KeyIsDown('X')) proj.parallel_projection = true;
+
+		Vector2 light_rotate_angle = Vector2(3, 3) * dt;
+		if (KeyIsDown('I'))      light.axes.pitch += light_rotate_angle.y;
+		else if (KeyIsDown('K')) light.axes.pitch -= light_rotate_angle.y;
+		if (KeyIsDown('J'))      light.axes.yaw -= light_rotate_angle.x;
+		else if (KeyIsDown('L')) light.axes.yaw += light_rotate_angle.x;
+
+		cbframe.light_intensity = XmFloat3(light.scale);
+		cbframe.light_direction = XmFloat3(light.GetFront());
+
+		// render
+		if (device->CheckCmdAllocator())
+		{
+			cmd_list = device->ResetCommand();
+			if (!cmd_list)
+				return SafeReturn(1);
+
+			// clear
+			target->ClearRenderTargets(device.get(), cmd_list);
+
+			// common
+			target->SetRenderTargets(device.get(), cmd_list);
+			target->SetRS(cmd_list);
+			cbframe.view = XmFloat4x4(MatrixTranspose(view.GetInverseTransformMatrix()));
+			cbframe.inv_view = XmFloat4x4(MatrixTranspose(view.GetTransformMatrix()));
+			cbframe.proj = XmFloat4x4(MatrixTranspose(proj.GetTransformMatrix()));
+			if (!cb->UploadData(cb_i.GetCurrentIndex(), &cbframe, 1))
+				return SafeReturn(1);
+			device->SetRSigCbvFast(cb->GetBufferObj()->GetGpuLocation(cb_i.UseCurrentIndex()));
+
+			// cubes
+			cmd_list->SetPipelineState(pso_cubes.Get());
+			cube->SetIA(cmd_list);
+			device->SetRSigSrv(device->GetSrvGpu(cube_infos_srv));
+			cmd_list->DrawIndexedInstanced(cube->index_count, cube_infos_count, 0, 0, 0);
+
+			// present
+			if (!device->ExecuteCommandAndPresent(target->GetTarget(), target->msaa))
+				return SafeReturn(1);
+
+			// refresh
+			window->Present();
+		}
+		else
+			Sleep(1);
+
+		// msg
+		SimpleMessageProcess();
+		// exit
+		if (KeyIsDown('Q'))
+			break;
+	}
+	return SafeReturn(0);
+}
+
 int main()
 {
 	cout << "Hello~ Rehenz~" << endl;
@@ -1717,5 +1934,6 @@ int main()
 	//return main_image_reader_test();
 	//return main_d3d12_example();
 	//return main_d3d12_show_image_example();
-	return main_d3d12_cubemap_example();
+	//return main_d3d12_cubemap_example();
+	return main_d3d12_shadow_example();
 }
