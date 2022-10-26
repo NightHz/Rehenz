@@ -1729,6 +1729,7 @@ int main_d3d12_shadow_example()
 	D3d12GPSOCreator psc;
 	D3D12_RESOURCE_BARRIER rc_barr[4]{};
 	D3D12_SHADER_RESOURCE_VIEW_DESC srv_desc{};
+	D3D12_SAMPLER_DESC samp_desc{};
 
 	// create target
 	auto target = std::make_shared<D3d12RenderTarget>(width, height, device->GetScFormat(), true, true, Color::yellow_green_o, 0, 0, device.get());
@@ -1754,6 +1755,10 @@ int main_d3d12_shadow_example()
 	light.axes.pitch = pi_div2 * 0.7f;
 	light.axes.yaw = pi_div2 * -0.7f;
 	light.scale = Vector(0.8f, 0.8f, 0.8f);
+	Projection light_proj;
+	light_proj.parallel_projection = true;
+	light_proj.height = 30;
+	light_proj.z_far = 100;
 
 	// create cb
 	struct CBFrame
@@ -1765,6 +1770,10 @@ int main_d3d12_shadow_example()
 		float _pad1;
 		XMFLOAT3 light_direction;
 		float _pad2;
+		XMFLOAT4X4 _pad3;
+		XMFLOAT4X4 _pad4;
+		XMFLOAT4 _pad5;
+		XMFLOAT4X4 light_view_proj_tex;
 	};
 	IndexLoop cb_i{ 0,1,2,3,4,5,6,7,8,9 };
 	auto cb = std::make_shared<D3d12UploadBuffer<CBFrame>>(true, 10, device.get());
@@ -1792,7 +1801,7 @@ int main_d3d12_shadow_example()
 		XMFLOAT4X4 _keep5;
 	};
 	const UINT cube_infos_count = 6;
-	const UINT cube_infos_srv = 1;
+	const UINT cube_infos_srv = 0;
 	auto cube_infos = std::make_shared<D3d12UploadBuffer<BObjInfo>>(false, cube_infos_count, device.get());
 	if (!*cube_infos)
 		return SafeReturn(1);
@@ -1818,19 +1827,39 @@ int main_d3d12_shadow_example()
 	auto vs_transform_all = D3d12Util::CompileShaderFile(L"vs_transform_all.hlsl", "vs");
 	if (!vs_transform_all)
 		return SafeReturn(1);
-	auto ps_light = D3d12Util::CompileShaderFile(L"ps_light.hlsl", "ps");
-	if (!ps_light)
+	auto ps_shadow = D3d12Util::CompileShaderFile(L"ps_shadow.hlsl", "ps");
+	if (!ps_shadow)
+		return SafeReturn(1);
+	auto ps_color = D3d12Util::CompileShaderFile(L"ps_color.hlsl", "ps");
+	if (!ps_color)
 		return SafeReturn(1);
 
 	// create pso
 	psc.Reset();
 	psc.SetRSig(device->GetRSig());
-	psc.SetShader(vs_transform_all.Get(), ps_light.Get());
+	psc.SetShader(vs_transform_all.Get(), ps_shadow.Get());
 	psc.SetIA(cube->input_layout);
 	psc.SetRenderTargets(target->msaa);
 	auto pso_cubes = psc.CreatePSO(device->Get());
 	if (!pso_cubes)
 		return SafeReturn(1);
+	psc.SetShader(vs_transform_all.Get(), ps_color.Get());
+	psc.SetRenderTargets(false);
+	auto pso_cubes_d = psc.CreatePSO(device->Get());
+	if (!pso_cubes_d)
+		return SafeReturn(1);
+
+	// create shadow map
+	const UINT shadow_map_srv = cube_infos_srv + 1;
+	const UINT shadow_map_sampler = 0;
+	auto shadow_map = std::make_shared<D3d12RenderTarget>(100, 100, device->GetScFormat(), false, true, Color::black, 1, 1, device.get());
+	if (!*shadow_map)
+		return SafeReturn(1);
+	srv_desc = shadow_map->GetZbufferObj()->GetSrvDesc();
+	srv_desc.Format = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
+	device->Get()->CreateShaderResourceView(shadow_map->GetZbuffer(), &srv_desc, device->GetSrv(shadow_map_srv));
+	samp_desc = D3d12Util::GetSamplerDesc(D3D12_FILTER_MIN_MAG_MIP_POINT, D3D12_TEXTURE_ADDRESS_MODE_BORDER, 1, std::vector<float>{1, 0, 0, 0});
+	device->Get()->CreateSampler(&samp_desc, device->GetSampler(shadow_map_sampler));
 
 	// finish
 	if (!device->ExecuteCommand())
@@ -1869,9 +1898,12 @@ int main_d3d12_shadow_example()
 		else if (KeyIsDown('K')) light.axes.pitch -= light_rotate_angle.y;
 		if (KeyIsDown('J'))      light.axes.yaw -= light_rotate_angle.x;
 		else if (KeyIsDown('L')) light.axes.yaw += light_rotate_angle.x;
+		light.pos = -light.GetFront() * light_proj.z_far / 2;
 
 		cbframe.light_intensity = XmFloat3(light.scale);
 		cbframe.light_direction = XmFloat3(light.GetFront());
+		const Matrix tex_tf(0.5f, 0, 0, 0, 0, -0.5f, 0, 0, 0, 0, 1, 0, 0.5f, 0.5f, 0, 1);
+		cbframe.light_view_proj_tex = XmFloat4x4(MatrixTranspose(light.GetInverseTransformMatrix() * light_proj.GetTransformMatrix() * tex_tf));
 
 		// render
 		if (device->CheckCmdAllocator())
@@ -1882,6 +1914,22 @@ int main_d3d12_shadow_example()
 
 			// clear
 			target->ClearRenderTargets(device.get(), cmd_list);
+			shadow_map->ClearRenderTargets(device.get(), cmd_list);
+
+			// render shadow map
+			shadow_map->SetRenderTargets(device.get(), cmd_list);
+			shadow_map->SetRS(cmd_list);
+			cbframe.view = XmFloat4x4(MatrixTranspose(light.GetInverseTransformMatrix()));
+			cbframe.inv_view = XmFloat4x4(MatrixTranspose(light.GetTransformMatrix()));
+			cbframe.proj = XmFloat4x4(MatrixTranspose(light_proj.GetTransformMatrix()));
+			if (!cb->UploadData(cb_i.GetCurrentIndex(), &cbframe, 1))
+				return SafeReturn(1);
+			device->SetRSigCbvFast(cb->GetBufferObj()->GetGpuLocation(cb_i.UseCurrentIndex()));
+			// cubes
+			cmd_list->SetPipelineState(pso_cubes_d.Get());
+			cube->SetIA(cmd_list);
+			device->SetRSigSrv(device->GetSrvGpu(cube_infos_srv));
+			cmd_list->DrawIndexedInstanced(cube->index_count, cube_infos_count, 0, 0, 0);
 
 			// common
 			target->SetRenderTargets(device.get(), cmd_list);
@@ -1897,6 +1945,7 @@ int main_d3d12_shadow_example()
 			cmd_list->SetPipelineState(pso_cubes.Get());
 			cube->SetIA(cmd_list);
 			device->SetRSigSrv(device->GetSrvGpu(cube_infos_srv));
+			device->SetRSigSampler(device->GetSamplerGpu(shadow_map_sampler));
 			cmd_list->DrawIndexedInstanced(cube->index_count, cube_infos_count, 0, 0, 0);
 
 			// present
