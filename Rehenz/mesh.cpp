@@ -610,7 +610,19 @@ namespace Rehenz
 							values[j] = std::stoi(value_str);
 					}
 					for (int j = 0; j < 3; j++)
-						values[j] -= 1;
+					{
+						if (values[j] >= 0)
+							values[j] -= 1;
+						else
+						{
+							if (j == 0)
+								values[j] += static_cast<int>(vs.size());
+							else if (j == 1)
+								values[j] += static_cast<int>(vts.size());
+							else if (j == 2)
+								values[j] += static_cast<int>(vns.size());
+						}
+					}
 
 					// add vertex
 					if (values[0] < 0 || values[0] >= vs.size()) // no pos, ignore the face
