@@ -171,3 +171,12 @@ h = 两倍欧氏距离（在此例中效果最好，且路径正确）
 |:-:|:-:|
 |![](img/d312_cubemap_reflection.gif)|![](img/d312_cubemap_refraction.gif)|
 
+|小阴影|小阴影|
+|:-:|:-:|
+|![](img/d312_shadow1.png)|![](img/d312_shadow1.gif)|
+
+|大阴影|大阴影|
+|:-:|:-:|
+|![](img/d312_shadow2.png)|![](img/d312_shadow2.gif)|
+
+
