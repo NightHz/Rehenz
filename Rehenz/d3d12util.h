@@ -227,6 +227,24 @@ namespace Rehenz
             return samp_desc;
         }
 
+        inline static D3D12_SAMPLER_DESC GetComparisonSamplerDesc(D3D12_FILTER filter, D3D12_TEXTURE_ADDRESS_MODE address,
+            D3D12_COMPARISON_FUNC comparison, UINT anisotropy = 1, const std::vector<float> border_color = { 0,0,0,1 })
+        {
+            D3D12_SAMPLER_DESC samp_desc{};
+            samp_desc.Filter = filter;
+            samp_desc.AddressU = samp_desc.AddressV = samp_desc.AddressW = address;
+            samp_desc.MipLODBias = 0;
+            samp_desc.MaxAnisotropy = anisotropy;
+            samp_desc.ComparisonFunc = comparison;
+            samp_desc.BorderColor[0] = border_color[0];
+            samp_desc.BorderColor[1] = border_color[1];
+            samp_desc.BorderColor[2] = border_color[2];
+            samp_desc.BorderColor[3] = border_color[3];
+            samp_desc.MinLOD = 0;
+            samp_desc.MaxLOD = D3D12_FLOAT32_MAX;
+            return samp_desc;
+        }
+
         inline static D3D12_DESCRIPTOR_HEAP_DESC GetDescriptorHeapDesc(D3D12_DESCRIPTOR_HEAP_TYPE type,
             bool shader_visible, UINT heap_size)
         {
@@ -265,7 +283,7 @@ namespace Rehenz
 
         static ComPtr<ID3DBlob> LoadShaderFile(const std::wstring& filename);
         // shader_type : vs hs ds gs ps cs
-        static ComPtr<ID3DBlob> CompileShaderFile(const std::wstring& filename, const std::string& shader_type, const std::unordered_map<std::string, bool>& macro = {});
+        static ComPtr<ID3DBlob> CompileShaderFile(const std::wstring& filename, const std::string& shader_type, const std::unordered_map<std::string, std::string>& macro = {});
 
         // forbid value > current fense value
         static bool WaitFenceValue(ID3D12Fence1* fence, UINT64 value);

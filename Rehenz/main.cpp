@@ -1827,7 +1827,7 @@ int main_d3d12_shadow_example()
 	auto vs_transform_all = D3d12Util::CompileShaderFile(L"vs_transform_all.hlsl", "vs");
 	if (!vs_transform_all)
 		return SafeReturn(1);
-	auto ps_shadow = D3d12Util::CompileShaderFile(L"ps_shadow.hlsl", "ps");
+	auto ps_shadow = D3d12Util::CompileShaderFile(L"ps_shadow.hlsl", "ps", { {"BIGPCF","1"} });
 	if (!ps_shadow)
 		return SafeReturn(1);
 	auto ps_color = D3d12Util::CompileShaderFile(L"ps_color.hlsl", "ps");
@@ -1844,6 +1844,9 @@ int main_d3d12_shadow_example()
 	if (!pso_cubes)
 		return SafeReturn(1);
 	psc.SetShader(vs_transform_all.Get(), ps_color.Get());
+	psc.pso_desc.RasterizerState.DepthBias = static_cast<INT>(0.001f * 0x1000000);
+	psc.pso_desc.RasterizerState.DepthBiasClamp = 0.02f;
+	psc.pso_desc.RasterizerState.SlopeScaledDepthBias = 1;
 	psc.SetRenderTargets(false);
 	auto pso_cubes_d = psc.CreatePSO(device->Get());
 	if (!pso_cubes_d)
@@ -1852,13 +1855,14 @@ int main_d3d12_shadow_example()
 	// create shadow map
 	const UINT shadow_map_srv = cube_infos_srv + 1;
 	const UINT shadow_map_sampler = 0;
-	auto shadow_map = std::make_shared<D3d12RenderTarget>(100, 100, device->GetScFormat(), false, true, Color::black, 1, 1, device.get());
+	auto shadow_map = std::make_shared<D3d12RenderTarget>(1024, 1024, device->GetScFormat(), false, true, Color::black, 1, 1, device.get());
 	if (!*shadow_map)
 		return SafeReturn(1);
 	srv_desc = shadow_map->GetZbufferObj()->GetSrvDesc();
 	srv_desc.Format = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
 	device->Get()->CreateShaderResourceView(shadow_map->GetZbuffer(), &srv_desc, device->GetSrv(shadow_map_srv));
-	samp_desc = D3d12Util::GetSamplerDesc(D3D12_FILTER_MIN_MAG_MIP_POINT, D3D12_TEXTURE_ADDRESS_MODE_BORDER, 1, std::vector<float>{1, 0, 0, 0});
+	samp_desc = D3d12Util::GetComparisonSamplerDesc(D3D12_FILTER_COMPARISON_MIN_MAG_MIP_LINEAR,
+		D3D12_TEXTURE_ADDRESS_MODE_BORDER, D3D12_COMPARISON_FUNC_GREATER, 1, std::vector<float>{1, 0, 0, 0});
 	device->Get()->CreateSampler(&samp_desc, device->GetSampler(shadow_map_sampler));
 
 	// finish
@@ -1931,6 +1935,9 @@ int main_d3d12_shadow_example()
 			device->SetRSigSrv(device->GetSrvGpu(cube_infos_srv));
 			cmd_list->DrawIndexedInstanced(cube->index_count, cube_infos_count, 0, 0, 0);
 
+			rc_barr[0] = D3d12Util::GetTransitionStruct(shadow_map->GetZbuffer(), D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+			cmd_list->ResourceBarrier(1, rc_barr);
+
 			// common
 			target->SetRenderTargets(device.get(), cmd_list);
 			target->SetRS(cmd_list);
@@ -1947,6 +1954,9 @@ int main_d3d12_shadow_example()
 			device->SetRSigSrv(device->GetSrvGpu(cube_infos_srv));
 			device->SetRSigSampler(device->GetSamplerGpu(shadow_map_sampler));
 			cmd_list->DrawIndexedInstanced(cube->index_count, cube_infos_count, 0, 0, 0);
+
+			rc_barr[0] = D3d12Util::GetTransitionStruct(shadow_map->GetZbuffer(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_DEPTH_WRITE);
+			cmd_list->ResourceBarrier(1, rc_barr);
 
 			// present
 			if (!device->ExecuteCommandAndPresent(target->GetTarget(), target->msaa))

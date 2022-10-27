@@ -32,7 +32,7 @@ namespace Rehenz
         return shader_blob;
     }
 
-    ComPtr<ID3DBlob> D3d12Util::CompileShaderFile(const std::wstring& filename, const std::string& shader_type, const std::unordered_map<std::string, bool>& macro)
+    ComPtr<ID3DBlob> D3d12Util::CompileShaderFile(const std::wstring& filename, const std::string& shader_type, const std::unordered_map<std::string, std::string>& macro)
     {
         HRESULT hr = S_OK;
 
@@ -41,7 +41,7 @@ namespace Rehenz
         // get defines
         std::vector<D3D_SHADER_MACRO> defines;
         for (const auto& m : macro)
-            defines.push_back(D3D_SHADER_MACRO{ m.first.c_str(),(m.second ? "1" : "0") });
+            defines.push_back(D3D_SHADER_MACRO{ m.first.c_str(),m.second.c_str() });
         defines.push_back(D3D_SHADER_MACRO{ nullptr,nullptr });
 
         // compile shader
