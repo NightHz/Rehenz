@@ -711,7 +711,7 @@ namespace Rehenz
 				float u = static_cast<float>(x) / xn;
 				float phi = pi_mul2 * u;
 				Point p(radius * cosf(phi), height, -radius * sinf(phi));
-				Vector n(normal.x * cosf(phi), normal.y, normal.x * sinf(phi));
+				Vector n(normal.x * cosf(phi), normal.y, -normal.x * sinf(phi));
 				vertices.emplace_back(p, n, Color::white, UV(u, v));
 			}
 		}
