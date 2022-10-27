@@ -1993,6 +1993,6 @@ int main()
 	//return main_image_reader_test();
 	//return main_d3d12_example();
 	//return main_d3d12_show_image_example();
-	//return main_d3d12_cubemap_example();
-	return main_d3d12_shadow_example();
+	return main_d3d12_cubemap_example();
+	//return main_d3d12_shadow_example();
 }

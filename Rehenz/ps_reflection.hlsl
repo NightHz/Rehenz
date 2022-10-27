@@ -56,7 +56,7 @@ float4 main(PSInput input) : SV_TARGET
     }
 
     float3 L = eye_pos - input.posW;
-    float3 R = reflect(-L, input.normW);
+    float3 R = reflect(-L, normalize(input.normW));
     float4 output = float4(saturate(color * 1.5f * envmap.Sample(samp_linear, R).xyz), 1);
 
     return output;
