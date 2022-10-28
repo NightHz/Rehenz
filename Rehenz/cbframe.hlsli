@@ -4,9 +4,9 @@ struct CBFrame
     matrix inv_view;
     matrix proj;
     float3 light_intensity;
-    float _pad1;
+    float mat_roughness;
     float3 light_direction;
-    float _pad2;
+    float _pad1;
     matrix world;
     matrix inv_world;
     float4 color;

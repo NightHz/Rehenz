@@ -1977,6 +1977,495 @@ int main_d3d12_shadow_example()
 	return SafeReturn(0);
 }
 
+int main_d3d12_ssao_ssr_example()
+{
+	cout << endl << "create window ..." << endl;
+	const std::string title = "d3d12 shadow+ssao+ssr example";
+	const int width = 800;
+	const int height = 600;
+	auto window = std::make_unique<SimpleWindowWithFC>(GetModuleHandle(nullptr), width, height, title);
+	if (!window->CheckWindowState())
+		return 1;
+	Mouse mouse;
+	FpsCounterS fps_counter;
+	fps_counter.LockFps(0);
+
+	cout << "create d3d12 device ..." << endl;
+	auto device = std::make_unique<D3d12Device>();
+	auto SafeReturn = [&device](int return_v)
+	{
+		if (device)
+			device->FlushGpu();
+		return return_v;
+	};
+	auto cmd_list = device->Create(window.get());
+	if (!cmd_list)
+		return SafeReturn(1);
+
+	cout << "setup resource ..." << endl;
+	std::shared_ptr<Mesh> mesh0;
+	D3d12GPSOCreator psc;
+	D3d12CPSOCreator cpsc;
+	D3D12_RESOURCE_BARRIER rc_barr[16]{};
+	D3D12_SHADER_RESOURCE_VIEW_DESC srv_desc{};
+	D3D12_UNORDERED_ACCESS_VIEW_DESC uav_desc{};
+	D3D12_SAMPLER_DESC samp_desc{};
+	D3D12_RESOURCE_DESC rc_desc{};
+	HRESULT hr = S_OK;
+	D3D12_DESCRIPTOR_HEAP_DESC dh_desc{};
+
+	// create target
+	auto target = std::make_shared<D3d12RenderTarget>(width, height, device->GetScFormat(), true, true, Color::yellow_green_o, 0, 0, device.get());
+	if (!*target)
+		return SafeReturn(1);
+
+	// create mesh
+	mesh0 = CreateCubeMesh();
+	auto cube = std::make_shared<D3d12Mesh>(mesh0.get(), device.get(), cmd_list);
+	if (!*cube)
+		return SafeReturn(1);
+	mesh0 = CreateFrustumMesh(0.3f);
+	auto frustum = std::make_shared<D3d12Mesh>(mesh0.get(), device.get(), cmd_list);
+	if (!*frustum)
+		return SafeReturn(1);
+	mesh0 = CreateMeshFromObjFile("assets/skull.obj");
+	if (!mesh0)
+		return SafeReturn(1);
+	auto skull = std::make_shared<D3d12Mesh>(mesh0.get(), device.get(), cmd_list);
+	if (!*skull)
+		return SafeReturn(1);
+	mesh0 = nullptr;
+
+	// set camera
+	Transform view;
+	Projection proj;
+	view.pos = Vector(4, 7, -11);
+	view.SetFront(-view.pos);
+	proj.aspect = static_cast<float>(width) / height;
+
+	// set light
+	Transform light;
+	light.axes.pitch = pi_div2 * 0.7f;
+	light.axes.yaw = pi_div2 * -0.7f;
+	light.scale = Vector(0.8f, 0.8f, 0.8f);
+	Projection light_proj;
+	light_proj.parallel_projection = true;
+	light_proj.height = 30;
+	light_proj.z_far = 100;
+
+	// create cb
+	struct CBFrame
+	{
+		XMFLOAT4X4 view;
+		XMFLOAT4X4 inv_view;
+		XMFLOAT4X4 proj;
+		XMFLOAT3 light_intensity;
+		float mat_roughness;
+		XMFLOAT3 light_direction;
+		float _pad1;
+		XMFLOAT4X4 world;
+		XMFLOAT4X4 inv_world;
+		XMFLOAT4 color;
+		XMFLOAT4X4 light_view_proj_tex;
+	};
+	IndexLoop cb_i{ 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17 };
+	auto cb = std::make_shared<D3d12UploadBuffer<CBFrame>>(true, 18, device.get());
+	if (!*cb)
+		return SafeReturn(1);
+	CBFrame cbframe{};
+	cbframe.view = XmFloat4x4(MatrixTranspose(view.GetInverseTransformMatrix()));
+	cbframe.inv_view = XmFloat4x4(MatrixTranspose(view.GetTransformMatrix()));
+	cbframe.proj = XmFloat4x4(MatrixTranspose(proj.GetTransformMatrix()));
+	cbframe.light_intensity = XmFloat3(light.scale);
+	cbframe.light_direction = XmFloat3(light.GetFront());
+	const Matrix tex_tf(0.5f, 0, 0, 0, 0, -0.5f, 0, 0, 0, 0, 1, 0, 0.5f, 0.5f, 0, 1);
+	cbframe.light_view_proj_tex = XmFloat4x4(MatrixTranspose(light.GetInverseTransformMatrix() * light_proj.GetTransformMatrix() * tex_tf));
+	if (!cb->UploadData(cb_i.GetCurrentIndex(), &cbframe, 1))
+		return SafeReturn(1);
+
+	// set cube, frustum and skull
+	Transform cube_tf, frustum_tf, skull_tf;
+	cube_tf.scale = Vector(12, 0.2f, 12);
+	cube_tf.pos = Vector(0, -0.2f, 0);
+	frustum_tf.scale = Vector(2, 3, 2);
+	frustum_tf.pos = Vector(4, 3, 0);
+	frustum_tf.axes.pitch = pi;
+	skull_tf.pos = Vector(-4, 0, 0);
+	skull_tf.axes.yaw = pi * 0.8f;
+	Color cube_color, frustum_color, skull_color;
+	cube_color = Color::gray_tm;
+	frustum_color = Color::orange_l;
+	skull_color = Color::green_l;
+	float cube_roughness, frustum_roughness, skull_roughness;
+	cube_roughness = 0.03f;
+	frustum_roughness = 0.125f;
+	skull_roughness = 0.125f;
+
+	// create shader
+	auto vs_transform_one = D3d12Util::CompileShaderFile(L"vs_transform_one.hlsl", "vs");
+	if (!vs_transform_one)
+		return SafeReturn(1);
+	auto ps_shadow_ssao_ssr = D3d12Util::CompileShaderFile(L"ps_shadow_ssao_ssr.hlsl", "ps", { {"BIGPCF","1"} });
+	if (!ps_shadow_ssao_ssr)
+		return SafeReturn(1);
+	auto ps_color = D3d12Util::CompileShaderFile(L"ps_color.hlsl", "ps");
+	if (!ps_color)
+		return SafeReturn(1);
+	auto ps_get_normal = D3d12Util::CompileShaderFile(L"ps_get_normal.hlsl", "ps");
+	if (!ps_get_normal)
+		return SafeReturn(1);
+
+	// create pso
+	psc.Reset();
+	psc.SetRSig(device->GetRSig());
+	psc.SetShader(vs_transform_one.Get(), ps_shadow_ssao_ssr.Get());
+	psc.SetIA(cube->input_layout);
+	psc.SetRenderTargets(target->msaa);
+	auto pso = psc.CreatePSO(device->Get());
+	if (!pso)
+		return SafeReturn(1);
+	psc.SetShader(vs_transform_one.Get(), ps_get_normal.Get());
+	psc.SetRenderTargets(false, 1, DXGI_FORMAT_R16G16B16A16_FLOAT);
+	auto pso_gen_ss = psc.CreatePSO(device->Get());
+	if (!pso_gen_ss)
+		return SafeReturn(1);
+	psc.SetShader(vs_transform_one.Get(), ps_color.Get());
+	psc.pso_desc.RasterizerState.DepthBias = static_cast<INT>(0.001f * 0x1000000);
+	psc.pso_desc.RasterizerState.DepthBiasClamp = 0.02f;
+	psc.pso_desc.RasterizerState.SlopeScaledDepthBias = 1;
+	psc.SetRenderTargets(false);
+	auto pso_gen_shadow = psc.CreatePSO(device->Get());
+	if (!pso_gen_shadow)
+		return SafeReturn(1);
+
+	// create shadow map
+	const UINT shadow_map_srv = 0;
+	const UINT shadow_map_sampler = 0;
+	auto shadow_map = std::make_shared<D3d12RenderTarget>(1024, 1024, device->GetScFormat(), false, true, Color::black, 1, 1, device.get());
+	if (!*shadow_map)
+		return SafeReturn(1);
+	srv_desc = shadow_map->GetZbufferObj()->GetSrvDesc();
+	srv_desc.Format = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
+	device->Get()->CreateShaderResourceView(shadow_map->GetZbuffer(), &srv_desc, device->GetSrv(shadow_map_srv));
+	samp_desc = D3d12Util::GetComparisonSamplerDesc(D3D12_FILTER_COMPARISON_MIN_MAG_MIP_LINEAR,
+		D3D12_TEXTURE_ADDRESS_MODE_BORDER, D3D12_COMPARISON_FUNC_GREATER, 1, std::vector<float>{1, 0, 0, 0});
+	device->Get()->CreateSampler(&samp_desc, device->GetSampler(shadow_map_sampler));
+
+	// create screen space map
+	const UINT ss_normal_map_srv = 3;
+	const UINT ss_depth_map_srv = 4;
+	const UINT prev_screen_srv = 5;
+	auto ss_map = std::make_shared<D3d12RenderTarget>(width, height, DXGI_FORMAT_R16G16B16A16_FLOAT, false, true, Color::black, 2, 2, device.get());
+	if (!*ss_map)
+		return SafeReturn(1);
+	srv_desc = ss_map->GetTargetObj()->GetSrvDesc();
+	device->Get()->CreateShaderResourceView(ss_map->GetTarget(), &srv_desc, device->GetSrv(ss_normal_map_srv));
+	srv_desc = ss_map->GetZbufferObj()->GetSrvDesc();
+	srv_desc.Format = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
+	device->Get()->CreateShaderResourceView(ss_map->GetZbuffer(), &srv_desc, device->GetSrv(ss_depth_map_srv));
+	rc_desc = D3d12Util::GetTexture2dRcDesc(width, height, 1, DXGI_FORMAT_B8G8R8A8_UNORM);
+	auto prev_screen = std::make_shared<D3d12Texture>(rc_desc, D3D12_HEAP_TYPE_DEFAULT, device->Get(), D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
+	srv_desc = prev_screen->GetSrvDesc();
+	device->Get()->CreateShaderResourceView(prev_screen->Get(), &srv_desc, device->GetSrv(prev_screen_srv));
+
+	// create ssao ssr map
+	ComPtr<ID3D12DescriptorHeap> uav_heap2;
+	dh_desc = D3d12Util::GetDescriptorHeapDesc(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, D3D12_DESCRIPTOR_HEAP_FLAG_NONE, 2);
+	hr = device->Get()->CreateDescriptorHeap(&dh_desc, IID_PPV_ARGS(uav_heap2.GetAddressOf()));
+	if (FAILED(hr))
+		return SafeReturn(1);
+	const D3D12_CPU_DESCRIPTOR_HANDLE ssao_map_uav2_cpu = uav_heap2->GetCPUDescriptorHandleForHeapStart();
+	const D3D12_CPU_DESCRIPTOR_HANDLE ssr_map_uav2_cpu{ ssao_map_uav2_cpu.ptr + device->Get()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV) };
+	const UINT ssao_map_uav = 6;
+	const UINT ssr_map_uav = 7;
+	const UINT ssao_map_srv = 1;
+	const UINT ssr_map_srv = 2;
+	rc_desc = D3d12Util::GetTexture2dRcDesc(width / 2, height / 2, 1, DXGI_FORMAT_R16_FLOAT, 1, false, D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS);
+	auto ssao_map = std::make_shared<D3d12Texture>(rc_desc, D3D12_HEAP_TYPE_DEFAULT, device->Get(), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+	if (!ssao_map->Get())
+		return SafeReturn(1);
+	uav_desc = ssao_map->GetUavDesc();
+	device->Get()->CreateUnorderedAccessView(ssao_map->Get(), nullptr, &uav_desc, device->GetUav(ssao_map_uav));
+	device->Get()->CreateUnorderedAccessView(ssao_map->Get(), nullptr, &uav_desc, ssao_map_uav2_cpu);
+	srv_desc = ssao_map->GetSrvDesc();
+	device->Get()->CreateShaderResourceView(ssao_map->Get(), &srv_desc, device->GetSrv(ssao_map_srv));
+	rc_desc = D3d12Util::GetTexture2dRcDesc(width, height, 1, DXGI_FORMAT_B8G8R8A8_UNORM, 1, false, D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS);
+	auto ssr_map = std::make_shared<D3d12Texture>(rc_desc, D3D12_HEAP_TYPE_DEFAULT, device->Get(), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+	if (!ssr_map->Get())
+		return SafeReturn(1);
+	uav_desc = ssr_map->GetUavDesc();
+	device->Get()->CreateUnorderedAccessView(ssr_map->Get(), nullptr, &uav_desc, device->GetUav(ssr_map_uav));
+	device->Get()->CreateUnorderedAccessView(ssr_map->Get(), nullptr, &uav_desc, ssr_map_uav2_cpu);
+	srv_desc = ssr_map->GetSrvDesc();
+	device->Get()->CreateShaderResourceView(ssr_map->Get(), &srv_desc, device->GetSrv(ssr_map_srv));
+
+	// create compute shader
+	auto cs_calc_ssao = D3d12Util::CompileShaderFile(L"cs_calc_ssao.hlsl", "cs");
+	if (!cs_calc_ssao)
+		return SafeReturn(1);
+	auto cs_calc_ssr = D3d12Util::CompileShaderFile(L"cs_calc_ssr.hlsl", "cs");
+	if (!cs_calc_ssr)
+		return SafeReturn(1);
+
+	// create compute pso
+	cpsc.Reset();
+	cpsc.SetRSig(device->GetRSig());
+	cpsc.SetShader(cs_calc_ssao.Get());
+	auto pso_ssao = cpsc.CreatePSO(device->Get());
+	if (!pso_ssao)
+		return SafeReturn(1);
+	cpsc.SetShader(cs_calc_ssr.Get());
+	auto pso_ssr = cpsc.CreatePSO(device->Get());
+	if (!pso_ssr)
+		return SafeReturn(1);
+
+	// finish
+	if (!device->ExecuteCommand())
+		return SafeReturn(1);
+	if (!device->FlushGpu())
+		return SafeReturn(1);
+
+	cout << "press Q to exit" << endl;
+	while (window->CheckWindowState())
+	{
+		// update
+		mouse.Present();
+		fps_counter.Present();
+		float dt = fps_counter.GetLastDeltatime2();
+
+		float cam_move_dis = 5 * dt;
+		float cam_rotate_angle_eu = 0.003f;
+		if (KeyIsDown('W'))      view.pos += cam_move_dis * view.GetFrontInGround();
+		else if (KeyIsDown('S')) view.pos -= cam_move_dis * view.GetFrontInGround();
+		if (KeyIsDown('A'))      view.pos -= cam_move_dis * view.GetRightInGround();
+		else if (KeyIsDown('D')) view.pos += cam_move_dis * view.GetRightInGround();
+		if (KeyIsDown(VK_SPACE)) view.pos.y += cam_move_dis;
+		else if (KeyIsDown(VK_LSHIFT)) view.pos.y -= cam_move_dis;
+		if (KeyIsDown(VK_MBUTTON))
+		{
+			view.axes.pitch += cam_rotate_angle_eu * mouse.GetMoveY();
+			view.axes.yaw += cam_rotate_angle_eu * mouse.GetMoveX();
+			mouse.SetToPrev();
+		}
+
+		if (KeyIsDown('Z'))      proj.parallel_projection = false;
+		else if (KeyIsDown('X')) proj.parallel_projection = true;
+
+		Vector2 light_rotate_angle = Vector2(3, 3) * dt;
+		if (KeyIsDown('I'))      light.axes.pitch += light_rotate_angle.y;
+		else if (KeyIsDown('K')) light.axes.pitch -= light_rotate_angle.y;
+		if (KeyIsDown('J'))      light.axes.yaw -= light_rotate_angle.x;
+		else if (KeyIsDown('L')) light.axes.yaw += light_rotate_angle.x;
+		light.pos = -light.GetFront() * light_proj.z_far / 2;
+
+		static bool shadow_enable = true;
+		if (KeyIsDown('1'))      shadow_enable = true;
+		else if (KeyIsDown('2')) shadow_enable = false;
+		static bool ssao_enable = true;
+		if (KeyIsDown('3'))      ssao_enable = true;
+		else if (KeyIsDown('4')) ssao_enable = false;
+		static bool ssr_enable = true;
+		if (KeyIsDown('5'))      ssr_enable = true;
+		else if (KeyIsDown('6')) ssr_enable = false;
+
+		cbframe.light_intensity = XmFloat3(light.scale);
+		cbframe.light_direction = XmFloat3(light.GetFront());
+		cbframe.light_view_proj_tex = XmFloat4x4(MatrixTranspose(light.GetInverseTransformMatrix() * light_proj.GetTransformMatrix() * tex_tf));
+
+		// render
+		if (device->CheckCmdAllocator())
+		{
+			cmd_list = device->ResetCommand();
+			if (!cmd_list)
+				return SafeReturn(1);
+
+			// clear
+			target->ClearRenderTargets(device.get(), cmd_list);
+			shadow_map->ClearRenderTargets(device.get(), cmd_list);
+			ss_map->ClearRenderTargets(device.get(), cmd_list);
+			float color1[4]{ 0.5f,0,0,0 };
+			cmd_list->ClearUnorderedAccessViewFloat(device->GetUavGpu(ssao_map_uav), ssao_map_uav2_cpu, ssao_map->Get(), color1, 0, nullptr);
+			float color2[4]{ 0,0,0,1 };
+			cmd_list->ClearUnorderedAccessViewFloat(device->GetUavGpu(ssr_map_uav), ssr_map_uav2_cpu, ssr_map->Get(), color2, 0, nullptr);
+
+			// STEP 1 : render shadow map
+			cbframe.view = XmFloat4x4(MatrixTranspose(light.GetInverseTransformMatrix()));
+			cbframe.inv_view = XmFloat4x4(MatrixTranspose(light.GetTransformMatrix()));
+			cbframe.proj = XmFloat4x4(MatrixTranspose(light_proj.GetTransformMatrix()));
+			if (shadow_enable)
+			{
+				cmd_list->SetPipelineState(pso_gen_shadow.Get());
+				shadow_map->SetRenderTargets(device.get(), cmd_list);
+				shadow_map->SetRS(cmd_list);
+				// cube
+				cbframe.world = XmFloat4x4(MatrixTranspose(cube_tf.GetTransformMatrix()));
+				cbframe.inv_world = XmFloat4x4(MatrixTranspose(cube_tf.GetInverseTransformMatrix()));
+				cbframe.color = XmFloat4(cube_color);
+				cbframe.mat_roughness = cube_roughness;
+				if (!cb->UploadData(cb_i.GetCurrentIndex(), &cbframe, 1))
+					return SafeReturn(1);
+				device->SetRSigCbvFast(cb->GetBufferObj()->GetGpuLocation(cb_i.UseCurrentIndex()));
+				cube->SetIA(cmd_list);
+				cmd_list->DrawIndexedInstanced(cube->index_count, 1, 0, 0, 0);
+				// frustum
+				cbframe.world = XmFloat4x4(MatrixTranspose(frustum_tf.GetTransformMatrix()));
+				cbframe.inv_world = XmFloat4x4(MatrixTranspose(frustum_tf.GetInverseTransformMatrix()));
+				cbframe.color = XmFloat4(frustum_color);
+				cbframe.mat_roughness = frustum_roughness;
+				if (!cb->UploadData(cb_i.GetCurrentIndex(), &cbframe, 1))
+					return SafeReturn(1);
+				device->SetRSigCbvFast(cb->GetBufferObj()->GetGpuLocation(cb_i.UseCurrentIndex()));
+				frustum->SetIA(cmd_list);
+				cmd_list->DrawIndexedInstanced(frustum->index_count, 1, 0, 0, 0);
+				// skull
+				cbframe.world = XmFloat4x4(MatrixTranspose(skull_tf.GetTransformMatrix()));
+				cbframe.inv_world = XmFloat4x4(MatrixTranspose(skull_tf.GetInverseTransformMatrix()));
+				cbframe.color = XmFloat4(skull_color);
+				cbframe.mat_roughness = skull_roughness;
+				if (!cb->UploadData(cb_i.GetCurrentIndex(), &cbframe, 1))
+					return SafeReturn(1);
+				device->SetRSigCbvFast(cb->GetBufferObj()->GetGpuLocation(cb_i.UseCurrentIndex()));
+				skull->SetIA(cmd_list);
+				cmd_list->DrawIndexedInstanced(skull->index_count, 1, 0, 0, 0);
+			}
+
+			// STEP 2 : render ss map
+			cbframe.view = XmFloat4x4(MatrixTranspose(view.GetInverseTransformMatrix()));
+			cbframe.inv_view = XmFloat4x4(MatrixTranspose(view.GetTransformMatrix()));
+			cbframe.proj = XmFloat4x4(MatrixTranspose(proj.GetTransformMatrix()));
+			if (ssao_enable || ssr_enable)
+			{
+				cmd_list->SetPipelineState(pso_gen_ss.Get());
+				ss_map->SetRenderTargets(device.get(), cmd_list);
+				ss_map->SetRS(cmd_list);
+				// cube
+				cbframe.world = XmFloat4x4(MatrixTranspose(cube_tf.GetTransformMatrix()));
+				cbframe.inv_world = XmFloat4x4(MatrixTranspose(cube_tf.GetInverseTransformMatrix()));
+				cbframe.color = XmFloat4(cube_color);
+				cbframe.mat_roughness = cube_roughness;
+				if (!cb->UploadData(cb_i.GetCurrentIndex(), &cbframe, 1))
+					return SafeReturn(1);
+				device->SetRSigCbvFast(cb->GetBufferObj()->GetGpuLocation(cb_i.UseCurrentIndex()));
+				cube->SetIA(cmd_list);
+				cmd_list->DrawIndexedInstanced(cube->index_count, 1, 0, 0, 0);
+				// frustum
+				cbframe.world = XmFloat4x4(MatrixTranspose(frustum_tf.GetTransformMatrix()));
+				cbframe.inv_world = XmFloat4x4(MatrixTranspose(frustum_tf.GetInverseTransformMatrix()));
+				cbframe.color = XmFloat4(frustum_color);
+				cbframe.mat_roughness = frustum_roughness;
+				if (!cb->UploadData(cb_i.GetCurrentIndex(), &cbframe, 1))
+					return SafeReturn(1);
+				device->SetRSigCbvFast(cb->GetBufferObj()->GetGpuLocation(cb_i.UseCurrentIndex()));
+				frustum->SetIA(cmd_list);
+				cmd_list->DrawIndexedInstanced(frustum->index_count, 1, 0, 0, 0);
+				// skull
+				cbframe.world = XmFloat4x4(MatrixTranspose(skull_tf.GetTransformMatrix()));
+				cbframe.inv_world = XmFloat4x4(MatrixTranspose(skull_tf.GetInverseTransformMatrix()));
+				cbframe.color = XmFloat4(skull_color);
+				cbframe.mat_roughness = skull_roughness;
+				if (!cb->UploadData(cb_i.GetCurrentIndex(), &cbframe, 1))
+					return SafeReturn(1);
+				device->SetRSigCbvFast(cb->GetBufferObj()->GetGpuLocation(cb_i.UseCurrentIndex()));
+				skull->SetIA(cmd_list);
+				cmd_list->DrawIndexedInstanced(skull->index_count, 1, 0, 0, 0);
+			}
+
+			rc_barr[0] = D3d12Util::GetTransitionStruct(ss_map->GetTarget(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
+			rc_barr[1] = D3d12Util::GetTransitionStruct(ss_map->GetZbuffer(), D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
+			cmd_list->ResourceBarrier(2, rc_barr);
+
+			// STEP 3 : compute ssao map
+			if (ssao_enable || ssr_enable)
+				cmd_list->SetComputeRootSignature(device->GetRSig());
+			if (ssao_enable)
+			{
+				cmd_list->SetPipelineState(pso_ssao.Get());
+				cmd_list->SetComputeRootDescriptorTable(2, device->GetSrvGpu(ss_normal_map_srv));
+				cmd_list->SetComputeRootDescriptorTable(3, device->GetUavGpu(ssao_map_uav));
+				cmd_list->Dispatch(width / 2, height / 2, 1);
+			}
+
+			// STEP 4 : compute ssr map
+			if (ssr_enable)
+			{
+				cmd_list->SetPipelineState(pso_ssr.Get());
+				cmd_list->SetComputeRootDescriptorTable(3, device->GetUavGpu(ssr_map_uav));
+				cmd_list->Dispatch(width, height, 1);
+			}
+
+			rc_barr[0] = D3d12Util::GetTransitionStruct(shadow_map->GetZbuffer(), D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+			rc_barr[1] = D3d12Util::GetTransitionStruct(ssao_map->Get(), D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+			rc_barr[2] = D3d12Util::GetTransitionStruct(ssr_map->Get(), D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+			cmd_list->ResourceBarrier(3, rc_barr);
+
+			// STEP 5 : render scene
+			if (ssao_enable || ssr_enable)
+				cmd_list->SetGraphicsRootSignature(device->GetRSig());
+			// common
+			cmd_list->SetPipelineState(pso.Get());
+			target->SetRenderTargets(device.get(), cmd_list);
+			target->SetRS(cmd_list);
+			device->SetRSigSrv(device->GetSrvGpu(shadow_map_srv));
+			device->SetRSigSampler(device->GetSamplerGpu(shadow_map_sampler));
+
+			// cube
+			cbframe.world = XmFloat4x4(MatrixTranspose(cube_tf.GetTransformMatrix()));
+			cbframe.inv_world = XmFloat4x4(MatrixTranspose(cube_tf.GetInverseTransformMatrix()));
+			cbframe.color = XmFloat4(cube_color);
+			cbframe.mat_roughness = cube_roughness;
+			if (!cb->UploadData(cb_i.GetCurrentIndex(), &cbframe, 1))
+				return SafeReturn(1);
+			device->SetRSigCbvFast(cb->GetBufferObj()->GetGpuLocation(cb_i.UseCurrentIndex()));
+			cube->SetIA(cmd_list);
+			cmd_list->DrawIndexedInstanced(cube->index_count, 1, 0, 0, 0);
+			// frustum
+			cbframe.world = XmFloat4x4(MatrixTranspose(frustum_tf.GetTransformMatrix()));
+			cbframe.inv_world = XmFloat4x4(MatrixTranspose(frustum_tf.GetInverseTransformMatrix()));
+			cbframe.color = XmFloat4(frustum_color);
+			cbframe.mat_roughness = frustum_roughness;
+			if (!cb->UploadData(cb_i.GetCurrentIndex(), &cbframe, 1))
+				return SafeReturn(1);
+			device->SetRSigCbvFast(cb->GetBufferObj()->GetGpuLocation(cb_i.UseCurrentIndex()));
+			frustum->SetIA(cmd_list);
+			cmd_list->DrawIndexedInstanced(frustum->index_count, 1, 0, 0, 0);
+			// skull
+			cbframe.world = XmFloat4x4(MatrixTranspose(skull_tf.GetTransformMatrix()));
+			cbframe.inv_world = XmFloat4x4(MatrixTranspose(skull_tf.GetInverseTransformMatrix()));
+			cbframe.color = XmFloat4(skull_color);
+			cbframe.mat_roughness = skull_roughness;
+			if (!cb->UploadData(cb_i.GetCurrentIndex(), &cbframe, 1))
+				return SafeReturn(1);
+			device->SetRSigCbvFast(cb->GetBufferObj()->GetGpuLocation(cb_i.UseCurrentIndex()));
+			skull->SetIA(cmd_list);
+			cmd_list->DrawIndexedInstanced(skull->index_count, 1, 0, 0, 0);
+
+			rc_barr[0] = D3d12Util::GetTransitionStruct(shadow_map->GetZbuffer(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_DEPTH_WRITE);
+			rc_barr[1] = D3d12Util::GetTransitionStruct(ssao_map->Get(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+			rc_barr[2] = D3d12Util::GetTransitionStruct(ssr_map->Get(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+			rc_barr[3] = D3d12Util::GetTransitionStruct(ss_map->GetTarget(), D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_RENDER_TARGET);
+			rc_barr[4] = D3d12Util::GetTransitionStruct(ss_map->GetZbuffer(), D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_DEPTH_WRITE);
+			cmd_list->ResourceBarrier(5, rc_barr);
+			target->CopyTarget(0, prev_screen->Get(), 0, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE, cmd_list);
+
+			// present
+			if (!device->ExecuteCommandAndPresent(target->GetTarget(), target->msaa))
+				return SafeReturn(1);
+
+			// refresh
+			window->Present();
+		}
+		else
+			Sleep(1);
+
+		// msg
+		SimpleMessageProcess();
+		// exit
+		if (KeyIsDown('Q'))
+			break;
+	}
+	return SafeReturn(0);
+}
+
 int main()
 {
 	cout << "Hello~ Rehenz~" << endl;
@@ -1993,6 +2482,7 @@ int main()
 	//return main_image_reader_test();
 	//return main_d3d12_example();
 	//return main_d3d12_show_image_example();
-	return main_d3d12_cubemap_example();
+	//return main_d3d12_cubemap_example();
 	//return main_d3d12_shadow_example();
+	return main_d3d12_ssao_ssr_example();
 }
