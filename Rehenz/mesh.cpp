@@ -748,7 +748,7 @@ namespace Rehenz
 		{
 			for (int r = 0; r <= brn; r++)
 			{
-				float t = static_cast<float>(r) / trn;
+				float t = static_cast<float>(r) / brn;
 				float v = t * 0.25f + 0.75f;
 				float radius = 1 - t;
 				for (int x = 0; x <= xn; x++)
