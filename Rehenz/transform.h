@@ -38,6 +38,7 @@ namespace Rehenz
 		~Projection();
 
 		Matrix GetTransformMatrix();
+		Matrix GetInverseTransformMatrix();
 
 		Point GetOrigin();
 	};

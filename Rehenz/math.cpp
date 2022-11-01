@@ -390,6 +390,18 @@ namespace Rehenz
 		return result;
 	}
 
+	Matrix GetInverseMatrixP(float fovy, float aspect, float z_near, float z_far)
+	{
+		Matrix result(0.0f);
+		float f1 = tanf(fovy * 0.5f);
+		result(0, 0) = f1 * aspect;
+		result(1, 1) = f1;
+		result(3, 3) = 1 / z_near;
+		result(2, 3) = (z_far - z_near) / (-z_near * z_far);
+		result(3, 2) = 1.0f;
+		return result;
+	}
+
 	Point GetOriginP(float z_near, float z_far)
 	{
 		return Point(0, 0, -z_near * z_far / (z_far - z_near), 0);

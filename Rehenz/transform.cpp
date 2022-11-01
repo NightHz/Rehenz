@@ -82,6 +82,14 @@ namespace Rehenz
 			return GetMatrixT(0, 0, -z_near) * GetMatrixS(2 / height / aspect, 2 / height, 1 / (z_far - z_near));
 	}
 
+	Matrix Projection::GetInverseTransformMatrix()
+	{
+		if (!parallel_projection)
+			return GetInverseMatrixP(fovy, aspect, z_near, z_far);
+		else
+			return GetInverseMatrixS(2 / height / aspect, 2 / height, 1 / (z_far - z_near)) * GetInverseMatrixT(0, 0, -z_near);
+	}
+
 	Point Projection::GetOrigin()
 	{
 		if (!parallel_projection)

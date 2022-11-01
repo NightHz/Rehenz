@@ -170,6 +170,9 @@ namespace Rehenz
 	// get matrix of perspective, project to Cube(-1,-1,0)(1,1,1)
 	Matrix GetMatrixP(float fovy, float aspect, float z_near, float z_far);
 
+	// get inverse matrix of perspective, from Cube(-1,-1,0)(1,1,1)
+	Matrix GetInverseMatrixP(float fovy, float aspect, float z_near, float z_far);
+
 	// get origin point in perspective space
 	Point GetOriginP(float z_near, float z_far);
 
