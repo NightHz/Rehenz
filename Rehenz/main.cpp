@@ -2067,6 +2067,7 @@ int main_d3d12_ssao_ssr_example()
 		XMFLOAT4X4 inv_world;
 		XMFLOAT4 color;
 		XMFLOAT4X4 light_view_proj_tex;
+		XMFLOAT4X4 inv_proj;
 	};
 	IndexLoop cb_i{ 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17 };
 	auto cb = std::make_shared<D3d12UploadBuffer<CBFrame>>(true, 18, device.get());
@@ -2076,6 +2077,7 @@ int main_d3d12_ssao_ssr_example()
 	cbframe.view = XmFloat4x4(MatrixTranspose(view.GetInverseTransformMatrix()));
 	cbframe.inv_view = XmFloat4x4(MatrixTranspose(view.GetTransformMatrix()));
 	cbframe.proj = XmFloat4x4(MatrixTranspose(proj.GetTransformMatrix()));
+	cbframe.inv_proj = XmFloat4x4(MatrixTranspose(proj.GetInverseTransformMatrix()));
 	cbframe.light_intensity = XmFloat3(light.scale);
 	cbframe.light_direction = XmFloat3(light.GetFront());
 	const Matrix tex_tf(0.5f, 0, 0, 0, 0, -0.5f, 0, 0, 0, 0, 1, 0, 0.5f, 0.5f, 0, 1);
@@ -2283,7 +2285,7 @@ int main_d3d12_ssao_ssr_example()
 			target->ClearRenderTargets(device.get(), cmd_list);
 			shadow_map->ClearRenderTargets(device.get(), cmd_list);
 			ss_map->ClearRenderTargets(device.get(), cmd_list);
-			float color1[4]{ 0.5f,0,0,0 };
+			float color1[4]{ 0,0,0,0 };
 			cmd_list->ClearUnorderedAccessViewFloat(device->GetUavGpu(ssao_map_uav), ssao_map_uav2_cpu, ssao_map->Get(), color1, 0, nullptr);
 			float color2[4]{ 0,0,0,1 };
 			cmd_list->ClearUnorderedAccessViewFloat(device->GetUavGpu(ssr_map_uav), ssr_map_uav2_cpu, ssr_map->Get(), color2, 0, nullptr);
@@ -2292,6 +2294,7 @@ int main_d3d12_ssao_ssr_example()
 			cbframe.view = XmFloat4x4(MatrixTranspose(light.GetInverseTransformMatrix()));
 			cbframe.inv_view = XmFloat4x4(MatrixTranspose(light.GetTransformMatrix()));
 			cbframe.proj = XmFloat4x4(MatrixTranspose(light_proj.GetTransformMatrix()));
+			cbframe.inv_proj = XmFloat4x4(MatrixTranspose(light_proj.GetInverseTransformMatrix()));
 			if (shadow_enable)
 			{
 				cmd_list->SetPipelineState(pso_gen_shadow.Get());
@@ -2333,6 +2336,7 @@ int main_d3d12_ssao_ssr_example()
 			cbframe.view = XmFloat4x4(MatrixTranspose(view.GetInverseTransformMatrix()));
 			cbframe.inv_view = XmFloat4x4(MatrixTranspose(view.GetTransformMatrix()));
 			cbframe.proj = XmFloat4x4(MatrixTranspose(proj.GetTransformMatrix()));
+			cbframe.inv_proj = XmFloat4x4(MatrixTranspose(proj.GetInverseTransformMatrix()));
 			if (ssao_enable || ssr_enable)
 			{
 				cmd_list->SetPipelineState(pso_gen_ss.Get());
@@ -2376,7 +2380,10 @@ int main_d3d12_ssao_ssr_example()
 
 			// STEP 3 : compute ssao map
 			if (ssao_enable || ssr_enable)
+			{
 				cmd_list->SetComputeRootSignature(device->GetRSig());
+				cmd_list->SetComputeRootConstantBufferView(0, cb->GetBufferObj()->GetGpuLocation(cb_i.GetCurrentIndex()));
+			}
 			if (ssao_enable)
 			{
 				cmd_list->SetPipelineState(pso_ssao.Get());

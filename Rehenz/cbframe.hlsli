@@ -11,4 +11,5 @@ struct CBFrame
     matrix inv_world;
     float4 color;
     matrix light_view_proj_tex;
+    matrix inv_proj;
 };

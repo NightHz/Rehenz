@@ -93,18 +93,22 @@ float4 main(PSInput input) : SV_TARGET
     posT.xyz /= posT.w;
     float shadow = ComputeShadow(shadow_map, shadow_samp, posT.xy, posT.z);
 
-    float2 ss_uv = (input.posH.xy / input.posH.w * float2(1, -1) + 1) / 2;
-    float ambient_occlusion = (1 - ssao_map.Sample(samp_linear, ss_uv).r) * 2;
+    float4 posH = mul(mul(float4(input.posW, 1), frame_info.view), frame_info.proj);
+    float2 ss_uv = (posH.xy / posH.w * float2(1, -1) + 1) / 2;
+    float ambient_occlusion = ssao_map.Sample(samp_linear, ss_uv).r;
+    float ambient_accessiblity = 1 - ambient_occlusion;
     float3 reflect_color = ssr_map.Sample(samp_linear, ss_uv).rgb;
 
     float3 color = 0;
     if (light_enable > 0.5f)
     {
-        color += ambient_occlusion * mat.diffuse_albedo * light_ambient;
+        color += ambient_accessiblity * mat.diffuse_albedo * light_ambient;
         color += (1 - shadow) * ComputeLight(light, mat, normal, to_eye, input.posW);
         color += 0.8f * reflect_color;
     }
     float4 output = float4(saturate(color), 1);
+
+    //output.rgb = ambient_occlusion;
 
     return output;
 }
