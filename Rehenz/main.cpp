@@ -2005,14 +2005,10 @@ int main_d3d12_ssao_ssr_example()
 	cout << "setup resource ..." << endl;
 	std::shared_ptr<Mesh> mesh0;
 	D3d12GPSOCreator psc;
-	D3d12CPSOCreator cpsc;
 	D3D12_RESOURCE_BARRIER rc_barr[16]{};
 	D3D12_SHADER_RESOURCE_VIEW_DESC srv_desc{};
-	D3D12_UNORDERED_ACCESS_VIEW_DESC uav_desc{};
 	D3D12_SAMPLER_DESC samp_desc{};
 	D3D12_RESOURCE_DESC rc_desc{};
-	HRESULT hr = S_OK;
-	D3D12_DESCRIPTOR_HEAP_DESC dh_desc{};
 
 	// create target
 	auto target = std::make_shared<D3d12RenderTarget>(width, height, device->GetScFormat(), true, true, Color::yellow_green_o, 0, 0, device.get());
@@ -2107,8 +2103,8 @@ int main_d3d12_ssao_ssr_example()
 	auto vs_transform_one = D3d12Util::CompileShaderFile(L"vs_transform_one.hlsl", "vs");
 	if (!vs_transform_one)
 		return SafeReturn(1);
-	auto ps_shadow_ssao_ssr = D3d12Util::CompileShaderFile(L"ps_shadow_ssao_ssr.hlsl", "ps", { {"BIGPCF","1"} });
-	if (!ps_shadow_ssao_ssr)
+	auto ps_shadow_ssao = D3d12Util::CompileShaderFile(L"ps_shadow_ssao.hlsl", "ps", { {"SHADOW","1"},{"SSAO","1"},{"BIGPCF","1"} });
+	if (!ps_shadow_ssao)
 		return SafeReturn(1);
 	auto ps_color = D3d12Util::CompileShaderFile(L"ps_color.hlsl", "ps");
 	if (!ps_color)
@@ -2120,7 +2116,7 @@ int main_d3d12_ssao_ssr_example()
 	// create pso
 	psc.Reset();
 	psc.SetRSig(device->GetRSig());
-	psc.SetShader(vs_transform_one.Get(), ps_shadow_ssao_ssr.Get());
+	psc.SetShader(vs_transform_one.Get(), ps_shadow_ssao.Get());
 	psc.SetIA(cube->input_layout);
 	psc.SetRenderTargets(target->msaa);
 	auto pso = psc.CreatePSO(device->Get());
@@ -2154,9 +2150,9 @@ int main_d3d12_ssao_ssr_example()
 	device->Get()->CreateSampler(&samp_desc, device->GetSampler(shadow_map_sampler));
 
 	// create screen space map
-	const UINT ss_normal_map_srv = 3;
-	const UINT ss_depth_map_srv = 4;
-	const UINT prev_screen_srv = 5;
+	const UINT ss_normal_map_srv = 1;
+	const UINT ss_depth_map_srv = 2;
+	const UINT prev_screen_srv = 3;
 	auto ss_map = std::make_shared<D3d12RenderTarget>(width, height, DXGI_FORMAT_R16G16B16A16_FLOAT, false, true, Color(0.5f, 0.5f, 0.5f), 2, 2, device.get());
 	if (!*ss_map)
 		return SafeReturn(1);
@@ -2169,57 +2165,6 @@ int main_d3d12_ssao_ssr_example()
 	auto prev_screen = std::make_shared<D3d12Texture>(rc_desc, D3D12_HEAP_TYPE_DEFAULT, device->Get(), D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
 	srv_desc = prev_screen->GetSrvDesc();
 	device->Get()->CreateShaderResourceView(prev_screen->Get(), &srv_desc, device->GetSrv(prev_screen_srv));
-
-	// create ssao ssr map
-	ComPtr<ID3D12DescriptorHeap> uav_heap2;
-	dh_desc = D3d12Util::GetDescriptorHeapDesc(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, D3D12_DESCRIPTOR_HEAP_FLAG_NONE, 2);
-	hr = device->Get()->CreateDescriptorHeap(&dh_desc, IID_PPV_ARGS(uav_heap2.GetAddressOf()));
-	if (FAILED(hr))
-		return SafeReturn(1);
-	const D3D12_CPU_DESCRIPTOR_HANDLE ssao_map_uav2_cpu = uav_heap2->GetCPUDescriptorHandleForHeapStart();
-	const D3D12_CPU_DESCRIPTOR_HANDLE ssr_map_uav2_cpu{ ssao_map_uav2_cpu.ptr + device->Get()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV) };
-	const UINT ssao_map_uav = 6;
-	const UINT ssr_map_uav = 7;
-	const UINT ssao_map_srv = 1;
-	const UINT ssr_map_srv = 2;
-	rc_desc = D3d12Util::GetTexture2dRcDesc(width / 2, height / 2, 1, DXGI_FORMAT_R16_FLOAT, 1, false, D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS);
-	auto ssao_map = std::make_shared<D3d12Texture>(rc_desc, D3D12_HEAP_TYPE_DEFAULT, device->Get(), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
-	if (!ssao_map->Get())
-		return SafeReturn(1);
-	uav_desc = ssao_map->GetUavDesc();
-	device->Get()->CreateUnorderedAccessView(ssao_map->Get(), nullptr, &uav_desc, device->GetUav(ssao_map_uav));
-	device->Get()->CreateUnorderedAccessView(ssao_map->Get(), nullptr, &uav_desc, ssao_map_uav2_cpu);
-	srv_desc = ssao_map->GetSrvDesc();
-	device->Get()->CreateShaderResourceView(ssao_map->Get(), &srv_desc, device->GetSrv(ssao_map_srv));
-	rc_desc = D3d12Util::GetTexture2dRcDesc(width, height, 1, DXGI_FORMAT_B8G8R8A8_UNORM, 1, false, D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS);
-	auto ssr_map = std::make_shared<D3d12Texture>(rc_desc, D3D12_HEAP_TYPE_DEFAULT, device->Get(), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
-	if (!ssr_map->Get())
-		return SafeReturn(1);
-	uav_desc = ssr_map->GetUavDesc();
-	device->Get()->CreateUnorderedAccessView(ssr_map->Get(), nullptr, &uav_desc, device->GetUav(ssr_map_uav));
-	device->Get()->CreateUnorderedAccessView(ssr_map->Get(), nullptr, &uav_desc, ssr_map_uav2_cpu);
-	srv_desc = ssr_map->GetSrvDesc();
-	device->Get()->CreateShaderResourceView(ssr_map->Get(), &srv_desc, device->GetSrv(ssr_map_srv));
-
-	// create compute shader
-	auto cs_calc_ssao = D3d12Util::CompileShaderFile(L"cs_calc_ssao.hlsl", "cs");
-	if (!cs_calc_ssao)
-		return SafeReturn(1);
-	auto cs_calc_ssr = D3d12Util::CompileShaderFile(L"cs_calc_ssr.hlsl", "cs");
-	if (!cs_calc_ssr)
-		return SafeReturn(1);
-
-	// create compute pso
-	cpsc.Reset();
-	cpsc.SetRSig(device->GetRSig());
-	cpsc.SetShader(cs_calc_ssao.Get());
-	auto pso_ssao = cpsc.CreatePSO(device->Get());
-	if (!pso_ssao)
-		return SafeReturn(1);
-	cpsc.SetShader(cs_calc_ssr.Get());
-	auto pso_ssr = cpsc.CreatePSO(device->Get());
-	if (!pso_ssr)
-		return SafeReturn(1);
 
 	// finish
 	if (!device->ExecuteCommand())
@@ -2266,9 +2211,6 @@ int main_d3d12_ssao_ssr_example()
 		static bool ssao_enable = true;
 		if (KeyIsDown('3'))      ssao_enable = true;
 		else if (KeyIsDown('4')) ssao_enable = false;
-		static bool ssr_enable = true;
-		if (KeyIsDown('5'))      ssr_enable = true;
-		else if (KeyIsDown('6')) ssr_enable = false;
 
 		cbframe.light_intensity = XmFloat3(light.scale);
 		cbframe.light_direction = XmFloat3(light.GetFront());
@@ -2285,10 +2227,6 @@ int main_d3d12_ssao_ssr_example()
 			target->ClearRenderTargets(device.get(), cmd_list);
 			shadow_map->ClearRenderTargets(device.get(), cmd_list);
 			ss_map->ClearRenderTargets(device.get(), cmd_list);
-			float color1[4]{ 0,0,0,0 };
-			cmd_list->ClearUnorderedAccessViewFloat(device->GetUavGpu(ssao_map_uav), ssao_map_uav2_cpu, ssao_map->Get(), color1, 0, nullptr);
-			float color2[4]{ 0,0,0,1 };
-			cmd_list->ClearUnorderedAccessViewFloat(device->GetUavGpu(ssr_map_uav), ssr_map_uav2_cpu, ssr_map->Get(), color2, 0, nullptr);
 
 			// STEP 1 : render shadow map
 			cbframe.view = XmFloat4x4(MatrixTranspose(light.GetInverseTransformMatrix()));
@@ -2337,7 +2275,7 @@ int main_d3d12_ssao_ssr_example()
 			cbframe.inv_view = XmFloat4x4(MatrixTranspose(view.GetTransformMatrix()));
 			cbframe.proj = XmFloat4x4(MatrixTranspose(proj.GetTransformMatrix()));
 			cbframe.inv_proj = XmFloat4x4(MatrixTranspose(proj.GetInverseTransformMatrix()));
-			if (ssao_enable || ssr_enable)
+			if (ssao_enable)
 			{
 				cmd_list->SetPipelineState(pso_gen_ss.Get());
 				ss_map->SetRenderTargets(device.get(), cmd_list);
@@ -2374,40 +2312,12 @@ int main_d3d12_ssao_ssr_example()
 				cmd_list->DrawIndexedInstanced(skull->index_count, 1, 0, 0, 0);
 			}
 
-			rc_barr[0] = D3d12Util::GetTransitionStruct(ss_map->GetTarget(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
-			rc_barr[1] = D3d12Util::GetTransitionStruct(ss_map->GetZbuffer(), D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
-			cmd_list->ResourceBarrier(2, rc_barr);
-
-			// STEP 3 : compute ssao map
-			if (ssao_enable || ssr_enable)
-			{
-				cmd_list->SetComputeRootSignature(device->GetRSig());
-				cmd_list->SetComputeRootConstantBufferView(0, cb->GetBufferObj()->GetGpuLocation(cb_i.GetCurrentIndex()));
-			}
-			if (ssao_enable)
-			{
-				cmd_list->SetPipelineState(pso_ssao.Get());
-				cmd_list->SetComputeRootDescriptorTable(2, device->GetSrvGpu(ss_normal_map_srv));
-				cmd_list->SetComputeRootDescriptorTable(3, device->GetUavGpu(ssao_map_uav));
-				cmd_list->Dispatch(width / 2, height / 2, 1);
-			}
-
-			// STEP 4 : compute ssr map
-			if (ssr_enable)
-			{
-				cmd_list->SetPipelineState(pso_ssr.Get());
-				cmd_list->SetComputeRootDescriptorTable(3, device->GetUavGpu(ssr_map_uav));
-				cmd_list->Dispatch(width, height, 1);
-			}
-
 			rc_barr[0] = D3d12Util::GetTransitionStruct(shadow_map->GetZbuffer(), D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
-			rc_barr[1] = D3d12Util::GetTransitionStruct(ssao_map->Get(), D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
-			rc_barr[2] = D3d12Util::GetTransitionStruct(ssr_map->Get(), D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+			rc_barr[1] = D3d12Util::GetTransitionStruct(ss_map->GetTarget(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+			rc_barr[2] = D3d12Util::GetTransitionStruct(ss_map->GetZbuffer(), D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 			cmd_list->ResourceBarrier(3, rc_barr);
 
-			// STEP 5 : render scene
-			if (ssao_enable || ssr_enable)
-				cmd_list->SetGraphicsRootSignature(device->GetRSig());
+			// STEP 3 : render scene
 			// common
 			cmd_list->SetPipelineState(pso.Get());
 			target->SetRenderTargets(device.get(), cmd_list);
@@ -2447,11 +2357,9 @@ int main_d3d12_ssao_ssr_example()
 			cmd_list->DrawIndexedInstanced(skull->index_count, 1, 0, 0, 0);
 
 			rc_barr[0] = D3d12Util::GetTransitionStruct(shadow_map->GetZbuffer(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_DEPTH_WRITE);
-			rc_barr[1] = D3d12Util::GetTransitionStruct(ssao_map->Get(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
-			rc_barr[2] = D3d12Util::GetTransitionStruct(ssr_map->Get(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
-			rc_barr[3] = D3d12Util::GetTransitionStruct(ss_map->GetTarget(), D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_RENDER_TARGET);
-			rc_barr[4] = D3d12Util::GetTransitionStruct(ss_map->GetZbuffer(), D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_DEPTH_WRITE);
-			cmd_list->ResourceBarrier(5, rc_barr);
+			rc_barr[1] = D3d12Util::GetTransitionStruct(ss_map->GetTarget(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_RENDER_TARGET);
+			rc_barr[2] = D3d12Util::GetTransitionStruct(ss_map->GetZbuffer(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_DEPTH_WRITE);
+			cmd_list->ResourceBarrier(3, rc_barr);
 			target->CopyTarget(0, prev_screen->Get(), 0, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE, cmd_list);
 
 			// present

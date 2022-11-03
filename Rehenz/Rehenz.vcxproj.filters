@@ -263,16 +263,13 @@
     <FxCompile Include="ps_shadow.hlsl">
       <Filter>shader</Filter>
     </FxCompile>
-    <FxCompile Include="ps_shadow_ssao_ssr.hlsl">
+    <FxCompile Include="ps_shadow_ssao.hlsl">
       <Filter>shader</Filter>
     </FxCompile>
     <FxCompile Include="ps_get_normal.hlsl">
       <Filter>shader</Filter>
     </FxCompile>
     <FxCompile Include="cs_calc_ssao.hlsl">
-      <Filter>shader</Filter>
-    </FxCompile>
-    <FxCompile Include="cs_calc_ssr.hlsl">
       <Filter>shader</Filter>
     </FxCompile>
   </ItemGroup>
