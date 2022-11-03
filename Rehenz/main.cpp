@@ -2157,7 +2157,7 @@ int main_d3d12_ssao_ssr_example()
 	const UINT ss_normal_map_srv = 3;
 	const UINT ss_depth_map_srv = 4;
 	const UINT prev_screen_srv = 5;
-	auto ss_map = std::make_shared<D3d12RenderTarget>(width, height, DXGI_FORMAT_R16G16B16A16_FLOAT, false, true, Color::black, 2, 2, device.get());
+	auto ss_map = std::make_shared<D3d12RenderTarget>(width, height, DXGI_FORMAT_R16G16B16A16_FLOAT, false, true, Color(0.5f, 0.5f, 0.5f), 2, 2, device.get());
 	if (!*ss_map)
 		return SafeReturn(1);
 	srv_desc = ss_map->GetTargetObj()->GetSrvDesc();

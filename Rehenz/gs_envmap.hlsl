@@ -35,7 +35,8 @@ struct GSOutput
 void main(triangle GSInput input[3], inout TriangleStream<GSOutput> output)
 {
 	float3 eye_pos = mul(float4(0, 0, 0, 1), frame_info.inv_view).xyz;
-	float3x3 rotates[6];
+	float3x3 z = 0;
+	float3x3 rotates[6] = { z,z,z,z,z,z };
 	rotates[0] = float3x3(0, 0, 1, 0, 1, 0, -1, 0, 0); // +x
 	rotates[1] = float3x3(0, 0, -1, 0, 1, 0, 1, 0, 0); // -x
 	rotates[2] = float3x3(1, 0, 0, 0, 0, 1, 0, -1, 0); // +y

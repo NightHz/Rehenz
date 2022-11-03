@@ -104,11 +104,11 @@ float4 main(PSInput input) : SV_TARGET
     {
         color += ambient_accessiblity * mat.diffuse_albedo * light_ambient;
         color += (1 - shadow) * ComputeLight(light, mat, normal, to_eye, input.posW);
-        color += 0.8f * reflect_color;
+        //color += 0.8f * reflect_color;
     }
     float4 output = float4(saturate(color), 1);
 
-    //output.rgb = ambient_occlusion;
+    //output.rgb = ambient_accessiblity;
 
     return output;
 }
