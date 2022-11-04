@@ -1977,10 +1977,10 @@ int main_d3d12_shadow_example()
 	return SafeReturn(0);
 }
 
-int main_d3d12_ssao_ssr_example()
+int main_d3d12_ssao_example()
 {
 	cout << endl << "create window ..." << endl;
-	const std::string title = "d3d12 shadow+ssao+ssr example";
+	const std::string title = "d3d12 shadow+ssao example";
 	const int width = 800;
 	const int height = 600;
 	auto window = std::make_unique<SimpleWindowWithFC>(GetModuleHandle(nullptr), width, height, title);
@@ -2399,5 +2399,5 @@ int main()
 	//return main_d3d12_show_image_example();
 	//return main_d3d12_cubemap_example();
 	//return main_d3d12_shadow_example();
-	return main_d3d12_ssao_ssr_example();
+	return main_d3d12_ssao_example();
 }

@@ -165,18 +165,21 @@ h = 两倍欧氏距离（在此例中效果最好，且路径正确）
 
 |天空盒|天空盒|
 |:-:|:-:|
-|![](img/d312_cubemap_scene.png)|![](img/d312_cubemap_scene.gif)|
+|![](img/d3d12_cubemap_scene.png)|![](img/d3d12_cubemap_scene.gif)|
 
 |反射球|折射球|
 |:-:|:-:|
-|![](img/d312_cubemap_reflection.gif)|![](img/d312_cubemap_refraction.gif)|
+|![](img/d3d12_cubemap_reflection.gif)|![](img/d3d12_cubemap_refraction.gif)|
 
 |小阴影|小阴影|
 |:-:|:-:|
-|![](img/d312_shadow1.png)|![](img/d312_shadow1.gif)|
+|![](img/d3d12_shadow1.png)|![](img/d3d12_shadow1.gif)|
 
 |大阴影|大阴影|
 |:-:|:-:|
-|![](img/d312_shadow2.png)|![](img/d312_shadow2.gif)|
+|![](img/d3d12_shadow2.png)|![](img/d3d12_shadow2.gif)|
 
+|SSAO|关闭 SSAO|
+|:-:|:-:|
+|![](img/d3d12_ssao.png)|![](img/d3d12_ssao_contrast.png)|
 
