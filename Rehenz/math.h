@@ -269,12 +269,17 @@ namespace Rehenz
 
 		// default (1,0,0,0)
 		Quaternion();
+		explicit Quaternion(float _a);
+		explicit Quaternion(const Vector3& v);
 		explicit Quaternion(float _a, float _b, float _c, float _d);
 
 		// access date
 		float& operator()(int index);
 		float operator()(int index) const;
 		Quaternion& operator=(Quaternion);
+
+		float Real() const;
+		Vector3 Image() const;
 
 		// some operator
 		Quaternion& operator*=(Quaternion);
@@ -290,6 +295,8 @@ namespace Rehenz
 		Quaternion operator-(Quaternion) const;
 		Quaternion operator*(float) const;
 		Quaternion operator/(float) const;
+
+		Vector3 operator*(Vector3) const;
 
 		bool operator==(Quaternion) const;
 		bool operator!=(Quaternion) const;
@@ -443,6 +450,18 @@ namespace Rehenz
 
 	// quaternion conjugate
 	Quaternion QuaternionConjugate(Quaternion q);
+
+	// compute quaternion length
+	float QuaternionLength(Quaternion q);
+
+	// quaternion dot
+	float QuaternionDot(Quaternion q1, Quaternion q2);
+
+	// quaternion normalize
+	Quaternion QuaternionNormalize(Quaternion q);
+
+	// quaternion sphere lerp
+	Quaternion QuaternionSlerp(Quaternion q1, Quaternion q2, float t);
 
 	// get quaternion defined by axis-angle
 	Quaternion GetQuaternionAxis(float theta, Vector axis);

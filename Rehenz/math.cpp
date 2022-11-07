@@ -599,6 +599,20 @@ namespace Rehenz
 		b = c = d = 0;
 	}
 
+	Quaternion::Quaternion(float _a)
+	{
+		a = _a;
+		b = c = d = 0;
+	}
+
+	Quaternion::Quaternion(const Vector3& v)
+	{
+		a = 0;
+		b = v.x;
+		c = v.y;
+		d = v.z;
+	}
+
 	Quaternion::Quaternion(float _a, float _b, float _c, float _d)
 	{
 		a = _a;
@@ -622,6 +636,16 @@ namespace Rehenz
 		for (int i = 0; i < 4; i++)
 			q[i] = quaternion(i);
 		return (*this);
+	}
+
+	float Quaternion::Real() const
+	{
+		return a;
+	}
+
+	Vector3 Quaternion::Image() const
+	{
+		return Vector3(b, c, d);
 	}
 
 	Quaternion& Quaternion::operator*=(Quaternion quaternion)
@@ -713,6 +737,12 @@ namespace Rehenz
 		for (int i = 0; i < 4; i++)
 			result(i) = q[i] / f;
 		return result;
+	}
+
+	Vector3 Quaternion::operator*(Vector3 v) const
+	{
+		Quaternion result = (*this) * Quaternion(v) * QuaternionConjugate(*this);
+		return result.Image();
 	}
 
 	bool Quaternion::operator==(Quaternion quaternion) const
@@ -1087,6 +1117,39 @@ namespace Rehenz
 	Quaternion QuaternionConjugate(Quaternion q)
 	{
 		return Quaternion(q.a, -q.b, -q.c, -q.d);
+	}
+
+	float QuaternionLength(Quaternion q)
+	{
+		return sqrtf(q.a * q.a + q.b * q.b + q.c * q.c + q.d * q.d);
+	}
+
+	float QuaternionDot(Quaternion q1, Quaternion q2)
+	{
+		return q1.a * q2.a + q1.b * q2.b + q1.c * q2.c + q1.d * q2.d;
+	}
+
+	Quaternion QuaternionNormalize(Quaternion q)
+	{
+		float length = QuaternionLength(q);
+		if (length == 0)
+			return q;
+
+		return q / length;
+	}
+
+	Quaternion QuaternionSlerp(Quaternion q1, Quaternion q2, float t)
+	{
+		if (QuaternionLength(q1 - q2) > QuaternionLength(q1 + q2))
+			q2 = -q2;
+		float dot = QuaternionDot(q1, q2);
+		if (dot > 0.999f)
+			return QuaternionNormalize(Lerp(q1, q2, t));
+		float theta = std::acosf(dot);
+		float sin_theta = std::sinf(theta);
+		float c1 = std::sinf((1 - t) * theta) / sin_theta;
+		float c2 = std::sinf(t * theta) / sin_theta;
+		return c1 * q1 + c2 * q2;
 	}
 
 	Quaternion GetQuaternionAxis(float theta, Vector axis)
