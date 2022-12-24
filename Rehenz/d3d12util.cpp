@@ -32,7 +32,8 @@ namespace Rehenz
         return shader_blob;
     }
 
-    ComPtr<ID3DBlob> D3d12Util::CompileShaderFile(const std::wstring& filename, const std::string& shader_type, const std::unordered_map<std::string, std::string>& macro)
+    ComPtr<ID3DBlob> D3d12Util::CompileShaderFile(const std::wstring& filename, const std::string& shader_type,
+        const std::unordered_map<std::string, std::string>& macro, const std::string& entrypoint_name)
     {
         HRESULT hr = S_OK;
 
@@ -50,7 +51,7 @@ namespace Rehenz
         flags |= D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
 #endif
         ComPtr<ID3DBlob> error_blob;
-        hr = D3DCompileFromFile(filename.c_str(), &defines[0], D3D_COMPILE_STANDARD_FILE_INCLUDE, "main", (shader_type + "_5_1").c_str(),
+        hr = D3DCompileFromFile(filename.c_str(), &defines[0], D3D_COMPILE_STANDARD_FILE_INCLUDE, entrypoint_name.c_str(), (shader_type + "_5_1").c_str(),
             flags, 0, shader_blob.GetAddressOf(), error_blob.GetAddressOf());
         if (FAILED(hr))
         {

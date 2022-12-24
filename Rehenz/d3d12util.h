@@ -283,7 +283,8 @@ namespace Rehenz
 
         static ComPtr<ID3DBlob> LoadShaderFile(const std::wstring& filename);
         // shader_type : vs hs ds gs ps cs
-        static ComPtr<ID3DBlob> CompileShaderFile(const std::wstring& filename, const std::string& shader_type, const std::unordered_map<std::string, std::string>& macro = {});
+        static ComPtr<ID3DBlob> CompileShaderFile(const std::wstring& filename, const std::string& shader_type,
+            const std::unordered_map<std::string, std::string>& macro = {}, const std::string& entrypoint_name = "main");
 
         // forbid value > current fense value
         static bool WaitFenceValue(ID3D12Fence1* fence, UINT64 value);
@@ -306,8 +307,8 @@ namespace Rehenz
         int i;
         std::vector<UINT> indices;
 
-        inline int PrevIndex() { return (i + static_cast<int>(indices.size()) - 1) % static_cast<int>(indices.size()); }
-        inline int NextIndex() { return (i + 1) % static_cast<int>(indices.size()); }
+        inline int PrevI() { return (i + static_cast<int>(indices.size()) - 1) % static_cast<int>(indices.size()); }
+        inline int NextI() { return (i + 1) % static_cast<int>(indices.size()); }
 
     public:
         inline IndexLoop(std::initializer_list<UINT> il, bool _always_dirty = true) : indices{ il }
@@ -320,6 +321,16 @@ namespace Rehenz
         }
         inline IndexLoop(std::vector<UINT> _indices, bool _always_dirty = true) : indices(std::move(_indices))
         {
+            always_dirty = _always_dirty;
+            dirty = always_dirty;
+            i = 0;
+            if (indices.size() == 0)
+                indices.push_back(0);
+        }
+        inline IndexLoop(UINT start, UINT end, UINT interval = 1, bool _always_dirty = true)
+        {
+            for (UINT index = start; index < end; index += interval)
+                indices.push_back(index);
             always_dirty = _always_dirty;
             dirty = always_dirty;
             i = 0;
@@ -340,13 +351,13 @@ namespace Rehenz
         {
             if (dirty)
             {
-                int ii = indices[i];
-                i = NextIndex();
+                int index = indices[i];
+                i = NextI();
                 dirty = always_dirty;
-                return ii;
+                return index;
             }
             else
-                return PrevIndex();
+                return indices[PrevI()];
         }
     };
 }
