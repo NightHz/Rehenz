@@ -53,6 +53,11 @@ namespace Rehenz
 		return static_cast<float>(static_cast<double>(t1 - t0) / static_cast<double>(frequency));
 	}
 
+	double FpsCounter::GetLastDeltatime3()
+	{
+		return static_cast<double>(t1 - t0) / static_cast<double>(frequency);
+	}
+
 	void FpsCounter::LockFps(uint _fps)
 	{
 		if (_fps == 0)

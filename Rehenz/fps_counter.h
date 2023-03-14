@@ -31,6 +31,8 @@ namespace Rehenz
 		uint GetLastDeltatime();
 		// s unit
 		float GetLastDeltatime2();
+		// s unit
+		double GetLastDeltatime3();
 		// input 0 to unlock fps
 		void LockFps(uint fps);
 	};

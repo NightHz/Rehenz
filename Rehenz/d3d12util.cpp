@@ -57,7 +57,7 @@ namespace Rehenz
         {
 #ifdef _DEBUG
             if (error_blob)
-                OutputDebugString(static_cast<char*>(error_blob->GetBufferPointer()));
+                OutputDebugStringA(static_cast<char*>(error_blob->GetBufferPointer()));
 #endif
             return nullptr;
         }
